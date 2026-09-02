@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F&O Live Scanner</title>
+</head>
+
+<body>
+
+  <h1>⚡ F&O Live Scanner</h1>
+
+  <p id="status">Server connecting...</p>
+
+  <script>
+    fetch("/api/status")
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById("status").innerText =
+          "🟢 " + data.message;
+      })
+      .catch(error => {
+        document.getElementById("status").innerText =
+          "🔴 Server not connected";
+      });
+  </script>
+
+</body>
+</html>
