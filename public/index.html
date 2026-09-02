@@ -1,204 +1,662 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
 
-<title>F&O Live Scanner</title>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0">
+
+<title>
+F&O Live Scanner
+</title>
 
 <style>
-body {
-    margin: 0;
-    background: #080b10;
-    color: white;
-    font-family: Arial, sans-serif;
+
+/* =========================
+   GLOBAL
+========================= */
+
+* {
+  box-sizing: border-box;
 }
 
+body {
+
+  margin: 0;
+
+  background:
+    radial-gradient(
+      circle at top,
+      #17202c,
+      #070a0f 55%
+    );
+
+  color: #ffffff;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  min-height: 100vh;
+
+}
+
+/* =========================
+   CONTAINER
+========================= */
+
 .container {
-    max-width: 500px;
-    margin: auto;
-    padding: 20px;
+
+  width: 100%;
+
+  max-width: 520px;
+
+  margin: auto;
+
+  padding: 20px;
+
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.header {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-bottom: 20px;
+
 }
 
 .logo {
-    font-size: 25px;
-    font-weight: bold;
-    margin: 20px 0;
+
+  font-size: 24px;
+
+  font-weight: 800;
+
 }
+
+.live {
+
+  font-size: 12px;
+
+  padding: 7px 10px;
+
+  border-radius: 20px;
+
+  background: #13261e;
+
+  color: #00e38c;
+
+  border: 1px solid #145b42;
+
+}
+
+/* =========================
+   CARD
+========================= */
 
 .card {
-    background: #111720;
-    border: 1px solid #263241;
-    border-radius: 15px;
-    padding: 20px;
+
+  background:
+    rgba(17, 23, 32, 0.92);
+
+  border:
+    1px solid #293443;
+
+  border-radius: 18px;
+
+  padding: 20px;
+
+  margin-bottom: 18px;
+
+  box-shadow:
+    0 15px 40px
+    rgba(0,0,0,0.25);
+
 }
+
+/* =========================
+   TITLE
+========================= */
+
+.card h2 {
+
+  margin-top: 0;
+
+  font-size: 21px;
+
+}
+
+/* =========================
+   LABEL
+========================= */
 
 label {
-    display: block;
-    color: #9da9b7;
-    margin-top: 15px;
-    margin-bottom: 6px;
+
+  display: block;
+
+  color: #aeb8c5;
+
+  margin-top: 16px;
+
+  margin-bottom: 7px;
+
+  font-size: 14px;
+
 }
+
+/* =========================
+   INPUT
+========================= */
 
 input {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 14px;
-    border-radius: 8px;
-    border: 1px solid #344354;
-    background: #080c12;
-    color: white;
-    font-size: 16px;
+
+  width: 100%;
+
+  padding: 14px;
+
+  background: #080c12;
+
+  border:
+    1px solid #354253;
+
+  border-radius: 10px;
+
+  color: #ffffff;
+
+  font-size: 15px;
+
+  outline: none;
+
 }
+
+input:focus {
+
+  border-color:
+    #00d084;
+
+}
+
+/* =========================
+   BUTTON
+========================= */
 
 button {
-    width: 100%;
-    padding: 15px;
-    margin-top: 22px;
-    border: 0;
-    border-radius: 8px;
-    background: #00c875;
-    color: #001b10;
-    font-size: 16px;
-    font-weight: bold;
+
+  width: 100%;
+
+  margin-top: 22px;
+
+  padding: 15px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #00d084,
+      #00a96b
+    );
+
+  color: #00150d;
+
+  font-weight: 800;
+
+  font-size: 15px;
+
+  cursor: pointer;
+
 }
 
-#status {
-    text-align: center;
-    margin-top: 18px;
-    color: #9da9b7;
+button:active {
+
+  transform: scale(0.98);
+
 }
 
-.warning {
-    margin-top: 15px;
-    color: #8793a1;
-    font-size: 12px;
-    line-height: 18px;
+/* =========================
+   STATUS
+========================= */
+
+.status {
+
+  text-align: center;
+
+  margin-top: 18px;
+
+  color: #aeb8c5;
+
+  font-size: 14px;
+
 }
+
+/* =========================
+   SECURITY NOTE
+========================= */
+
+.note {
+
+  margin-top: 16px;
+
+  color: #788595;
+
+  font-size: 12px;
+
+  line-height: 18px;
+
+}
+
+/* =========================
+   HIDDEN SCANNER
+========================= */
+
+.scanner {
+
+  display: none;
+
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 420px) {
+
+  .container {
+
+    padding: 14px;
+
+  }
+
+  .logo {
+
+    font-size: 21px;
+
+  }
+
+  .card {
+
+    padding: 17px;
+
+  }
+
+}
+
 </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
 
+
+  <!-- HEADER -->
+
+  <div class="header">
+
     <div class="logo">
-        ⚡ F&O LIVE SCANNER
+
+      ⚡ F&O LIVE SCANNER
+
     </div>
+
+    <div class="live">
+
+      ● OFFLINE
+
+    </div>
+
+  </div>
+
+
+  <!-- LOGIN CARD -->
+
+  <div class="card">
+
+    <h2>
+
+      Angel One Connection
+
+    </h2>
+
+
+    <!-- API KEY -->
+
+    <label>
+
+      API Key
+
+    </label>
+
+    <input
+
+      id="apiKey"
+
+      type="password"
+
+      autocomplete="off"
+
+      placeholder="Enter API Key">
+
+
+    <!-- CLIENT ID -->
+
+    <label>
+
+      Client ID
+
+    </label>
+
+    <input
+
+      id="clientCode"
+
+      type="text"
+
+      autocomplete="off"
+
+      placeholder="Enter Client ID">
+
+
+    <!-- MPIN -->
+
+    <label>
+
+      MPIN
+
+    </label>
+
+    <input
+
+      id="mpin"
+
+      type="password"
+
+      inputmode="numeric"
+
+      autocomplete="off"
+
+      placeholder="Enter MPIN">
+
+
+    <!-- TOTP SECRET -->
+
+    <label>
+
+      TOTP Secret
+
+    </label>
+
+    <input
+
+      id="totpSecret"
+
+      type="password"
+
+      autocomplete="off"
+
+      placeholder="Long TOTP secret">
+
+
+    <!-- CONNECT -->
+
+    <button
+      onclick="connectAngel()">
+
+      🔌 CONNECT ANGEL ONE
+
+    </button>
+
+
+    <!-- STATUS -->
+
+    <div
+      id="status"
+      class="status">
+
+      ⚪ Not Connected
+
+    </div>
+
+
+    <div class="note">
+
+      🔐 Your credentials are sent only for
+      authentication. Never share your API
+      key, MPIN or TOTP secret with anyone.
+
+    </div>
+
+  </div>
+
+
+  <!-- SCANNER -->
+
+  <div
+    id="scanner"
+    class="scanner">
 
     <div class="card">
 
-        <h2>Angel One Login</h2>
+      <h2>
 
-        <label>API Key</label>
-        <input
-            id="apiKey"
-            type="password"
-            autocomplete="off">
+        🔥 OI Gainers
 
-        <label>Client ID</label>
-        <input
-            id="clientCode"
-            autocomplete="off">
+      </h2>
 
-        <label>MPIN</label>
-        <input
-            id="mpin"
-            type="password"
-            inputmode="numeric"
-            autocomplete="off">
+      <div id="oiGainers">
 
-        <label>Current TOTP</label>
-        <input
-            id="totp"
-            type="password"
-            inputmode="numeric"
-            maxlength="6"
-            autocomplete="one-time-code">
+        Waiting for live data...
 
-        <button onclick="connectAngel()">
-            CONNECT ANGEL ONE
-        </button>
-
-        <div id="status">
-            ⚪ Not Connected
-        </div>
-
-        <div class="warning">
-            Credentials are used for the current login request
-            and are not stored in this webpage.
-        </div>
+      </div>
 
     </div>
 
+
+    <div class="card">
+
+      <h2>
+
+        🔻 OI Losers
+
+      </h2>
+
+      <div id="oiLosers">
+
+        Waiting for live data...
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>
+
+        🚀 Volume Gainers
+
+      </h2>
+
+      <div id="volumeGainers">
+
+        Waiting for live data...
+
+      </div>
+
+    </div>
+
+  </div>
+
+
 </div>
+
 
 <script>
 
+/* =========================
+   ANGEL ONE CONNECT
+========================= */
+
 async function connectAngel() {
 
-    const status = document.getElementById("status");
+  const status =
+    document.getElementById("status");
 
-    const apiKey =
-        document.getElementById("apiKey").value.trim();
+  const apiKey =
+    document
+      .getElementById("apiKey")
+      .value
+      .trim();
 
-    const clientCode =
-        document.getElementById("clientCode").value.trim();
+  const clientCode =
+    document
+      .getElementById("clientCode")
+      .value
+      .trim();
 
-    const mpin =
-        document.getElementById("mpin").value.trim();
+  const mpin =
+    document
+      .getElementById("mpin")
+      .value
+      .trim();
 
-    const totp =
-        document.getElementById("totp").value.trim();
+  const totpSecret =
+    document
+      .getElementById("totpSecret")
+      .value
+      .trim();
 
-    if (!apiKey || !clientCode || !mpin || !totp) {
-        status.innerText = "🔴 Fill all fields";
-        return;
-    }
 
-    status.innerText = "🟡 Connecting...";
+  /* Validation */
 
-    try {
+  if (
+    !apiKey ||
+    !clientCode ||
+    !mpin ||
+    !totpSecret
+  ) {
 
-        const response = await fetch("/api/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
+    status.innerText =
+      "🔴 Please fill all fields";
+
+    return;
+
+  }
+
+
+  status.innerText =
+    "🟡 Connecting to Angel One...";
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/login",
+        {
+
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+
+              apiKey:
                 apiKey,
+
+              clientCode:
                 clientCode,
+
+              mpin:
                 mpin,
-                totp
+
+              totpSecret:
+                totpSecret
+
             })
-        });
 
-        const data = await response.json();
-
-        if (data.success) {
-
-            status.innerText =
-                "🟢 Angel One Connected";
-
-            // Remove sensitive values from form
-            document.getElementById("mpin").value = "";
-            document.getElementById("totp").value = "";
-
-        } else {
-
-            status.innerText =
-                "🔴 " + (data.message || "Login failed");
         }
+      );
 
-    } catch (error) {
 
-        status.innerText =
-            "🔴 Server connection failed";
+    const data =
+      await response.json();
+
+
+    if (data.success) {
+
+      status.innerText =
+        "🟢 Angel One Connected";
+
+      document
+        .querySelector(".live")
+        .innerText =
+        "● CONNECTED";
+
+      document
+        .getElementById("scanner")
+        .style.display =
+        "block";
+
+
+      /* Clear sensitive fields */
+
+      document
+        .getElementById("mpin")
+        .value = "";
+
+      document
+        .getElementById("totpSecret")
+        .value = "";
+
     }
+
+    else {
+
+      status.innerText =
+        "🔴 " +
+        (data.message ||
+         "Angel One login failed");
+
+    }
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    status.innerText =
+      "🔴 Server connection failed";
+
+  }
+
 }
 
 </script>
 
+
 </body>
+
 </html>
