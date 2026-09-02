@@ -1,29 +1,204 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>F&O Live Scanner</title>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>F&O Live Scanner</title>
+
+<style>
+body {
+    margin: 0;
+    background: #080b10;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    max-width: 500px;
+    margin: auto;
+    padding: 20px;
+}
+
+.logo {
+    font-size: 25px;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.card {
+    background: #111720;
+    border: 1px solid #263241;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+label {
+    display: block;
+    color: #9da9b7;
+    margin-top: 15px;
+    margin-bottom: 6px;
+}
+
+input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid #344354;
+    background: #080c12;
+    color: white;
+    font-size: 16px;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    margin-top: 22px;
+    border: 0;
+    border-radius: 8px;
+    background: #00c875;
+    color: #001b10;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#status {
+    text-align: center;
+    margin-top: 18px;
+    color: #9da9b7;
+}
+
+.warning {
+    margin-top: 15px;
+    color: #8793a1;
+    font-size: 12px;
+    line-height: 18px;
+}
+</style>
 </head>
 
 <body>
 
-  <h1>⚡ F&O Live Scanner</h1>
+<div class="container">
 
-  <p id="status">Server connecting...</p>
+    <div class="logo">
+        ⚡ F&O LIVE SCANNER
+    </div>
 
-  <script>
-    fetch("/api/status")
-      .then(response => response.json())
-      .then(data => {
-        document.getElementById("status").innerText =
-          "🟢 " + data.message;
-      })
-      .catch(error => {
-        document.getElementById("status").innerText =
-          "🔴 Server not connected";
-      });
-  </script>
+    <div class="card">
+
+        <h2>Angel One Login</h2>
+
+        <label>API Key</label>
+        <input
+            id="apiKey"
+            type="password"
+            autocomplete="off">
+
+        <label>Client ID</label>
+        <input
+            id="clientCode"
+            autocomplete="off">
+
+        <label>MPIN</label>
+        <input
+            id="mpin"
+            type="password"
+            inputmode="numeric"
+            autocomplete="off">
+
+        <label>Current TOTP</label>
+        <input
+            id="totp"
+            type="password"
+            inputmode="numeric"
+            maxlength="6"
+            autocomplete="one-time-code">
+
+        <button onclick="connectAngel()">
+            CONNECT ANGEL ONE
+        </button>
+
+        <div id="status">
+            ⚪ Not Connected
+        </div>
+
+        <div class="warning">
+            Credentials are used for the current login request
+            and are not stored in this webpage.
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+async function connectAngel() {
+
+    const status = document.getElementById("status");
+
+    const apiKey =
+        document.getElementById("apiKey").value.trim();
+
+    const clientCode =
+        document.getElementById("clientCode").value.trim();
+
+    const mpin =
+        document.getElementById("mpin").value.trim();
+
+    const totp =
+        document.getElementById("totp").value.trim();
+
+    if (!apiKey || !clientCode || !mpin || !totp) {
+        status.innerText = "🔴 Fill all fields";
+        return;
+    }
+
+    status.innerText = "🟡 Connecting...";
+
+    try {
+
+        const response = await fetch("/api/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                apiKey,
+                clientCode,
+                mpin,
+                totp
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            status.innerText =
+                "🟢 Angel One Connected";
+
+            // Remove sensitive values from form
+            document.getElementById("mpin").value = "";
+            document.getElementById("totp").value = "";
+
+        } else {
+
+            status.innerText =
+                "🔴 " + (data.message || "Login failed");
+        }
+
+    } catch (error) {
+
+        status.innerText =
+            "🔴 Server connection failed";
+    }
+}
+
+</script>
 
 </body>
 </html>
