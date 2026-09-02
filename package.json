@@ -1,0 +1,15 @@
+{
+  "name": "fno-live-scanner",
+  "version": "1.0.0",
+  "description": "Real-time F&O OI and Volume Scanner",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "ws": "^8.18.3"
+  }
+}
