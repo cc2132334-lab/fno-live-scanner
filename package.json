@@ -11,6 +11,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "ws": "^8.18.3",
-    "smartapi-javascript": "^1.0.23"
+    "smartapi-javascript": "^1.0.23",
+    "otplib": "^13.5.0"
   }
 }
