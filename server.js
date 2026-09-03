@@ -1,1712 +1,792 @@
 const express = require("express");
 const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
 const https = require("https");
 
-const {
-  SmartAPI,
-  WebSocketV2
-} = require("smartapi-javascript");
-
-const { generate } = require("otplib");
+const { SmartAPI, WebSocketV2 } = require("smartapi-javascript");
 
 const app = express();
-
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
-app.use(express.static("public"));
+app.use(express.json({ limit: "1mb" }));
+app.use(express.static(path.join(__dirname, "public")));
 
-let angelSession = null;
+// ============================================================
+// GLOBAL STATE
+// ============================================================
 
-const SCRIP_MASTER_URL =
-  "https://margincalculator.angelone.in/OpenAPI_File/files/OpenAPIScripMaster.json";
+let currentSession = null;
 
-let scripMasterLoaded = false;
+let fnoUniverse = [];
+let cashUniverse = [];
 
+let cashByUnderlying = new Map();
+let cashByToken = new Map();
 
-/* =====================================================
-   F&O CASH UNIVERSE
-===================================================== */
+let volumeData = new Map();
+let volumeHistory = new Map();
 
-const cashStocks = new Map();
-const futureToCash = new Map();
+let priceData = new Map();
 
+let cashWebSocket = null;
+let websocketRunning = false;
 
-/* =====================================================
-   VOLUME WEBSOCKET
-===================================================== */
-
-let volumeSocket = null;
-let volumeReady = false;
-let volumeSocketStarted = false;
-
-
-/*
-  Current live volume for each NSE cash stock
-*/
-const volumeData = new Map();
-
-
-/*
-  Recent volume snapshots.
-
-  token => [
-    {
-      time,
-      volume
-    }
-  ]
-*/
-const volumeHistory = new Map();
-
-
-/*
-  We compare approximately the last 30 seconds.
-
-  This is intentionally shorter than the previous
-  60-second requirement so the scanner starts showing
-  results much faster.
-*/
 const VOLUME_LOOKBACK_MS = 30 * 1000;
+const MAX_HISTORY_PER_STOCK = 20;
 
+// ============================================================
+// HELPERS
+// ============================================================
 
-/* =====================================================
-   DOWNLOAD SCRIP MASTER
-===================================================== */
+function cleanSymbol(symbol) {
+  if (!symbol) return "";
 
-function downloadScripMaster() {
-
-  return new Promise((resolve, reject) => {
-
-    https.get(
-      SCRIP_MASTER_URL,
-      {
-        headers: {
-          "User-Agent": "Mozilla/5.0"
-        }
-      },
-      response => {
-
-        let body = "";
-
-        if (response.statusCode !== 200) {
-
-          response.resume();
-
-          reject(
-            new Error(
-              "Scrip master HTTP " +
-              response.statusCode
-            )
-          );
-
-          return;
-        }
-
-        response.setEncoding("utf8");
-
-        response.on(
-          "data",
-          chunk => {
-            body += chunk;
-          }
-        );
-
-        response.on(
-          "end",
-          () => {
-
-            try {
-
-              resolve(
-                JSON.parse(body)
-              );
-
-            } catch (error) {
-
-              reject(
-                new Error(
-                  "Invalid scrip master JSON"
-                )
-              );
-
-            }
-
-          }
-        );
-
-      }
-    ).on(
-      "error",
-      reject
-    );
-
-  });
-
-}
-
-
-/* =====================================================
-   SYMBOL CLEANER
-===================================================== */
-
-function cleanSymbol(value) {
-
-  if (!value) {
-    return "";
-  }
-
-  return String(value)
-    .toUpperCase()
+  return String(symbol)
+    .replace(/-EQ$/i, "")
+    .replace(/\s+/g, "")
     .trim()
-    .replace(/-EQ$/, "");
-
+    .toUpperCase();
 }
 
+function numberValue(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
 
-/* =====================================================
-   LOAD F&O STOCK UNIVERSE
-===================================================== */
+function safePercent(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
 
-async function loadFNOUniverse() {
+function normalizeApiData(result) {
+  if (!result) return [];
 
-  console.log(
-    "📥 Loading Angel One scrip master..."
+  if (Array.isArray(result)) return result;
+
+  if (Array.isArray(result.data)) return result.data;
+
+  return [];
+}
+
+// ============================================================
+// SCRIP MASTER
+// ============================================================
+
+async function loadScripMaster() {
+  return new Promise((resolve, reject) => {
+    https
+      .get(
+        "https://margincalculator.angelone.in/OpenAPI_File/files/OpenAPIScripMaster.json",
+        (res) => {
+          let body = "";
+
+          res.on("data", (chunk) => {
+            body += chunk;
+          });
+
+          res.on("end", () => {
+            try {
+              const data = JSON.parse(body);
+              resolve(data);
+            } catch (err) {
+              reject(err);
+            }
+          });
+        }
+      )
+      .on("error", reject);
+  });
+}
+
+// ============================================================
+// BUILD F&O -> NSE CASH MAPPING
+// ============================================================
+
+async function buildUniverse() {
+  console.log("Loading Angel One scrip master...");
+
+  const master = await loadScripMaster();
+
+  const nseCash = master.filter(
+    (item) =>
+      item &&
+      item.exch_seg === "NSE" &&
+      typeof item.symbol === "string" &&
+      item.symbol.endsWith("-EQ")
   );
 
-  const master =
-    await downloadScripMaster();
+  const nseCashMap = new Map();
 
+  for (const item of nseCash) {
+    const underlying = cleanSymbol(item.name || item.symbol);
 
-  if (!Array.isArray(master)) {
+    if (!underlying) continue;
 
-    throw new Error(
-      "Scrip master is not an array"
-    );
-
+    nseCashMap.set(underlying, {
+      symbol: item.symbol,
+      token: String(item.token),
+      name: underlying,
+    });
   }
 
-
-  /*
-    First create NSE CASH map.
-
-    Example:
-
-    HDFCBANK-EQ
-    RELIANCE-EQ
-    SBIN-EQ
-
-    becomes:
-
-    HDFCBANK
-    RELIANCE
-    SBIN
-  */
-
-  const nseCash =
-    new Map();
-
-
-  for (const item of master) {
-
-    const exchange =
-      String(
-        item.exch_seg || ""
-      ).toUpperCase();
-
-
-    if (exchange !== "NSE") {
-      continue;
-    }
-
-
-    const symbol =
-      String(
-        item.symbol || ""
-      ).toUpperCase();
-
-
-    if (!symbol.endsWith("-EQ")) {
-      continue;
-    }
-
-
-    const clean =
-      cleanSymbol(symbol);
-
-
-    const token =
-      String(
-        item.token || ""
-      );
-
-
-    if (!clean || !token) {
-      continue;
-    }
-
-
-    nseCash.set(
-      clean,
-      {
-        symbol: clean,
-        tradingSymbol: symbol,
-        token,
-        name:
-          item.name ||
-          clean
-      }
-    );
-
-  }
-
-
-  console.log(
-    "💰 NSE CASH stocks:",
-    nseCash.size
+  const futures = master.filter(
+    (item) =>
+      item &&
+      item.exch_seg === "NFO" &&
+      item.instrumenttype === "FUTSTK"
   );
 
+  const unique = new Map();
 
-  /*
-    Now find F&O stock futures.
+  for (const fut of futures) {
+    const underlying = cleanSymbol(fut.name);
 
-    FUTSTK = Stock Futures
+    if (!underlying) continue;
 
-    We use their underlying name only
-    to identify which CASH stocks are F&O eligible.
-  */
+    const cash = nseCashMap.get(underlying);
 
-  const fnoUnderlyings =
-    new Set();
+    if (!cash) continue;
 
-  const futures = [];
+    if (!unique.has(underlying)) {
+      unique.set(underlying, {
+        underlying,
+        cashSymbol: cash.symbol,
+        cashToken: cash.token,
+        cashName: cash.name,
+      });
+    }
+  }
 
+  fnoUniverse = Array.from(unique.values());
+  cashUniverse = fnoUniverse;
 
-  for (const item of master) {
+  cashByUnderlying.clear();
+  cashByToken.clear();
 
-    const exchange =
-      String(
-        item.exch_seg || ""
-      ).toUpperCase();
+  for (const item of cashUniverse) {
+    cashByUnderlying.set(item.underlying, item);
 
+    cashByToken.set(String(item.cashToken), item);
+  }
 
-    if (exchange !== "NFO") {
-      continue;
+  console.log(
+    `F&O eligible NSE cash stocks loaded: ${cashUniverse.length}`
+  );
+}
+
+// ============================================================
+// LOGIN
+// ============================================================
+
+app.post("/api/login", async (req, res) => {
+  try {
+    const { apiKey, clientId, mpin, totp } = req.body;
+
+    if (!apiKey || !clientId || !mpin || !totp) {
+      return res.status(400).json({
+        success: false,
+        message: "API Key, Client ID, MPIN and TOTP are required.",
+      });
     }
 
+    console.log("Logging into Angel One...");
 
-    const instrumentType =
-      String(
-        item.instrumenttype || ""
-      ).toUpperCase();
-
-
-    if (
-      instrumentType !==
-      "FUTSTK"
-    ) {
-      continue;
-    }
-
-
-    const underlying =
-      cleanSymbol(
-        item.name
-      );
-
-
-    const futureToken =
-      String(
-        item.token || ""
-      );
-
-
-    if (
-      !underlying ||
-      !futureToken
-    ) {
-      continue;
-    }
-
-
-    /*
-      Match F&O underlying with NSE cash symbol.
-    */
-
-    const cash =
-      nseCash.get(
-        underlying
-      );
-
-
-    if (!cash) {
-      continue;
-    }
-
-
-    fnoUnderlyings.add(
-      underlying
-    );
-
-
-    futures.push({
-      futureToken,
-      futureSymbol:
-        item.symbol || "",
-      underlying,
-      cashSymbol:
-        cash.symbol,
-      cashToken:
-        cash.token,
-      cashTradingSymbol:
-        cash.tradingSymbol
+    const smartApi = new SmartAPI({
+      api_key: apiKey,
     });
 
-  }
-
-
-  console.log(
-    "📊 F&O STOCK underlyings:",
-    fnoUnderlyings.size
-  );
-
-
-  /* =================================================
-     FUTURES -> CASH MAPPING
-  ================================================= */
-
-  futureToCash.clear();
-
-
-  for (const item of futures) {
-
-    futureToCash.set(
-      item.futureToken,
-      {
-        underlying:
-          item.underlying,
-
-        cashSymbol:
-          item.cashSymbol,
-
-        cashToken:
-          item.cashToken,
-
-        cashTradingSymbol:
-          item.cashTradingSymbol
-      }
+    const loginResponse = await smartApi.generateSession(
+      clientId,
+      mpin,
+      totp
     );
 
-  }
+    if (!loginResponse || loginResponse.status !== true) {
+      console.log("Angel One login failed:", loginResponse);
 
-
-  /* =================================================
-     CASH STOCK MAP
-  ================================================= */
-
-  cashStocks.clear();
-
-
-  for (
-    const underlying
-    of fnoUnderlyings
-  ) {
-
-    const cash =
-      nseCash.get(
-        underlying
-      );
-
-
-    if (!cash) {
-      continue;
+      return res.status(401).json({
+        success: false,
+        message:
+          loginResponse?.message ||
+          loginResponse?.errorcode ||
+          "Angel One login failed.",
+      });
     }
 
+    const data = loginResponse.data || {};
 
-    cashStocks.set(
-      cash.token,
-      {
-        symbol:
-          cash.symbol,
+    currentSession = {
+      apiKey,
+      clientId,
+      jwtToken: data.jwtToken,
+      refreshToken: data.refreshToken,
+      feedToken: data.feedToken,
+      smartApi,
+    };
 
-        tradingSymbol:
-          cash.tradingSymbol,
+    console.log("Angel One login successful.");
 
-        token:
-          cash.token,
+    // Start live NSE cash feed
+    startCashWebSocket();
 
-        name:
-          cash.name
-      }
-    );
+    return res.json({
+      success: true,
+      message: "Angel One connected.",
+      cashStocks: cashUniverse.length,
+    });
+  } catch (error) {
+    console.error("LOGIN ERROR:", error);
 
+    currentSession = null;
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Login failed.",
+    });
   }
+});
 
+// ============================================================
+// LIVE NSE CASH WEBSOCKET
+// ============================================================
 
-  scripMasterLoaded = true;
-
-
-  console.log(
-    "🟢 F&O -> CASH mapping ready"
-  );
-
-  console.log(
-    "💰 F&O eligible CASH stocks:",
-    cashStocks.size
-  );
-
-}
-
-
-/* =====================================================
-   START CASH VOLUME WEBSOCKET
-===================================================== */
-
-async function startVolumeWebSocket() {
-
-  if (!angelSession) {
+function startCashWebSocket() {
+  if (!currentSession) {
+    console.log("No session. WebSocket not started.");
     return;
   }
 
+  if (cashWebSocket) {
+    try {
+      cashWebSocket.close();
+    } catch (e) {}
+  }
 
   try {
-
-    /*
-      Close old socket if any.
-    */
-
-    if (volumeSocket) {
-
-      try {
-        volumeSocket.close();
-      } catch (_) {}
-
-    }
-
-
-    volumeSocket = null;
-
-    volumeReady = false;
-
-    volumeSocketStarted = false;
-
-
-    /*
-      Clear old data after new login.
-    */
-
-    volumeData.clear();
-
-    volumeHistory.clear();
-
-
-    if (!scripMasterLoaded) {
-
-      await loadFNOUniverse();
-
-    }
-
-
-    const tokens =
-      Array.from(
-        cashStocks.keys()
-      );
-
-
-    if (!tokens.length) {
-
-      throw new Error(
-        "No F&O eligible cash stocks found"
-      );
-
-    }
-
-
-    /*
-      Angel One WebSocket subscription.
-      Keep maximum 1000 tokens.
-    */
-
-    const subscribeTokens =
-      tokens.slice(0, 1000);
-
-
     console.log(
-      "🔌 Starting NSE CASH WebSocket..."
+      `Starting NSE cash WebSocket for ${cashUniverse.length} stocks...`
     );
 
-    console.log(
-      "📡 Cash tokens:",
-      subscribeTokens.length
-    );
-
-
-    volumeSocket =
-      new WebSocketV2({
-
-        jwttoken:
-          angelSession.authToken,
-
-        apikey:
-          angelSession.apiKey,
-
-        clientcode:
-          angelSession.clientCode,
-
-        feedtype:
-          angelSession.feedToken
-
-      });
-
-
-    /* =================================================
-       LIVE TICK
-    ================================================= */
-
-    volumeSocket.on(
-      "tick",
-      tick => {
-
-        try {
-
-          if (!tick) {
-            return;
-          }
-
-
-          const token =
-            String(
-              tick.token || ""
-            ).replace(
-              /"/g,
-              ""
-            );
-
-
-          if (!token) {
-            return;
-          }
-
-
-          const stock =
-            cashStocks.get(
-              token
-            );
-
-
-          if (!stock) {
-            return;
-          }
-
-
-          /*
-            Angel One gives traded volume
-            for the day.
-
-            Example:
-
-            12,50,000
-            12,53,400
-            12,58,900
-
-            We calculate the increase.
-          */
-
-          const volume =
-            Number(
-              tick.vol_traded
-            );
-
-
-          if (
-            !Number.isFinite(volume)
-          ) {
-            return;
-          }
-
-
-          const ltp =
-            Number(
-              tick.last_traded_price ||
-              0
-            ) / 100;
-
-
-          const now =
-            Date.now();
-
-
-          /*
-            Current data
-          */
-
-          volumeData.set(
-            token,
-            {
-              token,
-
-              symbol:
-                stock.symbol,
-
-              tradingSymbol:
-                stock.tradingSymbol,
-
-              name:
-                stock.name,
-
-              volume,
-
-              ltp,
-
-              lastUpdate:
-                now
-            }
-          );
-
-
-          /*
-            History
-          */
-
-          let history =
-            volumeHistory.get(
-              token
-            );
-
-
-          if (!history) {
-
-            history = [];
-
-            volumeHistory.set(
-              token,
-              history
-            );
-
-          }
-
-
-          /*
-            Add snapshot whenever
-            volume changes.
-          */
-
-          const last =
-            history[
-              history.length - 1
-            ];
-
-
-          if (
-            !last ||
-            last.volume !== volume
-          ) {
-
-            history.push({
-              time: now,
-              volume
-            });
-
-          }
-
-
-          /*
-            Keep last 2 minutes.
-          */
-
-          const cutoff =
-            now -
-            2 * 60 * 1000;
-
-
-          while (
-            history.length &&
-            history[0].time <
-              cutoff
-          ) {
-
-            history.shift();
-
-          }
-
-        } catch (error) {
-
-          console.error(
-            "TICK ERROR:",
-            error.message
-          );
-
-        }
-
-      }
-    );
-
-
-    /*
-      Connect
-    */
-
-    await volumeSocket.connect();
-
-
-    /*
-      NSE CASH
-      exchangeType = 1
-
-      mode = 3
-      SnapQuote
-    */
-
-    volumeSocket.fetchData({
-
-      correlationID:
-        "nse-cash-volume",
-
-      action: 1,
-
-      mode: 3,
-
-      exchangeType: 1,
-
-      tokens:
-        subscribeTokens
-
+    cashWebSocket = new WebSocketV2({
+      jwttoken: currentSession.jwtToken,
+      apikey: currentSession.apiKey,
+      clientcode: currentSession.clientId,
+      feedtype: currentSession.feedToken,
     });
 
+    cashWebSocket.on("tick", handleCashTick);
 
-    volumeReady = true;
+    cashWebSocket
+      .connect()
+      .then(() => {
+        websocketRunning = true;
 
-    volumeSocketStarted = true;
+        console.log("NSE cash WebSocket connected.");
 
+        subscribeCashTokens();
+      })
+      .catch((err) => {
+        websocketRunning = false;
+        console.error("WebSocket connect error:", err);
+      });
+  } catch (error) {
+    websocketRunning = false;
+    console.error("WebSocket start error:", error);
+  }
+}
 
-    console.log(
-      "🟢 NSE CASH VOLUME WEBSOCKET CONNECTED"
+// ============================================================
+// SUBSCRIBE NSE CASH TOKENS
+// ============================================================
+
+function subscribeCashTokens() {
+  if (!cashWebSocket || !cashUniverse.length) return;
+
+  const tokens = cashUniverse.map((item) =>
+    String(item.cashToken)
+  );
+
+  // Angel One WebSocket supports batches.
+  const BATCH_SIZE = 100;
+
+  for (let i = 0; i < tokens.length; i += BATCH_SIZE) {
+    const batch = tokens.slice(i, i + BATCH_SIZE);
+
+    const request = {
+      correlationID: `cash_${Date.now()}_${i}`,
+      action: 1,
+      mode: 3,
+      exchangeType: 1,
+      tokens: batch,
+    };
+
+    try {
+      cashWebSocket.fetchData(request);
+
+      console.log(
+        `Subscribed NSE cash tokens: ${batch.length}`
+      );
+    } catch (error) {
+      console.error("Subscription error:", error);
+    }
+  }
+}
+
+// ============================================================
+// PARSE LIVE CASH TICK
+// ============================================================
+
+function handleCashTick(tick) {
+  try {
+    if (!tick) return;
+
+    let data = tick;
+
+    // Some SDK versions can emit an object directly.
+    if (Buffer.isBuffer(data)) {
+      data = JSON.parse(data.toString());
+    }
+
+    if (typeof data === "string") {
+      data = JSON.parse(data);
+    }
+
+    if (!data || typeof data !== "object") return;
+
+    const token =
+      data.token ??
+      data.symbolToken ??
+      data.symboltoken;
+
+    if (!token) return;
+
+    const tokenKey = String(token);
+
+    const stock = cashByToken.get(tokenKey);
+
+    if (!stock) return;
+
+    // WebSocket V2 prices are generally paise-scaled.
+    let ltp = numberValue(
+      data.last_traded_price ??
+        data.lastTradedPrice ??
+        data.ltp ??
+        data.lastTradedPrice
     );
 
-  } catch (error) {
+    if (ltp > 100000) {
+      ltp = ltp / 100;
+    }
 
+    let volume = numberValue(
+      data.vol_traded ??
+        data.volume_traded ??
+        data.tradeVolume ??
+        data.volume
+    );
+
+    let percentChange = numberValue(
+      data.percent_change ??
+        data.percentChange ??
+        data.changePercent
+    );
+
+    let netChange = numberValue(
+      data.net_change ??
+        data.netChange ??
+        data.change
+    );
+
+    // Some WebSocket feeds send price/change in paise.
+    if (Math.abs(netChange) > 10000) {
+      netChange = netChange / 100;
+    }
+
+    // If percent change is missing but close exists, calculate it.
+    const close = numberValue(
+      data.close_price ??
+        data.close ??
+        data.prev_close ??
+        data.previousClose
+    );
+
+    if (!percentChange && close > 0 && ltp > 0) {
+      percentChange = ((ltp - close) / close) * 100;
+    }
+
+    const now = Date.now();
+
+    priceData.set(stock.underlying, {
+      symbol: stock.underlying,
+      cashSymbol: stock.cashSymbol,
+      token: stock.cashToken,
+      price: ltp,
+      change: netChange,
+      changePercent: percentChange,
+      volume,
+      updatedAt: now,
+    });
+
+    // --------------------------------------------------------
+    // Volume history
+    // --------------------------------------------------------
+
+    if (volume > 0) {
+      volumeData.set(stock.underlying, {
+        symbol: stock.underlying,
+        cashSymbol: stock.cashSymbol,
+        token: stock.cashToken,
+        volume,
+        price: ltp,
+        changePercent: percentChange,
+        updatedAt: now,
+      });
+
+      if (!volumeHistory.has(stock.underlying)) {
+        volumeHistory.set(stock.underlying, []);
+      }
+
+      const history = volumeHistory.get(stock.underlying);
+
+      const last = history[history.length - 1];
+
+      if (!last || now - last.time >= 1000) {
+        history.push({
+          time: now,
+          volume,
+        });
+      }
+
+      while (history.length > MAX_HISTORY_PER_STOCK) {
+        history.shift();
+      }
+
+      while (
+        history.length &&
+        now - history[0].time > 5 * 60 * 1000
+      ) {
+        history.shift();
+      }
+    }
+  } catch (error) {
+    console.error("Tick parse error:", error.message);
+  }
+}
+
+// ============================================================
+// OI GAINERS
+// ============================================================
+
+app.get("/api/oi-gainers", async (req, res) => {
+  try {
+    if (!currentSession?.smartApi) {
+      return res.status(401).json({
+        success: false,
+        message: "Please login first.",
+      });
+    }
+
+    const result = await currentSession.smartApi.gainersLosers({
+      datatype: "PercOIGainers",
+      expirytype: "NEAR",
+    });
+
+    const rows = normalizeApiData(result);
+
+    const output = rows
+      .map((item) => {
+        const underlying = cleanSymbol(
+          String(item.tradingSymbol || "").replace(
+            /[0-9]{2}[A-Z]{3}[0-9]{2}FUT$/i,
+            ""
+          )
+        );
+
+        const price = priceData.get(underlying);
+
+        return {
+          symbol: underlying,
+
+          // OI data
+          oiPercent: safePercent(item.percentChange),
+          openInterest: numberValue(item.opnInterest),
+          netChangeOpenInterest: numberValue(
+            item.netChangeOpnInterest
+          ),
+
+          // LIVE CASH PRICE
+          price: price?.price ?? null,
+          change: price?.change ?? null,
+          changePercent: price?.changePercent ?? null,
+
+          updatedAt: price?.updatedAt ?? null,
+        };
+      })
+      .filter((item) => item.symbol)
+      .sort((a, b) => b.oiPercent - a.oiPercent)
+      .slice(0, 10);
+
+    return res.json({
+      success: true,
+      data: output,
+      updatedAt: Date.now(),
+    });
+  } catch (error) {
+    console.error("OI GAINERS ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Unable to load OI gainers.",
+    });
+  }
+});
+
+// ============================================================
+// OI LOSERS
+// ============================================================
+
+app.get("/api/oi-losers", async (req, res) => {
+  try {
+    if (!currentSession?.smartApi) {
+      return res.status(401).json({
+        success: false,
+        message: "Please login first.",
+      });
+    }
+
+    const result = await currentSession.smartApi.gainersLosers({
+      datatype: "PercOILosers",
+      expirytype: "NEAR",
+    });
+
+    const rows = normalizeApiData(result);
+
+    const output = rows
+      .map((item) => {
+        const underlying = cleanSymbol(
+          String(item.tradingSymbol || "").replace(
+            /[0-9]{2}[A-Z]{3}[0-9]{2}FUT$/i,
+            ""
+          )
+        );
+
+        const price = priceData.get(underlying);
+
+        return {
+          symbol: underlying,
+
+          // OI data
+          oiPercent: safePercent(item.percentChange),
+          openInterest: numberValue(item.opnInterest),
+          netChangeOpenInterest: numberValue(
+            item.netChangeOpnInterest
+          ),
+
+          // LIVE CASH PRICE
+          price: price?.price ?? null,
+          change: price?.change ?? null,
+          changePercent: price?.changePercent ?? null,
+
+          updatedAt: price?.updatedAt ?? null,
+        };
+      })
+      .filter((item) => item.symbol)
+
+      // MOST NEGATIVE FIRST
+      .sort((a, b) => a.oiPercent - b.oiPercent)
+
+      .slice(0, 10);
+
+    return res.json({
+      success: true,
+      data: output,
+      updatedAt: Date.now(),
+    });
+  } catch (error) {
+    console.error("OI LOSERS ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Unable to load OI losers.",
+    });
+  }
+});
+
+// ============================================================
+// VOLUME GAINERS
+// ============================================================
+
+function getOldVolume(symbol) {
+  const history = volumeHistory.get(symbol);
+
+  if (!history || history.length < 2) {
+    return null;
+  }
+
+  const now = Date.now();
+  const targetTime = now - VOLUME_LOOKBACK_MS;
+
+  let candidate = history[0];
+
+  for (const item of history) {
+    if (item.time <= targetTime) {
+      candidate = item;
+    }
+  }
+
+  return candidate;
+}
+
+function getVolumeGainers() {
+  const results = [];
+
+  for (const [symbol, current] of volumeData.entries()) {
+    if (!current || current.volume <= 0) continue;
+
+    const old = getOldVolume(symbol);
+
+    if (!old) continue;
+
+    const increase = current.volume - old.volume;
+
+    if (increase <= 0) continue;
+
+    const percent =
+      old.volume > 0
+        ? (increase / old.volume) * 100
+        : 0;
+
+    results.push({
+      symbol,
+      price: current.price,
+      changePercent: current.changePercent,
+      currentVolume: current.volume,
+      previousVolume: old.volume,
+      volumeIncrease: increase,
+      volumePercent: percent,
+      updatedAt: current.updatedAt,
+    });
+  }
+
+  results.sort(
+    (a, b) => b.volumePercent - a.volumePercent
+  );
+
+  return results.slice(0, 10);
+}
+
+app.get("/api/volume-gainers", (req, res) => {
+  try {
+    const data = getVolumeGainers();
+
+    return res.json({
+      success: true,
+      data,
+      intervalSeconds: VOLUME_LOOKBACK_MS / 1000,
+      collecting: data.length === 0,
+      liveStocks: priceData.size,
+      historyStocks: volumeHistory.size,
+      websocketRunning,
+      updatedAt: Date.now(),
+    });
+  } catch (error) {
+    console.error("VOLUME ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Unable to calculate volume gainers.",
+    });
+  }
+});
+
+// ============================================================
+// STATUS
+// ============================================================
+
+app.get("/api/status", (req, res) => {
+  res.json({
+    success: true,
+    loggedIn: !!currentSession,
+    websocketRunning,
+    fnoStocks: fnoUniverse.length,
+    liveCashStocks: priceData.size,
+    historyStocks: volumeHistory.size,
+    updatedAt: Date.now(),
+  });
+});
+
+// ============================================================
+// LOGOUT
+// ============================================================
+
+app.post("/api/logout", async (req, res) => {
+  try {
+    if (cashWebSocket) {
+      try {
+        cashWebSocket.close();
+      } catch (e) {}
+    }
+
+    cashWebSocket = null;
+    websocketRunning = false;
+
+    currentSession = null;
+
+    priceData.clear();
+    volumeData.clear();
+    volumeHistory.clear();
+
+    res.json({
+      success: true,
+      message: "Logged out.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+// ============================================================
+// FALLBACK FRONTEND
+// Express 5 compatible wildcard
+// ============================================================
+
+app.get("/{*splat}", (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "public", "index.html")
+  );
+});
+
+// ============================================================
+// START SERVER
+// ============================================================
+
+async function startServer() {
+  try {
+    await buildUniverse();
+
+    app.listen(PORT, () => {
+      console.log(
+        `F&O Live Scanner running on port ${PORT}`
+      );
+    });
+  } catch (error) {
     console.error(
-      "❌ CASH WEBSOCKET ERROR:",
-      error?.message ||
+      "Failed to build F&O universe:",
       error
     );
 
-    volumeReady = false;
-
-    volumeSocketStarted = false;
-
-  }
-
-}
-
-
-/* =====================================================
-   FIND OLD VOLUME
-===================================================== */
-
-function getOldVolume(
-  history,
-  now
-) {
-
-  if (
-    !history ||
-    !history.length
-  ) {
-
-    return null;
-
-  }
-
-
-  const target =
-    now -
-    VOLUME_LOOKBACK_MS;
-
-
-  let closest = null;
-
-
-  /*
-    Find the latest sample that is
-    older than our lookback.
-  */
-
-  for (
-    let i = 0;
-    i < history.length;
-    i++
-  ) {
-
-    if (
-      history[i].time <= target
-    ) {
-
-      closest =
-        history[i];
-
-    } else {
-
-      break;
-
-    }
-
-  }
-
-
-  /*
-    If exact 30 sec history isn't
-    available, use the oldest available
-    sample.
-
-    This prevents blank results.
-  */
-
-  if (!closest) {
-
-    closest =
-      history[0] ||
-      null;
-
-  }
-
-
-  return closest;
-
-}
-
-
-/* =====================================================
-   VOLUME GAINERS
-===================================================== */
-
-function getVolumeGainers() {
-
-  const now =
-    Date.now();
-
-
-  const result = [];
-
-
-  for (
-    const item
-    of volumeData.values()
-  ) {
-
-    const history =
-      volumeHistory.get(
-        item.token
-      );
-
-
-    if (
-      !history ||
-      !history.length
-    ) {
-
-      continue;
-
-    }
-
-
-    const oldSample =
-      getOldVolume(
-        history,
-        now
-      );
-
-
-    if (!oldSample) {
-      continue;
-    }
-
-
-    const currentVolume =
-      Number(
-        item.volume
-      );
-
-
-    const oldVolume =
-      Number(
-        oldSample.volume
-      );
-
-
-    if (
-      !Number.isFinite(
-        currentVolume
-      ) ||
-      !Number.isFinite(
-        oldVolume
-      )
-    ) {
-
-      continue;
-
-    }
-
-
-    /*
-      Actual volume increase.
-    */
-
-    const increase =
-      Math.max(
-        0,
-        currentVolume -
-        oldVolume
-      );
-
-
-    /*
-      We only want stocks whose
-      volume has actually increased.
-    */
-
-    if (increase <= 0) {
-      continue;
-    }
-
-
-    let percent = 0;
-
-
-    if (oldVolume > 0) {
-
-      percent =
-        (
-          increase /
-          oldVolume
-        ) * 100;
-
-    }
-
-
-    result.push({
-
-      /*
-        CASH SYMBOL ONLY
-      */
-
-      symbol:
-        item.symbol,
-
-      tradingSymbol:
-        item.symbol,
-
-      symbolToken:
-        item.token,
-
-
-      /*
-        Current NSE cash volume
-      */
-
-      tradeVolume:
-        currentVolume,
-
-
-      /*
-        Volume added during
-        comparison period
-      */
-
-      volumeChange:
-        increase,
-
-
-      /*
-        Percentage increase
-      */
-
-      percentChange:
-        percent,
-
-
-      ltp:
-        item.ltp,
-
-
-      exchange:
-        "NSE",
-
-
-      ageSeconds:
-        Math.round(
-          (
-            now -
-            oldSample.time
-          ) / 1000
-        )
-
-    });
-
-  }
-
-
-  /*
-    Primary ranking:
-    percentage volume increase
-
-    Secondary:
-    absolute volume increase
-  */
-
-  result.sort(
-    (a, b) => {
-
-      const percentageDifference =
-        Number(
-          b.percentChange
-        ) -
-        Number(
-          a.percentChange
-        );
-
-
-      if (
-        percentageDifference !== 0
-      ) {
-
-        return percentageDifference;
-
-      }
-
-
-      return (
-        Number(
-          b.volumeChange
-        ) -
-        Number(
-          a.volumeChange
-        )
-      );
-
-    }
-  );
-
-
-  return result.slice(
-    0,
-    10
-  );
-
-}
-
-
-/* =====================================================
-   STATUS
-===================================================== */
-
-app.get(
-  "/api/status",
-  (req, res) => {
-
-    res.json({
-
-      success: true,
-
-      angelConnected:
-        !!angelSession,
-
-      scripMasterLoaded:
-        scripMasterLoaded,
-
-      fnoStocks:
-        cashStocks.size,
-
-      cashVolumeSocket:
-        volumeReady,
-
-      liveCashStocks:
-        volumeData.size,
-
-      historyStocks:
-        volumeHistory.size
-
-    });
-
-  }
-);
-
-
-/* =====================================================
-   LOGIN
-===================================================== */
-
-app.post(
-  "/api/login",
-  async (req, res) => {
-
-    try {
-
-      const {
-        apiKey,
-        clientCode,
-        mpin,
-        totpSecret
-      } = req.body;
-
-
-      if (
-        !apiKey ||
-        !clientCode ||
-        !mpin ||
-        !totpSecret
-      ) {
-
-        return res.status(400).json({
-
-          success: false,
-
-          message:
-            "Please fill all fields"
-
-        });
-
-      }
-
-
-      const cleanSecret =
-        totpSecret
-          .replace(/\s/g, "")
-          .toUpperCase();
-
-
-      const totp =
-        await generate({
-          secret:
-            cleanSecret
-        });
-
-
-      const smartApi =
-        new SmartAPI({
-          api_key:
-            apiKey
-        });
-
-
-      const session =
-        await smartApi.generateSession(
-          clientCode,
-          mpin,
-          totp
-        );
-
-
-      if (
-        !session ||
-        !session.data
-      ) {
-
-        console.log(
-          "LOGIN RESPONSE:",
-          session
-        );
-
-
-        return res.status(401).json({
-
-          success: false,
-
-          message:
-            session?.message ||
-            session?.errorcode ||
-            "Angel One login failed"
-
-        });
-
-      }
-
-
-      angelSession = {
-
-        smartApi,
-
-        apiKey,
-
-        clientCode,
-
-        authToken:
-          session.data.jwtToken,
-
-        refreshToken:
-          session.data.refreshToken,
-
-        feedToken:
-          session.data.feedToken
-
-      };
-
-
+    // Server still starts so Render doesn't immediately fail.
+    app.listen(PORT, () => {
       console.log(
-        "🟢 ANGEL ONE CONNECTED"
+        `Server running on port ${PORT}, but scrip master failed.`
       );
-
-
-      /*
-        Load F&O universe
-      */
-
-      await loadFNOUniverse();
-
-
-      /*
-        Start cash volume WebSocket
-      */
-
-      await startVolumeWebSocket();
-
-
-      return res.json({
-
-        success: true,
-
-        message:
-          "Angel One connected successfully",
-
-        cashVolumeSocket:
-          volumeReady,
-
-        fnoStocks:
-          cashStocks.size
-
-      });
-
-
-    } catch (error) {
-
-      console.error(
-        "LOGIN ERROR:",
-        error?.message ||
-        error
-      );
-
-
-      return res.status(500).json({
-
-        success: false,
-
-        message:
-          error?.message ||
-          "Angel One login failed"
-
-      });
-
-    }
-
+    });
   }
-);
+}
 
-
-/* =====================================================
-   OI GAINERS
-===================================================== */
-
-app.get(
-  "/api/oi-gainers",
-  async (req, res) => {
-
-    try {
-
-      if (!angelSession) {
-
-        return res.status(401).json({
-
-          success: false,
-
-          message:
-            "Angel One is not connected"
-
-        });
-
-      }
-
-
-      if (!scripMasterLoaded) {
-
-        await loadFNOUniverse();
-
-      }
-
-
-      const result =
-        await angelSession.smartApi.gainersLosers({
-
-          datatype:
-            "PercOIGainers",
-
-          expirytype:
-            "NEAR"
-
-        });
-
-
-      const raw =
-        Array.isArray(
-          result?.data
-        )
-          ? result.data
-          : [];
-
-
-      const data =
-        raw
-          .map(item => {
-
-            const futureToken =
-              String(
-                item.symbolToken ||
-                item.token ||
-                ""
-              );
-
-
-            const mapping =
-              futureToCash.get(
-                futureToken
-              );
-
-
-            if (!mapping) {
-              return null;
-            }
-
-
-            return {
-
-              ...item,
-
-              /*
-                CASH SYMBOL DISPLAY
-              */
-
-              tradingSymbol:
-                mapping.cashSymbol,
-
-              symbol:
-                mapping.cashSymbol,
-
-              cashSymbol:
-                mapping.cashSymbol,
-
-              cashToken:
-                mapping.cashToken,
-
-              futuresSymbol:
-                item.tradingSymbol ||
-                item.symbol ||
-                ""
-
-            };
-
-          })
-          .filter(Boolean);
-
-
-      return res.json({
-
-        success: true,
-
-        data
-
-      });
-
-
-    } catch (error) {
-
-      console.error(
-        "OI GAINERS ERROR:",
-        error?.message ||
-        error
-      );
-
-
-      return res.status(500).json({
-
-        success: false,
-
-        message:
-          error?.message ||
-          "Unable to fetch OI gainers"
-
-      });
-
-    }
-
-  }
-);
-
-
-/* =====================================================
-   OI LOSERS
-===================================================== */
-
-app.get(
-  "/api/oi-losers",
-  async (req, res) => {
-
-    try {
-
-      if (!angelSession) {
-
-        return res.status(401).json({
-
-          success: false,
-
-          message:
-            "Angel One is not connected"
-
-        });
-
-      }
-
-
-      if (!scripMasterLoaded) {
-
-        await loadFNOUniverse();
-
-      }
-
-
-      const result =
-        await angelSession.smartApi.gainersLosers({
-
-          datatype:
-            "PercOILosers",
-
-          expirytype:
-            "NEAR"
-
-        });
-
-
-      const raw =
-        Array.isArray(
-          result?.data
-        )
-          ? result.data
-          : [];
-
-
-      const data =
-        raw
-          .map(item => {
-
-            const futureToken =
-              String(
-                item.symbolToken ||
-                item.token ||
-                ""
-              );
-
-
-            const mapping =
-              futureToCash.get(
-                futureToken
-              );
-
-
-            if (!mapping) {
-              return null;
-            }
-
-
-            return {
-
-              ...item,
-
-              tradingSymbol:
-                mapping.cashSymbol,
-
-              symbol:
-                mapping.cashSymbol,
-
-              cashSymbol:
-                mapping.cashSymbol,
-
-              cashToken:
-                mapping.cashToken,
-
-              futuresSymbol:
-                item.tradingSymbol ||
-                item.symbol ||
-                ""
-
-            };
-
-          })
-          .filter(Boolean);
-
-
-      return res.json({
-
-        success: true,
-
-        data
-
-      });
-
-
-    } catch (error) {
-
-      console.error(
-        "OI LOSERS ERROR:",
-        error?.message ||
-        error
-      );
-
-
-      return res.status(500).json({
-
-        success: false,
-
-        message:
-          error?.message ||
-          "Unable to fetch OI losers"
-
-      });
-
-    }
-
-  }
-);
-
-
-/* =====================================================
-   VOLUME GAINERS API
-===================================================== */
-
-app.get(
-  "/api/volume-gainers",
-  async (req, res) => {
-
-    try {
-
-      if (!angelSession) {
-
-        return res.status(401).json({
-
-          success: false,
-
-          message:
-            "Angel One is not connected"
-
-        });
-
-      }
-
-
-      /*
-        If socket somehow stopped,
-        restart it.
-      */
-
-      if (
-        !volumeSocketStarted
-      ) {
-
-        await startVolumeWebSocket();
-
-      }
-
-
-      const data =
-        getVolumeGainers();
-
-
-      return res.json({
-
-        success: true,
-
-        data,
-
-        /*
-          Comparison window
-        */
-
-        intervalSeconds:
-          30,
-
-        /*
-          True only when we have
-          no usable gainers yet.
-        */
-
-        collecting:
-          data.length === 0,
-
-        /*
-          Useful debugging info
-        */
-
-        liveStocks:
-          volumeData.size,
-
-        historyStocks:
-          volumeHistory.size
-
-      });
-
-
-    } catch (error) {
-
-      console.error(
-        "VOLUME GAINERS ERROR:",
-        error?.message ||
-        error
-      );
-
-
-      return res.status(500).json({
-
-        success: false,
-
-        message:
-          error?.message ||
-          "Unable to fetch volume gainers"
-
-      });
-
-    }
-
-  }
-);
-
-
-/* =====================================================
-   FRONTEND
-===================================================== */
-
-app.get(
-  "/{*splat}",
-  (req, res) => {
-
-    res.sendFile(
-      __dirname +
-      "/public/index.html"
-    );
-
-  }
-);
-
-
-/* =====================================================
-   START SERVER
-===================================================== */
-
-app.listen(
-  PORT,
-  "0.0.0.0",
-  () => {
-
-    console.log(
-      `🚀 Server running on port ${PORT}`
-    );
-
-  }
-);
+startServer();
