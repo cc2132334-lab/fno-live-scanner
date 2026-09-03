@@ -1,1643 +1,2245 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  />
-
-  <title>F&O Live Scanner</title>
-
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    :root {
-      --bg: #070b10;
-      --card: #0d1319;
-      --card2: #101820;
-      --border: #202a34;
-      --text: #f2f5f7;
-      --muted: #7f8b97;
-      --muted2: #596570;
-      --green: #00d084;
-      --green2: #00a96b;
-      --red: #ff4d5a;
-      --yellow: #ffc857;
-      --blue: #4da3ff;
-      --shadow: rgba(0, 0, 0, 0.35);
-      --header-bg: rgba(13, 19, 25, 0.92);
-    }
-
-    html[data-theme="light"] {
-      --bg: #f3f6f8;
-      --card: #ffffff;
-      --card2: #f8fafb;
-      --border: #dce3e8;
-      --text: #17212b;
-      --muted: #6d7882;
-      --muted2: #89939c;
-      --green: #00a86b;
-      --green2: #008957;
-      --red: #e5394f;
-      --yellow: #d99800;
-      --blue: #287fd1;
-      --shadow: rgba(30, 50, 70, 0.10);
-      --header-bg: rgba(255, 255, 255, 0.92);
-    }
-
-    body {
-      min-height: 100vh;
-      background: var(--bg);
-      color: var(--text);
-      font-family:
-        Inter,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Roboto,
-        Arial,
-        sans-serif;
-      transition:
-        background 0.25s ease,
-        color 0.25s ease;
-    }
-
-    button {
-      font-family: inherit;
-    }
-
-    .app {
-      width: 100%;
-      max-width: 1500px;
-      margin: 0 auto;
-      padding: 18px 14px 40px;
-    }
-
-    /* ================= HEADER ================= */
-
-    .topbar {
-      min-height: 90px;
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      background: var(--header-bg);
-      backdrop-filter: blur(12px);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 16px;
-      box-shadow: 0 12px 35px var(--shadow);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .brand-icon {
-      width: 54px;
-      height: 54px;
-      border-radius: 15px;
-      background: var(--green);
-      color: #06110c;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      font-weight: 900;
-      box-shadow: 0 8px 22px rgba(0, 208, 132, 0.20);
-    }
-
-    .brand-title {
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: -0.4px;
-    }
-
-    .brand-subtitle {
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .connection {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--card2);
-      color: var(--green);
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
-    .connection-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 12px var(--green);
-    }
-
-    .theme-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 13px;
-      border: 1px solid var(--border);
-      background: var(--card2);
-      color: var(--text);
-      cursor: pointer;
-      font-size: 19px;
-      transition: 0.2s ease;
-    }
-
-    .theme-btn:hover {
-      transform: translateY(-1px);
-      border-color: var(--green);
-    }
-
-    /* ================= SECTION ================= */
-
-    .section-head {
-      margin: 25px 0 18px;
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 15px;
-    }
-
-    .section-title {
-      font-size: 24px;
-      font-weight: 800;
-      letter-spacing: -0.6px;
-    }
-
-    .section-subtitle {
-      margin-top: 5px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .refresh-all {
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-      padding: 12px 16px;
-      border-radius: 13px;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 13px;
-      transition: 0.2s ease;
-      white-space: nowrap;
-    }
-
-    .refresh-all:hover {
-      border-color: var(--green);
-      color: var(--green);
-    }
-
-    /* ================= CARDS ================= */
-
-    .cards-wrapper {
-      width: 100%;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 18px;
-    }
-
-    .scanner-card {
-      min-width: 0;
-      height: 610px;
-      border-radius: 22px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 12px 35px var(--shadow);
-    }
-
-    .card-head {
-      padding: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .card-title-wrap {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .card-icon {
-      width: 54px;
-      height: 54px;
-      border-radius: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      flex-shrink: 0;
-    }
-
-    .icon-green {
-      background: rgba(0, 208, 132, 0.13);
-    }
-
-    .icon-red {
-      background: rgba(255, 77, 90, 0.13);
-    }
-
-    .icon-yellow {
-      background: rgba(255, 200, 87, 0.13);
-    }
-
-    .card-title {
-      font-size: 18px;
-      font-weight: 800;
-    }
-
-    .card-subtitle {
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 4px;
-    }
-
-    .card-refresh {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: var(--card2);
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 18px;
-      transition: 0.2s ease;
-    }
-
-    .card-refresh:hover {
-      color: var(--green);
-      border-color: var(--green);
-    }
-
-    .card-refresh.loading {
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* ================= TABLE ================= */
-
-    .table-head {
-      height: 46px;
-      display: grid;
-      grid-template-columns: 42px 1fr 120px;
-      align-items: center;
-      padding: 0 18px;
-      background: var(--card2);
-      border-bottom: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
-    }
-
-    .rows {
-      overflow-y: auto;
-      flex: 1;
-    }
-
-    .rows::-webkit-scrollbar {
-      width: 5px;
-    }
-
-    .rows::-webkit-scrollbar-thumb {
-      background: var(--border);
-      border-radius: 20px;
-    }
-
-    .stock-row {
-      min-height: 58px;
-      display: grid;
-      grid-template-columns: 42px 1fr 120px;
-      align-items: center;
-      padding: 8px 18px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .rank {
-      color: var(--muted2);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .stock-name {
-      font-size: 14px;
-      font-weight: 800;
-      letter-spacing: 0.1px;
-    }
-
-    .stock-sub {
-      color: var(--muted);
-      font-size: 10px;
-      margin-top: 3px;
-    }
-
-    .value {
-      text-align: right;
-      font-size: 14px;
-      font-weight: 800;
-    }
-
-    .value.green {
-      color: var(--green);
-    }
-
-    .value.red {
-      color: var(--red);
-    }
-
-    .percent {
-      display: inline-block;
-      margin-left: 5px;
-      font-size: 10px;
-      font-weight: 800;
-    }
-
-    /* ================= EMPTY / LOADING ================= */
-
-    .empty {
-      height: 100%;
-      min-height: 220px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 25px;
-      text-align: center;
-      color: var(--muted);
-    }
-
-    .empty-icon {
-      font-size: 30px;
-      margin-bottom: 10px;
-      opacity: 0.7;
-    }
-
-    .empty-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 5px;
-    }
-
-    .empty-text {
-      font-size: 12px;
-      line-height: 1.5;
-      max-width: 270px;
-    }
-
-    /* ================= FOOTER ================= */
-
-    .notes {
-      margin-top: 18px;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      background: var(--card);
-      padding: 18px;
-    }
-
-    .notes-title {
-      font-size: 12px;
-      font-weight: 800;
-      margin-bottom: 8px;
-    }
-
-    .notes-text {
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.6;
-    }
-
-    .last-update {
-      margin-top: 8px;
-      text-align: right;
-      color: var(--muted2);
-      font-size: 10px;
-    }
-
-    .swipe-hint {
-      display: none;
-      text-align: center;
-      color: var(--muted2);
-      font-size: 11px;
-      margin-top: 10px;
-    }
-
-    /* ================= RESPONSIVE ================= */
-
-    @media (max-width: 900px) {
-      .app {
-        padding: 12px 12px 30px;
-      }
-
-      .topbar {
-        min-height: 88px;
-        border-radius: 20px;
-      }
-
-      .brand-title {
-        font-size: 18px;
-      }
-
-      .brand-subtitle {
-        font-size: 11px;
-      }
-
-      .connection {
-        padding: 8px 11px;
-        font-size: 11px;
-      }
-
-      .theme-btn {
-        width: 40px;
-        height: 40px;
-      }
-
-      .section-head {
-        margin-top: 22px;
-      }
-
-      .section-title {
-        font-size: 22px;
-      }
-
-      /*
-        Mobile:
-        cards become a horizontal swipe row.
-      */
-
-      .cards-wrapper {
-        overflow: hidden;
-        width: calc(100vw - 24px);
-      }
-
-      .cards {
-        display: flex;
-        gap: 14px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        padding-bottom: 2px;
-      }
-
-      .cards::-webkit-scrollbar {
-        display: none;
-      }
-
-      .scanner-card {
-        flex: 0 0 calc(100vw - 28px);
-        width: calc(100vw - 28px);
-        height: 610px;
-        scroll-snap-align: start;
-        scroll-snap-stop: always;
-      }
-
-      .swipe-hint {
-        display: block;
-      }
-    }
-
-    @media (max-width: 520px) {
-      .app {
-        padding: 10px 12px 28px;
-      }
-
-      .topbar {
-        padding: 12px;
-      }
-
-      .brand {
-        gap: 10px;
-      }
-
-      .brand-icon {
-        width: 50px;
-        height: 50px;
-        font-size: 25px;
-      }
-
-      .brand-title {
-        font-size: 17px;
-      }
-
-      .header-actions {
-        gap: 6px;
-      }
-
-      .connection {
-        font-size: 0;
-        width: 38px;
-        height: 38px;
-        padding: 0;
-        justify-content: center;
-      }
-
-      .connection-dot {
-        width: 8px;
-        height: 8px;
-      }
-
-      .theme-btn {
-        width: 38px;
-        height: 38px;
-        font-size: 17px;
-      }
-
-      .section-head {
-        align-items: center;
-      }
-
-      .section-title {
-        font-size: 21px;
-      }
-
-      .refresh-all {
-        padding: 10px 12px;
-        font-size: 12px;
-      }
-
-      .scanner-card {
-        height: 610px;
-        border-radius: 20px;
-      }
-
-      .card-head {
-        padding: 18px;
-      }
-
-      .card-icon {
-        width: 50px;
-        height: 50px;
-      }
-
-      .card-title {
-        font-size: 17px;
-      }
-
-      .table-head {
-        grid-template-columns: 35px 1fr 105px;
-        padding: 0 14px;
-      }
-
-      .stock-row {
-        grid-template-columns: 35px 1fr 105px;
-        padding: 8px 14px;
-      }
-
-      .stock-name {
-        font-size: 13px;
-      }
-
-      .value {
-        font-size: 12px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
+
+<title>F&O Live Scanner</title>
+
+<style>
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+:root{
+  --bg:#070b10;
+  --card:#0d1319;
+  --card2:#101820;
+  --border:#202a34;
+  --text:#f2f5f7;
+  --muted:#7f8b97;
+  --muted2:#596570;
+  --green:#00d084;
+  --red:#ff4d5a;
+  --yellow:#ffc857;
+  --shadow:rgba(0,0,0,.35);
+}
+
+html[data-theme="light"]{
+  --bg:#f3f6f8;
+  --card:#ffffff;
+  --card2:#f8fafb;
+  --border:#dce3e8;
+  --text:#17212b;
+  --muted:#6d7882;
+  --muted2:#89939c;
+  --green:#00a86b;
+  --red:#e5394f;
+  --yellow:#d99800;
+  --shadow:rgba(30,50,70,.10);
+}
+
+body{
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--text);
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+  transition:.25s ease;
+}
+
+button,
+input{
+  font-family:inherit;
+}
+
+.hidden{
+  display:none!important;
+}
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+#loginScreen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.login-box{
+  width:100%;
+  max-width:440px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  padding:28px;
+  box-shadow:0 20px 55px var(--shadow);
+}
+
+.login-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:25px;
+}
+
+.login-brand{
+  display:flex;
+  align-items:center;
+  gap:13px;
+}
+
+.login-icon{
+  width:55px;
+  height:55px;
+  border-radius:16px;
+  background:var(--green);
+  color:#06110c;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  font-weight:900;
+}
+
+.login-title{
+  font-size:21px;
+  font-weight:800;
+}
+
+.login-subtitle{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:4px;
+}
+
+.theme-btn{
+  width:42px;
+  height:42px;
+  border-radius:13px;
+  border:1px solid var(--border);
+  background:var(--card2);
+  color:var(--text);
+  cursor:pointer;
+  font-size:18px;
+}
+
+.login-heading{
+  font-size:22px;
+  font-weight:800;
+  margin-bottom:6px;
+}
+
+.login-description{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+  margin-bottom:20px;
+}
+
+.field{
+  margin-bottom:15px;
+}
+
+.field label{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+  margin-bottom:7px;
+}
+
+.field input{
+  width:100%;
+  height:48px;
+  border:1px solid var(--border);
+  border-radius:13px;
+  outline:none;
+  background:var(--card2);
+  color:var(--text);
+  padding:0 14px;
+  font-size:14px;
+}
+
+.field input:focus{
+  border-color:var(--green);
+}
+
+.login-button{
+  width:100%;
+  height:50px;
+  border:0;
+  border-radius:14px;
+  background:var(--green);
+  color:#04110b;
+  font-size:15px;
+  font-weight:800;
+  cursor:pointer;
+  margin-top:5px;
+}
+
+.login-button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+.login-status{
+  margin-top:15px;
+  padding:12px;
+  border-radius:12px;
+  font-size:12px;
+  line-height:1.5;
+  display:none;
+}
+
+.login-status.error{
+  display:block;
+  background:rgba(255,77,90,.10);
+  color:var(--red);
+  border:1px solid rgba(255,77,90,.20);
+}
+
+.login-status.success{
+  display:block;
+  background:rgba(0,208,132,.10);
+  color:var(--green);
+  border:1px solid rgba(0,208,132,.20);
+}
+
+.security-note{
+  margin-top:18px;
+  color:var(--muted2);
+  font-size:10px;
+  line-height:1.5;
+  text-align:center;
+}
+
+
+/* =====================================================
+   APP
+===================================================== */
+
+.app{
+  width:100%;
+  max-width:1500px;
+  margin:auto;
+  padding:18px 14px 40px;
+}
+
+
+/* HEADER */
+
+.topbar{
+  min-height:90px;
+  border:1px solid var(--border);
+  border-radius:22px;
+  background:var(--card);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px;
+  box-shadow:0 12px 35px var(--shadow);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.brand-icon{
+  width:54px;
+  height:54px;
+  border-radius:15px;
+  background:var(--green);
+  color:#06110c;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  font-weight:900;
+}
+
+.brand-title{
+  font-size:20px;
+  font-weight:800;
+}
+
+.brand-subtitle{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.connection{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:var(--card2);
+  color:var(--green);
+  font-size:13px;
+}
+
+.connection-dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 12px var(--green);
+}
+
+
+/* SECTION */
+
+.section-head{
+  margin:25px 0 18px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:15px;
+}
+
+.section-title{
+  font-size:24px;
+  font-weight:800;
+}
+
+.section-subtitle{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.refresh-all{
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--text);
+  padding:12px 16px;
+  border-radius:13px;
+  cursor:pointer;
+  font-weight:700;
+}
+
+
+/* CARDS */
+
+.cards-wrapper{
+  width:100%;
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+}
+
+.scanner-card{
+  min-width:0;
+  height:610px;
+  border-radius:22px;
+  border:1px solid var(--border);
+  background:var(--card);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 12px 35px var(--shadow);
+}
+
+.card-head{
+  padding:20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+
+.card-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.card-icon{
+  width:54px;
+  height:54px;
+  border-radius:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+}
+
+.icon-green{
+  background:rgba(0,208,132,.13);
+}
+
+.icon-red{
+  background:rgba(255,77,90,.13);
+}
+
+.icon-yellow{
+  background:rgba(255,200,87,.13);
+}
+
+.card-title{
+  font-size:18px;
+  font-weight:800;
+}
+
+.card-subtitle{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:4px;
+}
+
+.card-refresh{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--card2);
+  color:var(--muted);
+  cursor:pointer;
+  font-size:18px;
+}
+
+.card-refresh.loading{
+  animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg);}
+}
+
+
+/* TABLE */
+
+.table-head{
+  height:46px;
+  display:grid;
+  grid-template-columns:42px 1fr 120px;
+  align-items:center;
+  padding:0 18px;
+  background:var(--card2);
+  border-bottom:1px solid var(--border);
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.rows{
+  overflow-y:auto;
+  flex:1;
+}
+
+.stock-row{
+  min-height:58px;
+  display:grid;
+  grid-template-columns:42px 1fr 120px;
+  align-items:center;
+  padding:8px 18px;
+  border-bottom:1px solid var(--border);
+}
+
+.rank{
+  color:var(--muted2);
+  font-size:12px;
+  font-weight:700;
+}
+
+.stock-name{
+  font-size:14px;
+  font-weight:800;
+}
+
+.stock-sub{
+  color:var(--muted);
+  font-size:10px;
+  margin-top:3px;
+}
+
+.value{
+  text-align:right;
+  font-size:13px;
+  font-weight:800;
+}
+
+.value.green{
+  color:var(--green);
+}
+
+.value.red{
+  color:var(--red);
+}
+
+.percent{
+  display:inline-block;
+  margin-left:4px;
+  font-size:10px;
+}
+
+
+/* EMPTY */
+
+.empty{
+  height:100%;
+  min-height:220px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:25px;
+  text-align:center;
+  color:var(--muted);
+}
+
+.empty-icon{
+  font-size:30px;
+  margin-bottom:10px;
+}
+
+.empty-title{
+  font-size:14px;
+  font-weight:700;
+  color:var(--text);
+  margin-bottom:5px;
+}
+
+.empty-text{
+  font-size:12px;
+  line-height:1.5;
+  max-width:270px;
+}
+
+
+/* NOTES */
+
+.notes{
+  margin-top:18px;
+  border:1px solid var(--border);
+  border-radius:20px;
+  background:var(--card);
+  padding:18px;
+}
+
+.notes-title{
+  font-size:12px;
+  font-weight:800;
+  margin-bottom:8px;
+}
+
+.notes-text{
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.6;
+}
+
+.last-update{
+  margin-top:8px;
+  text-align:right;
+  color:var(--muted2);
+  font-size:10px;
+}
+
+.swipe-hint{
+  display:none;
+  text-align:center;
+  color:var(--muted2);
+  font-size:11px;
+  margin-top:10px;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:900px){
+
+  .app{
+    padding:12px 12px 30px;
+  }
+
+  .cards-wrapper{
+    overflow:hidden;
+    width:calc(100vw - 24px);
+  }
+
+  .cards{
+    display:flex;
+    gap:14px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scroll-snap-type:x mandatory;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .cards::-webkit-scrollbar{
+    display:none;
+  }
+
+  .scanner-card{
+    flex:0 0 calc(100vw - 28px);
+    width:calc(100vw - 28px);
+    scroll-snap-align:start;
+    scroll-snap-stop:always;
+  }
+
+  .swipe-hint{
+    display:block;
+  }
+}
+
+
+@media(max-width:520px){
+
+  .app{
+    padding:10px 12px 28px;
+  }
+
+  .topbar{
+    min-height:88px;
+    padding:12px;
+  }
+
+  .brand{
+    gap:10px;
+  }
+
+  .brand-icon{
+    width:50px;
+    height:50px;
+  }
+
+  .brand-title{
+    font-size:17px;
+  }
+
+  .connection{
+    width:38px;
+    height:38px;
+    padding:0;
+    justify-content:center;
+    font-size:0;
+  }
+
+  .connection-dot{
+    width:8px;
+    height:8px;
+  }
+
+  .theme-btn{
+    width:38px;
+    height:38px;
+  }
+
+  .section-title{
+    font-size:21px;
+  }
+
+  .refresh-all{
+    padding:10px 12px;
+    font-size:12px;
+  }
+
+  .scanner-card{
+    height:610px;
+    border-radius:20px;
+  }
+
+  .card-head{
+    padding:18px;
+  }
+
+  .table-head{
+    grid-template-columns:35px 1fr 105px;
+    padding:0 14px;
+  }
+
+  .stock-row{
+    grid-template-columns:35px 1fr 105px;
+    padding:8px 14px;
+  }
+
+  .stock-name{
+    font-size:13px;
+  }
+
+  .value{
+    font-size:12px;
+  }
+
+  .login-box{
+    padding:22px;
+    border-radius:22px;
+  }
+
+}
+
+</style>
 </head>
 
+
 <body>
-  <div class="app">
 
-    <!-- ================= HEADER ================= -->
 
-    <header class="topbar">
+<!-- =====================================================
+     LOGIN SCREEN
+===================================================== -->
 
-      <div class="brand">
-        <div class="brand-icon">₹</div>
+<div id="loginScreen">
+
+  <div class="login-box">
+
+    <div class="login-top">
+
+      <div class="login-brand">
+
+        <div class="login-icon">
+          ₹
+        </div>
 
         <div>
-          <div class="brand-title">F&amp;O Live Scanner</div>
-          <div class="brand-subtitle">
-            OI &amp; Volume Market Movers
+
+          <div class="login-title">
+            F&amp;O Live Scanner
           </div>
+
+          <div class="login-subtitle">
+            Angel One SmartAPI
+          </div>
+
         </div>
-      </div>
-
-      <div class="header-actions">
-
-        <div class="connection" id="connectionStatus">
-          <span class="connection-dot"></span>
-          <span id="connectionText">Checking...</span>
-        </div>
-
-        <button
-          class="theme-btn"
-          id="themeBtn"
-          onclick="toggleTheme()"
-          title="Toggle theme"
-        >
-          🌙
-        </button>
 
       </div>
 
-    </header>
-
-    <!-- ================= SECTION ================= -->
-
-    <div class="section-head">
-
-      <div>
-        <div class="section-title">
-          Market Movers
-        </div>
-
-        <div class="section-subtitle" id="marketStatus">
-          Market data loading...
-        </div>
-      </div>
 
       <button
-        class="refresh-all"
-        onclick="refreshAll()"
+        class="theme-btn"
+        id="loginThemeBtn"
+        onclick="toggleTheme()"
       >
-        ↻ Refresh All
+        🌙
       </button>
 
     </div>
 
-    <!-- ================= CARDS ================= -->
 
-    <div class="cards-wrapper">
+    <div class="login-heading">
+      Connect Angel One
+    </div>
 
-      <div class="cards">
-
-        <!-- OI GAINERS -->
-
-        <section class="scanner-card">
-
-          <div class="card-head">
-
-            <div class="card-title-wrap">
-
-              <div class="card-icon icon-green">
-                📈
-              </div>
-
-              <div>
-                <div class="card-title">
-                  OI Gainers
-                </div>
-
-                <div class="card-subtitle">
-                  Top 10 OI increase
-                </div>
-              </div>
-
-            </div>
-
-            <button
-              class="card-refresh"
-              id="oiGainersRefresh"
-              onclick="loadOIGainers()"
-            >
-              ↻
-            </button>
-
-          </div>
-
-          <div class="table-head">
-            <div>#</div>
-            <div>Instrument</div>
-            <div>OI Change</div>
-          </div>
-
-          <div
-            class="rows"
-            id="oiGainersRows"
-          >
-            <div class="empty">
-              <div class="empty-icon">⏳</div>
-              <div class="empty-title">
-                Loading OI Gainers
-              </div>
-              <div class="empty-text">
-                Fetching live Angel One market-mover data...
-              </div>
-            </div>
-          </div>
-
-        </section>
+    <div class="login-description">
+      Enter your Angel One SmartAPI details to connect
+      the live F&amp;O scanner.
+    </div>
 
 
-        <!-- OI LOSERS -->
+    <form id="loginForm">
 
-        <section class="scanner-card">
+      <div class="field">
 
-          <div class="card-head">
+        <label>
+          API Key
+        </label>
 
-            <div class="card-title-wrap">
+        <input
+          type="password"
+          id="apiKey"
+          placeholder="Enter API Key"
+          autocomplete="off"
+          required
+        >
 
-              <div class="card-icon icon-red">
-                📉
-              </div>
-
-              <div>
-                <div class="card-title">
-                  OI Losers
-                </div>
-
-                <div class="card-subtitle">
-                  Top 10 OI decrease
-                </div>
-              </div>
-
-            </div>
-
-            <button
-              class="card-refresh"
-              id="oiLosersRefresh"
-              onclick="loadOILosers()"
-            >
-              ↻
-            </button>
-
-          </div>
-
-          <div class="table-head">
-            <div>#</div>
-            <div>Instrument</div>
-            <div>OI Change</div>
-          </div>
-
-          <div
-            class="rows"
-            id="oiLosersRows"
-          >
-            <div class="empty">
-              <div class="empty-icon">⏳</div>
-              <div class="empty-title">
-                Loading OI Losers
-              </div>
-              <div class="empty-text">
-                Fetching live Angel One market-mover data...
-              </div>
-            </div>
-          </div>
-
-        </section>
+      </div>
 
 
-        <!-- VOLUME GAINERS -->
+      <div class="field">
 
-        <section class="scanner-card">
+        <label>
+          Client ID
+        </label>
 
-          <div class="card-head">
+        <input
+          type="text"
+          id="clientCode"
+          placeholder="Enter Client ID"
+          autocomplete="off"
+          required
+        >
 
-            <div class="card-title-wrap">
+      </div>
 
-              <div class="card-icon icon-yellow">
-                ⚡
-              </div>
 
-              <div>
-                <div class="card-title">
-                  Volume Gainers
-                </div>
+      <div class="field">
 
-                <div class="card-subtitle">
-                  NSE Cash Volume
-                </div>
-              </div>
+        <label>
+          MPIN
+        </label>
 
-            </div>
+        <input
+          type="password"
+          id="mpin"
+          placeholder="Enter MPIN"
+          inputmode="numeric"
+          autocomplete="off"
+          required
+        >
 
-            <button
-              class="card-refresh"
-              id="volumeRefresh"
-              onclick="loadVolumeGainers()"
-            >
-              ↻
-            </button>
+      </div>
 
-          </div>
 
-          <div class="table-head">
-            <div>#</div>
-            <div>Instrument</div>
-            <div>Volume</div>
-          </div>
+      <div class="field">
 
-          <div
-            class="rows"
-            id="volumeRows"
-          >
-            <div class="empty">
-              <div class="empty-icon">⚡</div>
-              <div class="empty-title">
-                Loading Cash Volume
-              </div>
-              <div class="empty-text">
-                Collecting live NSE cash-market volume...
-              </div>
-            </div>
-          </div>
+        <label>
+          TOTP Secret
+        </label>
 
-        </section>
+        <input
+          type="password"
+          id="totpSecret"
+          placeholder="Enter TOTP Secret"
+          autocomplete="off"
+          required
+        >
+
+      </div>
+
+
+      <button
+        type="submit"
+        class="login-button"
+        id="loginButton"
+      >
+        🔐 Connect Angel One
+      </button>
+
+    </form>
+
+
+    <div
+      class="login-status"
+      id="loginStatus"
+    ></div>
+
+
+    <div class="security-note">
+      Your credentials are sent to your scanner backend
+      only for Angel One authentication.
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     MAIN APP
+===================================================== -->
+
+<div
+  class="app hidden"
+  id="mainApp"
+>
+
+
+  <!-- HEADER -->
+
+  <header class="topbar">
+
+    <div class="brand">
+
+      <div class="brand-icon">
+        ₹
+      </div>
+
+      <div>
+
+        <div class="brand-title">
+          F&amp;O Live Scanner
+        </div>
+
+        <div class="brand-subtitle">
+          OI &amp; Volume Market Movers
+        </div>
 
       </div>
 
     </div>
 
-    <div class="swipe-hint">
-      ← Swipe cards →
-    </div>
 
-    <!-- ================= NOTES ================= -->
+    <div class="header-actions">
 
-    <div class="notes">
+      <div
+        class="connection"
+        id="connectionStatus"
+      >
 
-      <div class="notes-title">
-        Important Notes
+        <span class="connection-dot"></span>
+
+        <span id="connectionText">
+          Checking...
+        </span>
+
       </div>
 
-      <div class="notes-text">
-        OI Gainers and OI Losers are fetched from
-        Angel One market-mover data.
-        Volume Gainers use live
-        <strong>NSE Cash Volume</strong>
-        for F&amp;O-eligible stocks.
+
+      <button
+        class="theme-btn"
+        id="themeBtn"
+        onclick="toggleTheme()"
+      >
+        🌙
+      </button>
+
+    </div>
+
+  </header>
+
+
+
+  <!-- SECTION -->
+
+  <div class="section-head">
+
+    <div>
+
+      <div class="section-title">
+        Market Movers
       </div>
 
       <div
-        class="last-update"
-        id="lastUpdate"
+        class="section-subtitle"
+        id="marketStatus"
       >
-        Last update: --
+        Market data loading...
       </div>
+
+    </div>
+
+
+    <button
+      class="refresh-all"
+      onclick="refreshAll()"
+    >
+      ↻ Refresh All
+    </button>
+
+  </div>
+
+
+
+  <!-- CARDS -->
+
+  <div class="cards-wrapper">
+
+    <div class="cards">
+
+
+      <!-- OI GAINERS -->
+
+      <section class="scanner-card">
+
+        <div class="card-head">
+
+          <div class="card-title-wrap">
+
+            <div class="card-icon icon-green">
+              📈
+            </div>
+
+            <div>
+
+              <div class="card-title">
+                OI Gainers
+              </div>
+
+              <div class="card-subtitle">
+                Top 10 OI increase
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <button
+            class="card-refresh"
+            id="oiGainersRefresh"
+            onclick="loadOIGainers()"
+          >
+            ↻
+          </button>
+
+        </div>
+
+
+        <div class="table-head">
+
+          <div>#</div>
+          <div>Instrument</div>
+          <div>OI Change</div>
+
+        </div>
+
+
+        <div
+          class="rows"
+          id="oiGainersRows"
+        >
+
+          <div class="empty">
+
+            <div class="empty-icon">
+              ⏳
+            </div>
+
+            <div class="empty-title">
+              Loading OI Gainers
+            </div>
+
+            <div class="empty-text">
+              Fetching Angel One market data...
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- OI LOSERS -->
+
+      <section class="scanner-card">
+
+        <div class="card-head">
+
+          <div class="card-title-wrap">
+
+            <div class="card-icon icon-red">
+              📉
+            </div>
+
+            <div>
+
+              <div class="card-title">
+                OI Losers
+              </div>
+
+              <div class="card-subtitle">
+                Top 10 OI decrease
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <button
+            class="card-refresh"
+            id="oiLosersRefresh"
+            onclick="loadOILosers()"
+          >
+            ↻
+          </button>
+
+        </div>
+
+
+        <div class="table-head">
+
+          <div>#</div>
+          <div>Instrument</div>
+          <div>OI Change</div>
+
+        </div>
+
+
+        <div
+          class="rows"
+          id="oiLosersRows"
+        >
+
+          <div class="empty">
+
+            <div class="empty-icon">
+              ⏳
+            </div>
+
+            <div class="empty-title">
+              Loading OI Losers
+            </div>
+
+            <div class="empty-text">
+              Fetching Angel One market data...
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- VOLUME -->
+
+      <section class="scanner-card">
+
+        <div class="card-head">
+
+          <div class="card-title-wrap">
+
+            <div class="card-icon icon-yellow">
+              ⚡
+            </div>
+
+            <div>
+
+              <div class="card-title">
+                Volume Gainers
+              </div>
+
+              <div class="card-subtitle">
+                NSE Cash Volume
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <button
+            class="card-refresh"
+            id="volumeRefresh"
+            onclick="loadVolumeGainers()"
+          >
+            ↻
+          </button>
+
+        </div>
+
+
+        <div class="table-head">
+
+          <div>#</div>
+          <div>Instrument</div>
+          <div>Volume</div>
+
+        </div>
+
+
+        <div
+          class="rows"
+          id="volumeRows"
+        >
+
+          <div class="empty">
+
+            <div class="empty-icon">
+              ⚡
+            </div>
+
+            <div class="empty-title">
+              Waiting for volume
+            </div>
+
+            <div class="empty-text">
+              Collecting live NSE cash-market volume...
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
 
     </div>
 
   </div>
 
 
-  <script>
-    /* =====================================================
-       THEME
-    ===================================================== */
+  <div class="swipe-hint">
+    ← Swipe cards →
+  </div>
 
-    function applyTheme(theme) {
 
-      document.documentElement.setAttribute(
-        "data-theme",
-        theme
-      );
 
-      const button =
-        document.getElementById("themeBtn");
+  <!-- NOTES -->
 
-      if (!button) return;
+  <div class="notes">
 
-      if (theme === "light") {
-        button.textContent = "☀️";
-        button.title = "Switch to dark mode";
-      } else {
-        button.textContent = "🌙";
-        button.title = "Switch to light mode";
-      }
-    }
+    <div class="notes-title">
+      Important Notes
+    </div>
 
+    <div class="notes-text">
 
-    function loadSavedTheme() {
+      OI Gainers and OI Losers are fetched from
+      Angel One market-mover data.
 
-      const saved =
-        localStorage.getItem("scanner-theme");
+      Volume Gainers use live
+      <strong>NSE Cash Volume</strong>
+      for F&amp;O-eligible stocks.
 
-      if (saved === "light" || saved === "dark") {
-        applyTheme(saved);
-        return;
-      }
+    </div>
 
-      const prefersLight =
-        window.matchMedia &&
-        window.matchMedia(
-          "(prefers-color-scheme: light)"
-        ).matches;
 
-      applyTheme(
-        prefersLight ? "light" : "dark"
-      );
-    }
+    <div
+      class="last-update"
+      id="lastUpdate"
+    >
+      Last update: --
+    </div>
 
+  </div>
 
-    function toggleTheme() {
 
-      const current =
-        document.documentElement.getAttribute(
-          "data-theme"
-        ) || "dark";
+</div>
 
-      const next =
-        current === "dark"
-          ? "light"
-          : "dark";
 
-      localStorage.setItem(
-        "scanner-theme",
-        next
-      );
 
-      applyTheme(next);
-    }
+<script>
 
+/* =====================================================
+   THEME
+===================================================== */
 
-    loadSavedTheme();
+function applyTheme(theme){
 
+  document.documentElement.setAttribute(
+    "data-theme",
+    theme
+  );
 
-    /* =====================================================
-       HELPERS
-    ===================================================== */
+  const buttons=[
+    document.getElementById("themeBtn"),
+    document.getElementById("loginThemeBtn")
+  ];
 
-    function escapeHtml(value) {
+  buttons.forEach(button=>{
 
-      return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
+    if(!button) return;
 
+    button.textContent =
+      theme==="light"
+        ? "☀️"
+        : "🌙";
 
-    function formatNumber(value) {
+    button.title =
+      theme==="light"
+        ? "Switch to dark mode"
+        : "Switch to light mode";
 
-      const number = Number(value);
+  });
 
-      if (!Number.isFinite(number)) {
-        return "--";
-      }
+}
 
-      return number.toLocaleString("en-IN", {
-        maximumFractionDigits: 2
-      });
-    }
 
+function loadTheme(){
 
-    function formatVolume(value) {
-
-      const number = Number(value);
-
-      if (!Number.isFinite(number)) {
-        return "--";
-      }
-
-      if (number >= 10000000) {
-        return (
-          (number / 10000000).toFixed(2) +
-          " Cr"
-        );
-      }
-
-      if (number >= 100000) {
-        return (
-          (number / 100000).toFixed(2) +
-          " L"
-        );
-      }
-
-      if (number >= 1000) {
-        return (
-          (number / 1000).toFixed(1) +
-          " K"
-        );
-      }
-
-      return number.toLocaleString("en-IN");
-    }
-
-
-    function formatPercent(value) {
-
-      const number = Number(value);
-
-      if (!Number.isFinite(number)) {
-        return "--";
-      }
-
-      return (
-        number >= 0 ? "+" : ""
-      ) +
-      number.toFixed(2) +
-      "%";
-    }
-
-
-    function setRefreshing(id, state) {
-
-      const button =
-        document.getElementById(id);
-
-      if (!button) return;
-
-      if (state) {
-        button.classList.add("loading");
-      } else {
-        button.classList.remove("loading");
-      }
-    }
-
-
-    function updateLastTime() {
-
-      const element =
-        document.getElementById("lastUpdate");
-
-      if (!element) return;
-
-      const now = new Date();
-
-      element.textContent =
-        "Last update: " +
-        now.toLocaleTimeString("en-IN", {
-          hour: "numeric",
-          minute: "2-digit",
-          second: "2-digit"
-        });
-    }
-
-
-    async function apiGet(url) {
-
-      const response =
-        await fetch(url, {
-          cache: "no-store"
-        });
-
-      let json;
-
-      try {
-        json = await response.json();
-      } catch (error) {
-        throw new Error(
-          "Invalid server response"
-        );
-      }
-
-      if (!response.ok || json.success === false) {
-        throw new Error(
-          json.message ||
-          "Request failed"
-        );
-      }
-
-      return json;
-    }
-
-
-    /* =====================================================
-       CONNECTION STATUS
-    ===================================================== */
-
-    async function loadStatus() {
-
-      try {
-
-        const result =
-          await apiGet("/api/status");
-
-        const connected =
-          !!result.angelConnected;
-
-        const text =
-          document.getElementById(
-            "connectionText"
-          );
-
-        if (connected) {
-
-          text.textContent =
-            "Angel One Connected";
-
-          document
-            .getElementById(
-              "connectionStatus"
-            )
-            .style.color =
-            "var(--green)";
-
-        } else {
-
-          text.textContent =
-            "Angel One Disconnected";
-
-          document
-            .getElementById(
-              "connectionStatus"
-            )
-            .style.color =
-            "var(--red)";
-        }
-
-        const marketStatus =
-          document.getElementById(
-            "marketStatus"
-          );
-
-        if (
-          result.liveCashStocks !== undefined
-        ) {
-
-          marketStatus.textContent =
-            "Live cash stocks: " +
-            result.liveCashStocks;
-
-        } else {
-
-          marketStatus.textContent =
-            "Market data updated";
-        }
-
-      } catch (error) {
-
-        const text =
-          document.getElementById(
-            "connectionText"
-          );
-
-        text.textContent =
-          "Connection Error";
-
-        document
-          .getElementById(
-            "connectionStatus"
-          )
-          .style.color =
-          "var(--red)";
-      }
-    }
-
-
-    /* =====================================================
-       OI GAINERS
-    ===================================================== */
-
-    async function loadOIGainers() {
-
-      setRefreshing(
-        "oiGainersRefresh",
-        true
-      );
-
-      const container =
-        document.getElementById(
-          "oiGainersRows"
-        );
-
-      try {
-
-        const result =
-          await apiGet(
-            "/api/oi-gainers"
-          );
-
-        const data =
-          Array.isArray(result.data)
-            ? result.data
-            : [];
-
-        if (!data.length) {
-
-          container.innerHTML =
-            createEmpty(
-              "📈",
-              "No OI Gainers",
-              "No OI gainer data available right now."
-            );
-
-          return;
-        }
-
-        container.innerHTML =
-          data
-            .slice(0, 10)
-            .map(
-              (item, index) =>
-                createOIRow(
-                  item,
-                  index + 1,
-                  "green"
-                )
-            )
-            .join("");
-
-      } catch (error) {
-
-        container.innerHTML =
-          createEmpty(
-            "⚠️",
-            "Unable to load",
-            error.message
-          );
-
-      } finally {
-
-        setRefreshing(
-          "oiGainersRefresh",
-          false
-        );
-      }
-    }
-
-
-    /* =====================================================
-       OI LOSERS
-    ===================================================== */
-
-    async function loadOILosers() {
-
-      setRefreshing(
-        "oiLosersRefresh",
-        true
-      );
-
-      const container =
-        document.getElementById(
-          "oiLosersRows"
-        );
-
-      try {
-
-        const result =
-          await apiGet(
-            "/api/oi-losers"
-          );
-
-        const data =
-          Array.isArray(result.data)
-            ? result.data
-            : [];
-
-        if (!data.length) {
-
-          container.innerHTML =
-            createEmpty(
-              "📉",
-              "No OI Losers",
-              "No OI loser data available right now."
-            );
-
-          return;
-        }
-
-        container.innerHTML =
-          data
-            .slice(0, 10)
-            .map(
-              (item, index) =>
-                createOIRow(
-                  item,
-                  index + 1,
-                  "red"
-                )
-            )
-            .join("");
-
-      } catch (error) {
-
-        container.innerHTML =
-          createEmpty(
-            "⚠️",
-            "Unable to load",
-            error.message
-          );
-
-      } finally {
-
-        setRefreshing(
-          "oiLosersRefresh",
-          false
-        );
-      }
-    }
-
-
-    function createOIRow(
-      item,
-      rank,
-      type
-    ) {
-
-      const symbol =
-        item.cashSymbol ||
-        item.symbol ||
-        item.tradingSymbol ||
-        "--";
-
-      const percent =
-        Number(
-          item.percentChange ??
-          item.percent ??
-          item.changePercent ??
-          0
-        );
-
-      return `
-        <div class="stock-row">
-
-          <div class="rank">
-            ${rank}
-          </div>
-
-          <div>
-            <div class="stock-name">
-              ${escapeHtml(symbol)}
-            </div>
-
-            <div class="stock-sub">
-              F&amp;O underlying
-            </div>
-          </div>
-
-          <div
-            class="value ${type}"
-          >
-            ${formatPercent(percent)}
-          </div>
-
-        </div>
-      `;
-    }
-
-
-    /* =====================================================
-       VOLUME GAINERS
-    ===================================================== */
-
-    async function loadVolumeGainers() {
-
-      setRefreshing(
-        "volumeRefresh",
-        true
-      );
-
-      const container =
-        document.getElementById(
-          "volumeRows"
-        );
-
-      try {
-
-        const result =
-          await apiGet(
-            "/api/volume-gainers"
-          );
-
-        const data =
-          Array.isArray(result.data)
-            ? result.data
-            : [];
-
-        /*
-          Server tells us that it is still collecting
-          the rolling volume history.
-        */
-
-        if (
-          !data.length &&
-          result.collecting
-        ) {
-
-          container.innerHTML =
-            createEmpty(
-              "⚡",
-              "Collecting live volume",
-              "NSE cash-market volume is being collected. Volume Gainers will appear automatically."
-            );
-
-          return;
-        }
-
-
-        if (!data.length) {
-
-          container.innerHTML =
-            createEmpty(
-              "📊",
-              "No volume data",
-              "No NSE cash volume-gainer data is available right now."
-            );
-
-          return;
-        }
-
-
-        container.innerHTML =
-          data
-            .slice(0, 10)
-            .map(
-              (item, index) =>
-                createVolumeRow(
-                  item,
-                  index + 1
-                )
-            )
-            .join("");
-
-      } catch (error) {
-
-        container.innerHTML =
-          createEmpty(
-            "⚠️",
-            "Unable to load volume",
-            error.message
-          );
-
-      } finally {
-
-        setRefreshing(
-          "volumeRefresh",
-          false
-        );
-      }
-    }
-
-
-    function createVolumeRow(
-      item,
-      rank
-    ) {
-
-      const symbol =
-        item.symbol ||
-        item.tradingSymbol ||
-        "--";
-
-      const volume =
-        item.tradeVolume ??
-        item.volume ??
-        0;
-
-      const percent =
-        Number(
-          item.percentChange ?? 0
-        );
-
-      const volumeChange =
-        item.volumeChange ?? 0;
-
-      return `
-        <div class="stock-row">
-
-          <div class="rank">
-            ${rank}
-          </div>
-
-          <div>
-            <div class="stock-name">
-              ${escapeHtml(symbol)}
-            </div>
-
-            <div class="stock-sub">
-              NSE Cash Volume
-              • +${formatVolume(volumeChange)}
-            </div>
-          </div>
-
-          <div class="value green">
-
-            ${formatVolume(volume)}
-
-            <span class="percent">
-              ${formatPercent(percent)}
-            </span>
-
-          </div>
-
-        </div>
-      `;
-    }
-
-
-    /* =====================================================
-       EMPTY STATE
-    ===================================================== */
-
-    function createEmpty(
-      icon,
-      title,
-      text
-    ) {
-
-      return `
-        <div class="empty">
-
-          <div class="empty-icon">
-            ${icon}
-          </div>
-
-          <div class="empty-title">
-            ${escapeHtml(title)}
-          </div>
-
-          <div class="empty-text">
-            ${escapeHtml(text)}
-          </div>
-
-        </div>
-      `;
-    }
-
-
-    /* =====================================================
-       REFRESH ALL
-    ===================================================== */
-
-    async function refreshAll() {
-
-      await Promise.all([
-        loadStatus(),
-        loadOIGainers(),
-        loadOILosers(),
-        loadVolumeGainers()
-      ]);
-
-      updateLastTime();
-    }
-
-
-    /* =====================================================
-       INITIAL LOAD
-    ===================================================== */
-
-    async function initialLoad() {
-
-      await refreshAll();
-
-    }
-
-
-    initialLoad();
-
-
-    /* =====================================================
-       AUTO REFRESH
-       Every 10 seconds
-    ===================================================== */
-
-    setInterval(
-      async () => {
-
-        try {
-
-          await Promise.all([
-            loadStatus(),
-            loadOIGainers(),
-            loadOILosers(),
-            loadVolumeGainers()
-          ]);
-
-          updateLastTime();
-
-        } catch (error) {
-
-          console.log(
-            "Auto refresh error:",
-            error.message
-          );
-
-        }
-
-      },
-      10000
+  const saved =
+    localStorage.getItem(
+      "scanner-theme"
     );
 
-  </script>
+  if(
+    saved==="light" ||
+    saved==="dark"
+  ){
+
+    applyTheme(saved);
+    return;
+
+  }
+
+  const light =
+    window.matchMedia &&
+    window.matchMedia(
+      "(prefers-color-scheme: light)"
+    ).matches;
+
+  applyTheme(
+    light
+      ? "light"
+      : "dark"
+  );
+
+}
+
+
+function toggleTheme(){
+
+  const current =
+    document.documentElement.getAttribute(
+      "data-theme"
+    ) || "dark";
+
+  const next =
+    current==="dark"
+      ? "light"
+      : "dark";
+
+  localStorage.setItem(
+    "scanner-theme",
+    next
+  );
+
+  applyTheme(next);
+
+}
+
+
+loadTheme();
+
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+function escapeHtml(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+function formatNumber(value){
+
+  const n=Number(value);
+
+  if(!Number.isFinite(n)){
+    return "--";
+  }
+
+  return n.toLocaleString(
+    "en-IN",
+    {
+      maximumFractionDigits:2
+    }
+  );
+
+}
+
+
+function formatVolume(value){
+
+  const n=Number(value);
+
+  if(!Number.isFinite(n)){
+    return "--";
+  }
+
+  if(n>=10000000){
+    return (
+      (n/10000000).toFixed(2)
+      +" Cr"
+    );
+  }
+
+  if(n>=100000){
+    return (
+      (n/100000).toFixed(2)
+      +" L"
+    );
+  }
+
+  if(n>=1000){
+    return (
+      (n/1000).toFixed(1)
+      +" K"
+    );
+  }
+
+  return n.toLocaleString("en-IN");
+
+}
+
+
+function formatPercent(value){
+
+  const n=Number(value);
+
+  if(!Number.isFinite(n)){
+    return "--";
+  }
+
+  return (
+    n>=0 ? "+" : ""
+  )
+  +n.toFixed(2)
+  +"%";
+
+}
+
+
+function createEmpty(
+  icon,
+  title,
+  text
+){
+
+  return `
+    <div class="empty">
+
+      <div class="empty-icon">
+        ${icon}
+      </div>
+
+      <div class="empty-title">
+        ${escapeHtml(title)}
+      </div>
+
+      <div class="empty-text">
+        ${escapeHtml(text)}
+      </div>
+
+    </div>
+  `;
+
+}
+
+
+function setRefreshing(
+  id,
+  state
+){
+
+  const button =
+    document.getElementById(id);
+
+  if(!button) return;
+
+  if(state){
+
+    button.classList.add(
+      "loading"
+    );
+
+  }else{
+
+    button.classList.remove(
+      "loading"
+    );
+
+  }
+
+}
+
+
+function updateLastTime(){
+
+  const element =
+    document.getElementById(
+      "lastUpdate"
+    );
+
+  if(!element) return;
+
+  element.textContent =
+    "Last update: "
+    +
+    new Date().toLocaleTimeString(
+      "en-IN",
+      {
+        hour:"numeric",
+        minute:"2-digit",
+        second:"2-digit"
+      }
+    );
+
+}
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+document
+  .getElementById("loginForm")
+  .addEventListener(
+    "submit",
+    loginAngelOne
+  );
+
+
+async function loginAngelOne(event){
+
+  event.preventDefault();
+
+  const button =
+    document.getElementById(
+      "loginButton"
+    );
+
+  const status =
+    document.getElementById(
+      "loginStatus"
+    );
+
+  const apiKey =
+    document.getElementById(
+      "apiKey"
+    ).value.trim();
+
+  const clientCode =
+    document.getElementById(
+      "clientCode"
+    ).value.trim();
+
+  const mpin =
+    document.getElementById(
+      "mpin"
+    ).value.trim();
+
+  const totpSecret =
+    document.getElementById(
+      "totpSecret"
+    ).value.trim();
+
+
+  if(
+    !apiKey ||
+    !clientCode ||
+    !mpin ||
+    !totpSecret
+  ){
+
+    showLoginStatus(
+      "Please fill all fields.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  button.disabled=true;
+  button.textContent=
+    "⏳ Connecting...";
+
+
+  showLoginStatus(
+    "Connecting to Angel One...",
+    "success"
+  );
+
+
+  try{
+
+    const response =
+      await fetch(
+        "/api/login",
+        {
+          method:"POST",
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+          body:JSON.stringify({
+            apiKey,
+            clientCode,
+            mpin,
+            totpSecret
+          })
+        }
+      );
+
+
+    const result =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !result.success
+    ){
+
+      throw new Error(
+        result.message ||
+        "Angel One login failed"
+      );
+
+    }
+
+
+    showLoginStatus(
+      "✅ Angel One connected successfully.",
+      "success"
+    );
+
+
+    setTimeout(
+      ()=>{
+        showDashboard();
+      },
+      500
+    );
+
+
+  }catch(error){
+
+    showLoginStatus(
+      error.message ||
+      "Unable to connect to Angel One.",
+      "error"
+    );
+
+  }finally{
+
+    button.disabled=false;
+
+    button.textContent=
+      "🔐 Connect Angel One";
+
+  }
+
+}
+
+
+function showLoginStatus(
+  message,
+  type
+){
+
+  const element =
+    document.getElementById(
+      "loginStatus"
+    );
+
+  element.textContent=message;
+
+  element.className=
+    "login-status "
+    +type;
+
+}
+
+
+
+/* =====================================================
+   SHOW DASHBOARD
+===================================================== */
+
+function showDashboard(){
+
+  document
+    .getElementById(
+      "loginScreen"
+    )
+    .classList.add(
+      "hidden"
+    );
+
+  document
+    .getElementById(
+      "mainApp"
+    )
+    .classList.remove(
+      "hidden"
+    );
+
+  refreshAll();
+
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+async function loadStatus(){
+
+  try{
+
+    const response =
+      await fetch(
+        "/api/status",
+        {
+          cache:"no-store"
+        }
+      );
+
+    const result =
+      await response.json();
+
+
+    const text =
+      document.getElementById(
+        "connectionText"
+      );
+
+
+    if(result.angelConnected){
+
+      text.textContent=
+        "Angel One Connected";
+
+      document
+        .getElementById(
+          "connectionStatus"
+        )
+        .style.color=
+        "var(--green)";
+
+
+    }else{
+
+      text.textContent=
+        "Disconnected";
+
+      document
+        .getElementById(
+          "connectionStatus"
+        )
+        .style.color=
+        "var(--red)";
+
+    }
+
+
+    const marketStatus =
+      document.getElementById(
+        "marketStatus"
+      );
+
+
+    marketStatus.textContent=
+      "Live cash stocks: "
+      +
+      (
+        result.liveCashStocks ??
+        0
+      );
+
+
+  }catch(error){
+
+    console.log(
+      "Status error:",
+      error.message
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   OI GAINERS
+===================================================== */
+
+async function loadOIGainers(){
+
+  setRefreshing(
+    "oiGainersRefresh",
+    true
+  );
+
+  const container =
+    document.getElementById(
+      "oiGainersRows"
+    );
+
+
+  try{
+
+    const response =
+      await fetch(
+        "/api/oi-gainers",
+        {
+          cache:"no-store"
+        }
+      );
+
+    const result =
+      await response.json();
+
+
+    if(!response.ok){
+
+      throw new Error(
+        result.message ||
+        "Unable to load OI Gainers"
+      );
+
+    }
+
+
+    const data =
+      Array.isArray(result.data)
+        ? result.data
+        : [];
+
+
+    if(!data.length){
+
+      container.innerHTML=
+        createEmpty(
+          "📈",
+          "No OI Gainers",
+          "No OI gainer data available right now."
+        );
+
+      return;
+
+    }
+
+
+    container.innerHTML=
+      data
+        .slice(0,10)
+        .map(
+          (item,index)=>
+            createOIRow(
+              item,
+              index+1,
+              "green"
+            )
+        )
+        .join("");
+
+
+  }catch(error){
+
+    container.innerHTML=
+      createEmpty(
+        "⚠️",
+        "Unable to load",
+        error.message
+      );
+
+  }finally{
+
+    setRefreshing(
+      "oiGainersRefresh",
+      false
+    );
+
+  }
+
+}
+
+
+
+/* =====================================================
+   OI LOSERS
+===================================================== */
+
+async function loadOILosers(){
+
+  setRefreshing(
+    "oiLosersRefresh",
+    true
+  );
+
+  const container =
+    document.getElementById(
+      "oiLosersRows"
+    );
+
+
+  try{
+
+    const response =
+      await fetch(
+        "/api/oi-losers",
+        {
+          cache:"no-store"
+        }
+      );
+
+    const result =
+      await response.json();
+
+
+    if(!response.ok){
+
+      throw new Error(
+        result.message ||
+        "Unable to load OI Losers"
+      );
+
+    }
+
+
+    const data =
+      Array.isArray(result.data)
+        ? result.data
+        : [];
+
+
+    if(!data.length){
+
+      container.innerHTML=
+        createEmpty(
+          "📉",
+          "No OI Losers",
+          "No OI loser data available right now."
+        );
+
+      return;
+
+    }
+
+
+    container.innerHTML=
+      data
+        .slice(0,10)
+        .map(
+          (item,index)=>
+            createOIRow(
+              item,
+              index+1,
+              "red"
+            )
+        )
+        .join("");
+
+
+  }catch(error){
+
+    container.innerHTML=
+      createEmpty(
+        "⚠️",
+        "Unable to load",
+        error.message
+      );
+
+  }finally{
+
+    setRefreshing(
+      "oiLosersRefresh",
+      false
+    );
+
+  }
+
+}
+
+
+
+function createOIRow(
+  item,
+  rank,
+  type
+){
+
+  const symbol =
+    item.cashSymbol ||
+    item.symbol ||
+    item.tradingSymbol ||
+    "--";
+
+
+  const percent =
+    Number(
+      item.percentChange ??
+      item.percent ??
+      item.changePercent ??
+      0
+    );
+
+
+  return `
+
+    <div class="stock-row">
+
+      <div class="rank">
+        ${rank}
+      </div>
+
+      <div>
+
+        <div class="stock-name">
+          ${escapeHtml(symbol)}
+        </div>
+
+        <div class="stock-sub">
+          F&amp;O underlying
+        </div>
+
+      </div>
+
+      <div class="value ${type}">
+        ${formatPercent(percent)}
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+
+/* =====================================================
+   VOLUME GAINERS
+===================================================== */
+
+async function loadVolumeGainers(){
+
+  setRefreshing(
+    "volumeRefresh",
+    true
+  );
+
+  const container =
+    document.getElementById(
+      "volumeRows"
+    );
+
+
+  try{
+
+    const response =
+      await fetch(
+        "/api/volume-gainers",
+        {
+          cache:"no-store"
+        }
+      );
+
+    const result =
+      await response.json();
+
+
+    if(!response.ok){
+
+      throw new Error(
+        result.message ||
+        "Unable to load volume"
+      );
+
+    }
+
+
+    const data =
+      Array.isArray(result.data)
+        ? result.data
+        : [];
+
+
+    if(
+      !data.length &&
+      result.collecting
+    ){
+
+      container.innerHTML=
+        createEmpty(
+          "⚡",
+          "Collecting live volume",
+          "NSE cash-market volume is being collected. Volume Gainers will appear automatically."
+        );
+
+      return;
+
+    }
+
+
+    if(!data.length){
+
+      container.innerHTML=
+        createEmpty(
+          "📊",
+          "No volume data",
+          "No NSE cash volume-gainer data is available right now."
+        );
+
+      return;
+
+    }
+
+
+    container.innerHTML=
+      data
+        .slice(0,10)
+        .map(
+          (item,index)=>
+            createVolumeRow(
+              item,
+              index+1
+            )
+        )
+        .join("");
+
+
+  }catch(error){
+
+    container.innerHTML=
+      createEmpty(
+        "⚠️",
+        "Unable to load volume",
+        error.message
+      );
+
+  }finally{
+
+    setRefreshing(
+      "volumeRefresh",
+      false
+    );
+
+  }
+
+}
+
+
+
+function createVolumeRow(
+  item,
+  rank
+){
+
+  const symbol =
+    item.symbol ||
+    item.tradingSymbol ||
+    "--";
+
+
+  const volume =
+    item.tradeVolume ??
+    item.volume ??
+    0;
+
+
+  const volumeChange =
+    item.volumeChange ??
+    0;
+
+
+  const percent =
+    Number(
+      item.percentChange ??
+      0
+    );
+
+
+  return `
+
+    <div class="stock-row">
+
+      <div class="rank">
+        ${rank}
+      </div>
+
+      <div>
+
+        <div class="stock-name">
+          ${escapeHtml(symbol)}
+        </div>
+
+        <div class="stock-sub">
+          NSE Cash Volume
+          • +${formatVolume(volumeChange)}
+        </div>
+
+      </div>
+
+      <div class="value green">
+
+        ${formatVolume(volume)}
+
+        <span class="percent">
+          ${formatPercent(percent)}
+        </span>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+
+/* =====================================================
+   REFRESH ALL
+===================================================== */
+
+async function refreshAll(){
+
+  await Promise.all([
+    loadStatus(),
+    loadOIGainers(),
+    loadOILosers(),
+    loadVolumeGainers()
+  ]);
+
+  updateLastTime();
+
+}
+
+
+
+/* =====================================================
+   AUTO REFRESH
+===================================================== */
+
+setInterval(
+  ()=>{
+
+    const app =
+      document.getElementById(
+        "mainApp"
+      );
+
+    if(
+      app &&
+      !app.classList.contains(
+        "hidden"
+      )
+    ){
+
+      refreshAll();
+
+    }
+
+  },
+  10000
+);
+
+</script>
 
 </body>
-      </html>
+  </html>
