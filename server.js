@@ -9,28 +9,13 @@ const {
 
 const { generate } = require("otplib");
 
-
-/* =========================================================
-   APP
-========================================================= */
-
 const app = express();
 
-const PORT =
-  process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-
 app.use(express.json());
-
-app.use(
-  express.static("public")
-);
-
-
-/* =========================================================
-   ANGEL SESSION
-========================================================= */
+app.use(express.static("public"));
 
 let angelSession = null;
 
@@ -42,31 +27,15 @@ let angelSession = null;
 const SCRIP_MASTER_URL =
   "https://margincalculator.angelone.in/OpenAPI_File/files/OpenAPIScripMaster.json";
 
-
 let scripMasterLoaded = false;
 
-
-/*
-  F&O eligible CASH stocks
-
-  token -> stock information
-*/
-
 const cashStocks = new Map();
-
-
-/*
-  Futures token -> cash stock mapping
-
-  OI data futures se aayega,
-  lekin display CASH symbol ka hoga.
-*/
 
 const futureToCash = new Map();
 
 
 /* =========================================================
-   CASH VOLUME WEBSOCKET
+   CASH VOLUME
 ========================================================= */
 
 let volumeSocket = null;
@@ -77,56 +46,29 @@ let volumeSocketStarted = false;
 
 
 /*
-  Current live cumulative volume.
-
-  token -> data
+  token -> current live data
 */
-
 const volumeData = new Map();
 
 
 /*
-  60-second interval starting volume.
+  token -> rolling volume samples
 
-  token -> volume at beginning
-  of current 60-second interval
+  Example:
+
+  [
+    { time: 1000, volume: 50000 },
+    { time: 5000, volume: 52000 },
+    ...
+  ]
 */
-
-const intervalStartVolume =
-  new Map();
+const volumeHistory = new Map();
 
 
 /*
-  Last completed 60-second metrics.
-
-  token ->
-
-  {
-    volume,
-    volumeIncrease,
-    volumeIncreasePercent,
-    timestamp
-  }
+  Keep 2 minutes history.
 */
-
-const volumeMetrics =
-  new Map();
-
-
-/*
-  First interval ke liye data
-  collect hone ka status.
-*/
-
-let volumeIntervalReady = false;
-
-
-/*
-  60 seconds
-*/
-
-const VOLUME_INTERVAL =
-  60 * 1000;
+const HISTORY_MS = 2 * 60 * 1000;
 
 
 /* =========================================================
@@ -135,90 +77,72 @@ const VOLUME_INTERVAL =
 
 function downloadScripMaster() {
 
-  return new Promise(
-    (resolve, reject) => {
+  return new Promise((resolve, reject) => {
 
-      https.get(
+    https.get(
+      SCRIP_MASTER_URL,
+      {
+        headers: {
+          "User-Agent": "Mozilla/5.0"
+        }
+      },
+      (response) => {
 
-        SCRIP_MASTER_URL,
+        let body = "";
 
-        {
-          headers: {
-            "User-Agent":
-              "Mozilla/5.0"
-          }
-        },
+        if (response.statusCode !== 200) {
 
-        (response) => {
+          response.resume();
 
-          let body = "";
-
-
-          if (
-            response.statusCode !== 200
-          ) {
-
-            response.resume();
-
-            reject(
-              new Error(
-                "Scrip master HTTP " +
-                response.statusCode
-              )
-            );
-
-            return;
-          }
-
-
-          response.setEncoding(
-            "utf8"
+          reject(
+            new Error(
+              "Scrip master HTTP " +
+              response.statusCode
+            )
           );
 
-
-          response.on(
-            "data",
-            (chunk) => {
-
-              body += chunk;
-
-            }
-          );
-
-
-          response.on(
-            "end",
-            () => {
-
-              try {
-
-                const data =
-                  JSON.parse(body);
-
-                resolve(data);
-
-              } catch (error) {
-
-                reject(
-                  new Error(
-                    "Invalid scrip master JSON"
-                  )
-                );
-
-              }
-
-            }
-          );
-
+          return;
         }
 
-      ).on(
-        "error",
-        reject
-      );
+        response.setEncoding("utf8");
 
-    }
-  );
+        response.on(
+          "data",
+          chunk => {
+            body += chunk;
+          }
+        );
+
+        response.on(
+          "end",
+          () => {
+
+            try {
+
+              resolve(
+                JSON.parse(body)
+              );
+
+            } catch (error) {
+
+              reject(
+                new Error(
+                  "Invalid scrip master JSON"
+                )
+              );
+
+            }
+
+          }
+        );
+
+      }
+    ).on(
+      "error",
+      reject
+    );
+
+  });
 
 }
 
@@ -233,20 +157,16 @@ function cleanSymbol(value) {
     return "";
   }
 
-
   return String(value)
     .toUpperCase()
     .trim()
-    .replace(
-      /-EQ$/,
-      ""
-    );
+    .replace(/-EQ$/, "");
 
 }
 
 
 /* =========================================================
-   LOAD F&O STOCK UNIVERSE
+   LOAD F&O STOCK -> CASH STOCK
 ========================================================= */
 
 async function loadFNOUniverse() {
@@ -255,14 +175,11 @@ async function loadFNOUniverse() {
     "📥 Loading Angel One scrip master..."
   );
 
-
   const master =
     await downloadScripMaster();
 
 
-  if (
-    !Array.isArray(master)
-  ) {
+  if (!Array.isArray(master)) {
 
     throw new Error(
       "Scrip master is not an array"
@@ -271,20 +188,14 @@ async function loadFNOUniverse() {
   }
 
 
-  /*
-    ========================================================
-    STEP 1
-    NSE CASH EQUITY
-    ========================================================
-  */
+  /* =======================================================
+     NSE CASH
+  ======================================================= */
 
-  const nseCash =
-    new Map();
+  const nseCash = new Map();
 
 
-  for (
-    const item of master
-  ) {
+  for (const item of master) {
 
     const exchange =
       String(
@@ -292,12 +203,8 @@ async function loadFNOUniverse() {
       ).toUpperCase();
 
 
-    if (
-      exchange !== "NSE"
-    ) {
-
+    if (exchange !== "NSE") {
       continue;
-
     }
 
 
@@ -307,26 +214,13 @@ async function loadFNOUniverse() {
       ).toUpperCase();
 
 
-    /*
-      Normal NSE equity symbols:
-      RELIANCE-EQ
-      HDFCBANK-EQ
-      TCS-EQ
-    */
-
-    if (
-      !symbol.endsWith("-EQ")
-    ) {
-
+    if (!symbol.endsWith("-EQ")) {
       continue;
-
     }
 
 
     const clean =
-      cleanSymbol(
-        symbol
-      );
+      cleanSymbol(symbol);
 
 
     const token =
@@ -335,32 +229,20 @@ async function loadFNOUniverse() {
       );
 
 
-    if (
-      !clean ||
-      !token
-    ) {
-
+    if (!clean || !token) {
       continue;
-
     }
 
 
     nseCash.set(
       clean,
       {
-
-        symbol:
-          clean,
-
-        tradingSymbol:
-          symbol,
-
+        symbol: clean,
+        tradingSymbol: symbol,
         token,
-
         name:
           item.name ||
           clean
-
       }
     );
 
@@ -373,24 +255,18 @@ async function loadFNOUniverse() {
   );
 
 
-  /*
-    ========================================================
-    STEP 2
-    F&O STOCK FUTURES
-    ========================================================
-  */
+  /* =======================================================
+     F&O STOCK FUTURES
+  ======================================================= */
 
   const fnoUnderlyings =
     new Set();
 
 
-  const futures =
-    [];
+  const futures = [];
 
 
-  for (
-    const item of master
-  ) {
+  for (const item of master) {
 
     const exchange =
       String(
@@ -398,22 +274,10 @@ async function loadFNOUniverse() {
       ).toUpperCase();
 
 
-    if (
-      exchange !== "NFO"
-    ) {
-
+    if (exchange !== "NFO") {
       continue;
-
     }
 
-
-    /*
-      FUTSTK = Stock Futures
-
-      FUTIDX = Index Futures
-
-      Hume sirf STOCK FUTURES chahiye.
-    */
 
     const instrumentType =
       String(
@@ -421,12 +285,18 @@ async function loadFNOUniverse() {
       ).toUpperCase();
 
 
+    /*
+      Only stock futures.
+
+      FUTIDX ko intentionally exclude
+      kar rahe hain.
+    */
+
     if (
       instrumentType !== "FUTSTK"
     ) {
 
       continue;
-
     }
 
 
@@ -448,14 +318,8 @@ async function loadFNOUniverse() {
     ) {
 
       continue;
-
     }
 
-
-    /*
-      Corresponding NSE cash stock
-      exist karna chahiye.
-    */
 
     const cash =
       nseCash.get(
@@ -464,9 +328,7 @@ async function loadFNOUniverse() {
 
 
     if (!cash) {
-
       continue;
-
     }
 
 
@@ -504,24 +366,17 @@ async function loadFNOUniverse() {
   );
 
 
-  /*
-    ========================================================
-    STEP 3
-    FUTURES -> CASH MAPPING
-    ========================================================
-  */
+  /* =======================================================
+     FUTURE -> CASH MAPPING
+  ======================================================= */
 
   futureToCash.clear();
 
 
-  for (
-    const item of futures
-  ) {
+  for (const item of futures) {
 
     futureToCash.set(
-
       item.futureToken,
-
       {
 
         underlying:
@@ -537,18 +392,14 @@ async function loadFNOUniverse() {
           item.cashTradingSymbol
 
       }
-
     );
 
   }
 
 
-  /*
-    ========================================================
-    STEP 4
-    CASH STOCKS FOR VOLUME SCANNER
-    ========================================================
-  */
+  /* =======================================================
+     CASH STOCKS FOR LIVE VOLUME
+  ======================================================= */
 
   cashStocks.clear();
 
@@ -571,7 +422,6 @@ async function loadFNOUniverse() {
 
     cashStocks.set(
       cash.token,
-
       {
 
         symbol:
@@ -587,7 +437,6 @@ async function loadFNOUniverse() {
           cash.name
 
       }
-
     );
 
   }
@@ -603,51 +452,30 @@ async function loadFNOUniverse() {
 
 
   console.log(
-    "💰 CASH stocks for volume:",
+    "💰 CASH volume stocks:",
     cashStocks.size
   );
-
-
-  return {
-
-    cashStocks,
-
-    futureToCash
-
-  };
 
 }
 
 
 /* =========================================================
-   START NSE CASH VOLUME WEBSOCKET
+   START CASH WEBSOCKET
 ========================================================= */
 
 async function startVolumeWebSocket() {
 
-  if (
-    !angelSession
-  ) {
-
+  if (!angelSession) {
     return;
-
   }
 
 
   try {
 
-    /*
-      Old socket close.
-    */
-
-    if (
-      volumeSocket
-    ) {
+    if (volumeSocket) {
 
       try {
-
         volumeSocket.close();
-
       } catch (_) {}
 
     }
@@ -660,35 +488,17 @@ async function startVolumeWebSocket() {
     volumeSocketStarted = false;
 
 
-    /*
-      Clear old data.
-    */
-
     volumeData.clear();
 
-    intervalStartVolume.clear();
-
-    volumeMetrics.clear();
-
-    volumeIntervalReady = false;
+    volumeHistory.clear();
 
 
-    /*
-      Make sure universe exists.
-    */
-
-    if (
-      !scripMasterLoaded
-    ) {
+    if (!scripMasterLoaded) {
 
       await loadFNOUniverse();
 
     }
 
-
-    /*
-      Cash tokens.
-    */
 
     const tokens =
       Array.from(
@@ -696,9 +506,7 @@ async function startVolumeWebSocket() {
       );
 
 
-    if (
-      !tokens.length
-    ) {
+    if (!tokens.length) {
 
       throw new Error(
         "No F&O eligible cash stocks found"
@@ -708,10 +516,10 @@ async function startVolumeWebSocket() {
 
 
     /*
-      WebSocket per connection
-      max 1000 tokens.
+      Angel One WebSocket:
+      max 1000 tokens per connection.
 
-      First 1000 stocks.
+      Our first 1000 F&O stocks.
     */
 
     const subscribeTokens =
@@ -722,12 +530,12 @@ async function startVolumeWebSocket() {
 
 
     console.log(
-      "🔌 Starting NSE CASH volume WebSocket..."
+      "🔌 Starting NSE CASH WebSocket..."
     );
 
 
     console.log(
-      "📡 CASH tokens:",
+      "📡 Cash tokens:",
       subscribeTokens.length
     );
 
@@ -750,11 +558,9 @@ async function startVolumeWebSocket() {
       });
 
 
-    /*
-      ======================================================
-      LIVE TICK
-      ======================================================
-    */
+    /* =====================================================
+       TICK
+    ===================================================== */
 
     volumeSocket.on(
       "tick",
@@ -771,10 +577,10 @@ async function startVolumeWebSocket() {
             String(
               tick.token || ""
             )
-              .replace(
-                /"/g,
-                ""
-              );
+            .replace(
+              /"/g,
+              ""
+            );
 
 
           if (!token) {
@@ -794,10 +600,14 @@ async function startVolumeWebSocket() {
 
 
           /*
-            Angel One Quote mode:
+            IMPORTANT:
 
-            vol_traded =
-            cumulative traded volume
+            smartapi-javascript WebSocketV2
+            parser me field:
+
+            vol_traded
+
+            hota hai.
           */
 
           const volume =
@@ -813,7 +623,6 @@ async function startVolumeWebSocket() {
           ) {
 
             return;
-
           }
 
 
@@ -824,13 +633,12 @@ async function startVolumeWebSocket() {
             ) / 100;
 
 
-          /*
-            Save live current volume.
-          */
+          const now =
+            Date.now();
+
 
           volumeData.set(
             token,
-
             {
 
               token,
@@ -849,35 +657,89 @@ async function startVolumeWebSocket() {
               ltp,
 
               lastUpdate:
-                Date.now()
+                now
 
             }
-
           );
 
 
           /*
-            First tick for a stock
-            becomes start volume.
+            -----------------------------------------------
+            ROLLING HISTORY
+            -----------------------------------------------
+
+            Har tick ka current cumulative
+            traded volume save karenge.
           */
 
-          if (
-            !intervalStartVolume.has(
+          let history =
+            volumeHistory.get(
               token
-            )
-          ) {
+            );
 
-            intervalStartVolume.set(
+
+          if (!history) {
+
+            history = [];
+
+            volumeHistory.set(
               token,
-              volume
+              history
             );
 
           }
 
+
+          /*
+            Same volume repeatedly aane par
+            unnecessary entries avoid.
+          */
+
+          const last =
+            history[
+              history.length - 1
+            ];
+
+
+          if (
+            !last ||
+            last.volume !== volume
+          ) {
+
+            history.push({
+
+              time: now,
+
+              volume
+
+            });
+
+          }
+
+
+          /*
+            2 minute se purane samples
+            remove.
+          */
+
+          const cutoff =
+            now - HISTORY_MS;
+
+
+          while (
+            history.length > 0 &&
+            history[0].time < cutoff
+          ) {
+
+            history.shift();
+
+          }
+
+
         } catch (error) {
 
           console.error(
-            "CASH VOLUME TICK ERROR:",
+            "TICK ERROR:",
             error.message
           );
 
@@ -888,7 +750,7 @@ async function startVolumeWebSocket() {
 
 
     /*
-      Connect.
+      Connect first.
     */
 
     await volumeSocket.connect();
@@ -896,11 +758,13 @@ async function startVolumeWebSocket() {
 
     /*
       ======================================================
-      ANGEL ONE WEBSOCKET V2
+      MODE 3 = SNAP QUOTE
 
-      action 1 = Subscribe
-      mode 2   = Quote
+      Isme volume field definitely parser
+      ke through available hai.
+
       exchangeType 1 = NSE CASH
+      action 1 = subscribe
       ======================================================
     */
 
@@ -911,7 +775,7 @@ async function startVolumeWebSocket() {
 
       action: 1,
 
-      mode: 2,
+      mode: 3,
 
       exchangeType: 1,
 
@@ -929,14 +793,14 @@ async function startVolumeWebSocket() {
 
 
     console.log(
-      "🟢 NSE CASH VOLUME SOCKET CONNECTED"
+      "🟢 NSE CASH VOLUME WEBSOCKET CONNECTED"
     );
 
 
   } catch (error) {
 
     console.error(
-      "❌ CASH VOLUME SOCKET ERROR:",
+      "❌ CASH WEBSOCKET ERROR:",
       error?.message ||
       error
     );
@@ -954,44 +818,76 @@ async function startVolumeWebSocket() {
 
 
 /* =========================================================
-   CALCULATE 60 SECOND VOLUME GAIN
+   FIND 60 SECOND OLD VOLUME
 ========================================================= */
 
-function calculateVolumeInterval() {
+function getOldVolume(
+  history,
+  now
+) {
 
-  if (
-    !volumeReady
+  const target =
+    now - 60 * 1000;
+
+
+  let candidate =
+    null;
+
+
+  for (
+    let i = 0;
+    i < history.length;
+    i++
   ) {
 
-    return;
+    if (
+      history[i].time <= target
+    ) {
+
+      candidate =
+        history[i];
+
+    } else {
+
+      break;
+
+    }
 
   }
 
 
-  let calculated =
-    0;
+  return candidate;
+
+}
 
 
-  /*
-    Current live volume ko
-    interval-end snapshot samjho.
-  */
+/* =========================================================
+   CALCULATE VOLUME GAINERS
+========================================================= */
+
+function getVolumeGainers() {
+
+  const now =
+    Date.now();
+
+
+  const result = [];
+
 
   for (
     const item of
     volumeData.values()
   ) {
 
-    const currentVolume =
-      Number(
-        item.volume
+    const history =
+      volumeHistory.get(
+        item.token
       );
 
 
     if (
-      !Number.isFinite(
-        currentVolume
-      )
+      !history ||
+      history.length < 2
     ) {
 
       continue;
@@ -999,30 +895,45 @@ function calculateVolumeInterval() {
     }
 
 
-    const startVolume =
+    const oldSample =
+      getOldVolume(
+        history,
+        now
+      );
+
+
+    if (!oldSample) {
+
+      /*
+        Stock ke paas abhi
+        60 second history nahi hai.
+      */
+
+      continue;
+
+    }
+
+
+    const currentVolume =
       Number(
-        intervalStartVolume.get(
-          item.token
-        )
+        item.volume
+      );
+
+
+    const oldVolume =
+      Number(
+        oldSample.volume
       );
 
 
     if (
       !Number.isFinite(
-        startVolume
+        currentVolume
+      ) ||
+      !Number.isFinite(
+        oldVolume
       )
     ) {
-
-      /*
-        Agar stock beech me
-        start hua hai to next
-        interval se calculate hoga.
-      */
-
-      intervalStartVolume.set(
-        item.token,
-        currentVolume
-      );
 
       continue;
 
@@ -1033,112 +944,130 @@ function calculateVolumeInterval() {
       Math.max(
         0,
         currentVolume -
-        startVolume
+        oldVolume
       );
 
 
-    let percent =
-      null;
-
-
     if (
-      startVolume > 0
+      increase <= 0
     ) {
 
-      percent =
-        (
-          increase /
-          startVolume
-        ) * 100;
+      continue;
 
     }
 
 
     /*
-      Save completed interval.
+      Volume percentage.
+
+      Formula:
+
+      (60 sec volume increase /
+       volume at 60 sec ago)
+       * 100
     */
 
-    volumeMetrics.set(
-      item.token,
+    let percent =
+      0;
 
-      {
 
-        token:
-          item.token,
+    if (
+      oldVolume > 0
+    ) {
 
-        symbol:
-          item.symbol,
+      percent =
+        (
+          increase /
+          oldVolume
+        ) * 100;
 
-        tradingSymbol:
-          item.tradingSymbol,
+    }
 
-        volume:
-          currentVolume,
 
-        volumeIncrease:
-          increase,
+    result.push({
 
-        volumeIncreasePercent:
-          percent,
+      tradingSymbol:
+        item.symbol,
 
-        ltp:
-          item.ltp,
+      symbol:
+        item.symbol,
 
-        timestamp:
-          Date.now()
+      symbolToken:
+        item.token,
+
+      tradeVolume:
+        currentVolume,
+
+      volumeChange:
+        increase,
+
+      percentChange:
+        percent,
+
+      ltp:
+        item.ltp,
+
+      exchange:
+        "NSE",
+
+      ageSeconds:
+        Math.round(
+          (
+            now -
+            oldSample.time
+          ) / 1000
+        )
+
+    });
+
+  }
+
+
+  /*
+    Highest volume increase %
+    first.
+  */
+
+  result.sort(
+    (a, b) => {
+
+      const percentDiff =
+        Number(
+          b.percentChange
+        ) -
+        Number(
+          a.percentChange
+        );
+
+
+      if (
+        percentDiff !== 0
+      ) {
+
+        return percentDiff;
 
       }
 
-    );
+
+      return (
+        Number(
+          b.volumeChange
+        ) -
+        Number(
+          a.volumeChange
+        )
+      );
+
+    }
+  );
 
 
-    /*
-      New interval starts
-      from current cumulative volume.
-    */
-
-    intervalStartVolume.set(
-      item.token,
-      currentVolume
-    );
-
-
-    calculated++;
-
-  }
-
-
-  if (
-    calculated > 0
-  ) {
-
-    volumeIntervalReady =
-      true;
-
-  }
-
-
-  console.log(
-    "📈 Volume interval calculated:",
-    calculated,
-    "stocks"
+  return result.slice(
+    0,
+    10
   );
 
 }
-
-
-/* =========================================================
-   EVERY 60 SECONDS
-========================================================= */
-
-setInterval(
-  () => {
-
-    calculateVolumeInterval();
-
-  },
-  VOLUME_INTERVAL
-);
 
 
 /* =========================================================
@@ -1152,9 +1081,6 @@ app.get(
     res.json({
 
       success: true,
-
-      message:
-        "F&O Cash Stock Scanner server is running",
 
       angelConnected:
         !!angelSession,
@@ -1170,7 +1096,8 @@ app.get(
       liveCashStocks:
         volumeData.size,
 
-      volumeIntervalReady
+      historyStocks:
+        volumeHistory.size
 
     });
 
@@ -1179,7 +1106,7 @@ app.get(
 
 
 /* =========================================================
-   ANGEL ONE LOGIN
+   LOGIN
 ========================================================= */
 
 app.post(
@@ -1217,10 +1144,6 @@ app.post(
       }
 
 
-      /*
-        Clean TOTP secret.
-      */
-
       const cleanSecret =
         totpSecret
           .replace(
@@ -1229,10 +1152,6 @@ app.post(
           )
           .toUpperCase();
 
-
-      /*
-        Generate current 6 digit TOTP.
-      */
 
       const totp =
         await generate({
@@ -1243,10 +1162,6 @@ app.post(
         });
 
 
-      /*
-        SmartAPI.
-      */
-
       const smartApi =
         new SmartAPI({
 
@@ -1255,10 +1170,6 @@ app.post(
 
         });
 
-
-      /*
-        Login.
-      */
 
       const session =
         await smartApi.generateSession(
@@ -1299,10 +1210,6 @@ app.post(
       }
 
 
-      /*
-        Save session.
-      */
-
       angelSession = {
 
         smartApi,
@@ -1329,14 +1236,14 @@ app.post(
 
 
       /*
-        F&O -> CASH universe.
+        F&O universe -> Cash stocks
       */
 
       await loadFNOUniverse();
 
 
       /*
-        Start NSE cash volume feed.
+        Start cash market volume.
       */
 
       await startVolumeWebSocket();
@@ -1395,9 +1302,7 @@ app.get(
 
     try {
 
-      if (
-        !angelSession
-      ) {
+      if (!angelSession) {
 
         return res
           .status(401)
@@ -1413,9 +1318,7 @@ app.get(
       }
 
 
-      if (
-        !scripMasterLoaded
-      ) {
+      if (!scripMasterLoaded) {
 
         await loadFNOUniverse();
 
@@ -1444,14 +1347,10 @@ app.get(
           : [];
 
 
-      /*
-        Futures OI -> CASH symbol
-      */
-
       const data =
         raw
           .map(
-            (item) => {
+            item => {
 
               const futureToken =
                 String(
@@ -1467,12 +1366,8 @@ app.get(
                 );
 
 
-              if (
-                !mapping
-              ) {
-
+              if (!mapping) {
                 return null;
-
               }
 
 
@@ -1550,9 +1445,7 @@ app.get(
 
     try {
 
-      if (
-        !angelSession
-      ) {
+      if (!angelSession) {
 
         return res
           .status(401)
@@ -1568,9 +1461,7 @@ app.get(
       }
 
 
-      if (
-        !scripMasterLoaded
-      ) {
+      if (!scripMasterLoaded) {
 
         await loadFNOUniverse();
 
@@ -1602,7 +1493,7 @@ app.get(
       const data =
         raw
           .map(
-            (item) => {
+            item => {
 
               const futureToken =
                 String(
@@ -1618,12 +1509,8 @@ app.get(
                 );
 
 
-              if (
-                !mapping
-              ) {
-
+              if (!mapping) {
                 return null;
-
               }
 
 
@@ -1701,9 +1588,7 @@ app.get(
 
     try {
 
-      if (
-        !angelSession
-      ) {
+      if (!angelSession) {
 
         return res
           .status(401)
@@ -1719,171 +1604,28 @@ app.get(
       }
 
 
-      if (
-        !volumeSocketStarted
-      ) {
+      if (!volumeSocketStarted) {
 
         await startVolumeWebSocket();
 
       }
 
 
-      /*
-        First 60-second interval complete
-        nahi hua to meaningful volume
-        gain ranking possible nahi hai.
-      */
-
-      if (
-        !volumeIntervalReady
-      ) {
-
-        return res.json({
-
-          success: true,
-
-          data: [],
-
-          collecting: true,
-
-          message:
-            "Collecting first 60-second volume interval"
-
-        });
-
-      }
-
-
-      /*
-        Last completed 60-second
-        volume metrics.
-      */
-
-      const result =
-        Array.from(
-          volumeMetrics.values()
-        )
-        .filter(
-          item =>
-            Number.isFinite(
-              item.volumeIncrease
-            ) &&
-            item.volumeIncrease > 0
-        )
-        .map(
-          item => ({
-
-            tradingSymbol:
-              item.symbol,
-
-            symbol:
-              item.symbol,
-
-            symbolToken:
-              item.token,
-
-            /*
-              Current cumulative NSE
-              cash volume.
-            */
-
-            tradeVolume:
-              item.volume,
-
-            /*
-              Volume traded during
-              last completed 60 sec.
-            */
-
-            volumeChange:
-              item.volumeIncrease,
-
-            /*
-              Actual percentage increase.
-            */
-
-            percentChange:
-              item.volumeIncreasePercent,
-
-            ltp:
-              item.ltp,
-
-            exchange:
-              "NSE"
-
-          })
-        );
-
-
-      /*
-        Sort by volume increase %.
-
-        Highest percentage increase
-        first.
-
-        If percentage is same,
-        higher absolute volume increase
-        wins.
-      */
-
-      result.sort(
-        (a, b) => {
-
-          const aPercent =
-            Number(
-              a.percentChange
-            );
-
-
-          const bPercent =
-            Number(
-              b.percentChange
-            );
-
-
-          if (
-            Number.isFinite(
-              aPercent
-            ) &&
-            Number.isFinite(
-              bPercent
-            ) &&
-            aPercent !== bPercent
-          ) {
-
-            return (
-              bPercent -
-              aPercent
-            );
-
-          }
-
-
-          return (
-            Number(
-              b.volumeChange
-            ) -
-            Number(
-              a.volumeChange
-            )
-          );
-
-        }
-      );
+      const data =
+        getVolumeGainers();
 
 
       return res.json({
 
         success: true,
 
-        data:
-          result.slice(
-            0,
-            10
-          ),
+        data,
 
         intervalSeconds:
-          60
+          60,
+
+        collecting:
+          data.length === 0
 
       });
 
