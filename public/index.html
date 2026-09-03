@@ -1,676 +1,652 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
-  />
-
-  <title>F&O Live Scanner</title>
-
-  <style>
-    :root {
-      --bg: #eef3f6;
-      --card: #ffffff;
-      --text: #17212b;
-      --muted: #6f7881;
-      --border: #dce2e7;
-      --green: #05ad72;
-      --green-dark: #00895a;
-      --red: #e5484d;
-      --shadow: 0 18px 45px rgba(25, 45, 65, 0.10);
-    }
-
-    body.dark {
-      --bg: #101416;
-      --card: #171c1f;
-      --text: #f2f5f6;
-      --muted: #9da7ad;
-      --border: #2b3338;
-      --shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    .app {
-      width: min(1180px, 100%);
-      margin: auto;
-      padding: 28px 18px 50px;
-    }
-
-    /* ================= HEADER ================= */
-
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-      margin-bottom: 25px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .logo {
-      width: 58px;
-      height: 58px;
-      border-radius: 18px;
-      background: var(--green);
-      color: #07120d;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 30px;
-      font-weight: 900;
-    }
-
-    .brand h1 {
-      margin: 0;
-      font-size: 25px;
-    }
-
-    .brand p {
-      margin: 5px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .theme-btn {
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-      width: 54px;
-      height: 54px;
-      border-radius: 17px;
-      font-size: 25px;
-      cursor: pointer;
-    }
-
-    /* ================= LOGIN ================= */
-
-    .login-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 30px;
-      padding: 34px;
-      box-shadow: var(--shadow);
-      max-width: 620px;
-      margin: 120px auto 0;
-    }
-
-    .login-card h2 {
-      margin: 0 0 8px;
-      font-size: 28px;
-    }
-
-    .login-subtitle {
-      color: var(--muted);
-      line-height: 1.6;
-      margin-bottom: 28px;
-    }
-
-    .field {
-      margin-bottom: 18px;
-    }
-
-    .field label {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--muted);
-    }
-
-    .field input {
-      width: 100%;
-      height: 54px;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--text);
-      padding: 0 18px;
-      font-size: 16px;
-      outline: none;
-    }
-
-    .field input:focus {
-      border-color: var(--green);
-      box-shadow: 0 0 0 3px rgba(5, 173, 114, 0.12);
-    }
-
-    .connect-btn {
-      width: 100%;
-      height: 56px;
-      border: none;
-      border-radius: 17px;
-      background: var(--green);
-      color: #07120d;
-      font-size: 17px;
-      font-weight: 800;
-      cursor: pointer;
-      margin-top: 5px;
-    }
-
-    .connect-btn:disabled {
-      opacity: 0.6;
-      cursor: wait;
-    }
-
-    .message {
-      display: none;
-      margin-top: 15px;
-      padding: 14px 16px;
-      border-radius: 15px;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .message.error {
-      display: block;
-      background: #ffecef;
-      color: #bd4050;
-      border: 1px solid #f5cbd2;
-    }
-
-    .message.success {
-      display: block;
-      background: #e8fff5;
-      color: #087e57;
-      border: 1px solid #bcefd9;
-    }
-
-    .security-note {
-      margin-top: 18px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    /* ================= DASHBOARD ================= */
-
-    #dashboard {
-      display: none;
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-
-    .market-title h2 {
-      margin: 0;
-      font-size: 24px;
-    }
-
-    .market-title p {
-      margin: 5px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .status-box {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted);
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
-    .status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #aaa;
-    }
-
-    .status-dot.live {
-      background: var(--green);
-      box-shadow: 0 0 0 5px rgba(5, 173, 114, 0.12);
-    }
-
-    .refresh-btn {
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-      padding: 11px 15px;
-      border-radius: 13px;
-      cursor: pointer;
-      font-weight: 700;
-    }
-
-    /* ================= SCANNER ================= */
-
-    .scanner-row {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .scanner-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      min-width: 0;
-    }
-
-    .scanner-head {
-      padding: 19px 18px 15px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .scanner-head h3 {
-      margin: 0;
-      font-size: 18px;
-    }
-
-    .scanner-head p {
-      margin: 5px 0 0;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .stock-list {
-      padding: 6px 10px 12px;
-      min-height: 260px;
-    }
-
-    .stock-row {
-      padding: 13px 8px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .stock-row:last-child {
-      border-bottom: none;
-    }
-
-    .stock-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .stock-symbol {
-      font-size: 15px;
-      font-weight: 800;
-    }
-
-    .stock-price {
-      font-size: 15px;
-      font-weight: 800;
-      text-align: right;
-    }
-
-    .stock-bottom {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin-top: 5px;
-      font-size: 12px;
-    }
-
-    .positive {
-      color: var(--green);
-      font-weight: 700;
-    }
-
-    .negative {
-      color: var(--red);
-      font-weight: 700;
-    }
-
-    .oi-label {
-      color: var(--muted);
-    }
-
-    .loading,
-    .empty {
-      color: var(--muted);
-      text-align: center;
-      padding: 60px 15px;
-      font-size: 13px;
-    }
-
-    .volume-note {
-      padding: 10px 18px 16px;
-      color: var(--muted);
-      font-size: 11px;
-      text-align: center;
-    }
-
-    /* ================= NOTES ================= */
-
-    .notes {
-      margin-top: 18px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 17px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.7;
-    }
-
-    .notes strong {
-      color: var(--text);
-    }
-
-    /* ================= MOBILE ================= */
-
-    @media (max-width: 800px) {
-
-      .app {
-        padding: 18px 14px 35px;
-      }
-
-      .login-card {
-        margin-top: 65px;
-        padding: 24px 20px;
-        border-radius: 25px;
-      }
-
-      .brand h1 {
-        font-size: 22px;
-      }
-
-      .scanner-row {
-        display: flex;
-        overflow-x: auto;
-        gap: 14px;
-        scroll-snap-type: x mandatory;
-        scrollbar-width: none;
-        padding-bottom: 8px;
-      }
-
-      .scanner-row::-webkit-scrollbar {
-        display: none;
-      }
-
-      .scanner-card {
-        flex: 0 0 calc(100vw - 28px);
-        scroll-snap-align: start;
-      }
-
-      .topbar {
-        align-items: flex-start;
-        flex-wrap: wrap;
-      }
-
-      .status-box {
-        order: 3;
-        width: 100%;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>F&O Live Scanner</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#eef3f5;
+  color:#17212b;
+  transition:.25s;
+}
+
+body.dark{
+  background:#0c1410;
+  color:#edf7f0;
+}
+
+.container{
+  max-width:1250px;
+  margin:auto;
+  padding:18px;
+}
+
+/* HEADER */
+
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:22px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:13px;
+}
+
+.logo{
+  width:58px;
+  height:58px;
+  border-radius:17px;
+  background:#08ad70;
+  color:#10231a;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:32px;
+  font-weight:bold;
+}
+
+h1{
+  margin:0;
+  font-size:26px;
+}
+
+.subtitle{
+  margin-top:4px;
+  color:#6c7780;
+  font-size:14px;
+}
+
+body.dark .subtitle{
+  color:#9aa89f;
+}
+
+.theme-btn{
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  background:white;
+  border:1px solid #dce3e6;
+  font-size:25px;
+  cursor:pointer;
+}
+
+body.dark .theme-btn{
+  background:#18231d;
+  border-color:#2b3931;
+}
+
+/* LOGIN */
+
+.login-card{
+  max-width:520px;
+  margin:45px auto;
+  background:white;
+  padding:27px;
+  border-radius:23px;
+  box-shadow:0 12px 35px rgba(0,0,0,.08);
+}
+
+body.dark .login-card{
+  background:#152019;
+  box-shadow:0 12px 35px rgba(0,0,0,.3);
+}
+
+.login-title{
+  font-size:23px;
+  font-weight:bold;
+}
+
+.login-subtitle{
+  color:#718078;
+  font-size:13px;
+  margin-top:5px;
+  margin-bottom:22px;
+}
+
+body.dark .login-subtitle{
+  color:#9aa89f;
+}
+
+label{
+  display:block;
+  margin:14px 0 7px;
+  font-size:13px;
+  font-weight:bold;
+}
+
+input{
+  width:100%;
+  padding:14px;
+  border:1px solid #d5dfe0;
+  border-radius:12px;
+  font-size:15px;
+  outline:none;
+  background:white;
+  color:#17212b;
+}
+
+input:focus{
+  border-color:#08ad70;
+  box-shadow:0 0 0 3px rgba(8,173,112,.12);
+}
+
+body.dark input{
+  background:#0e1712;
+  color:white;
+  border-color:#304037;
+}
+
+.connect-btn{
+  width:100%;
+  margin-top:21px;
+  padding:15px;
+  border:0;
+  border-radius:13px;
+  background:#08ad70;
+  color:white;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.connect-btn:disabled{
+  opacity:.6;
+}
+
+.error{
+  display:none;
+  margin-top:15px;
+  padding:12px;
+  border-radius:11px;
+  background:#fee2e2;
+  color:#991b1b;
+  font-size:13px;
+}
+
+body.dark .error{
+  background:#401b1b;
+  color:#ffb6b6;
+}
+
+/* DASHBOARD */
+
+#dashboard{
+  display:none;
+}
+
+.market-header{
+  background:white;
+  padding:18px;
+  border-radius:18px;
+  margin-bottom:17px;
+}
+
+body.dark .market-header{
+  background:#152019;
+}
+
+.market-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+
+.market-title{
+  font-size:22px;
+  font-weight:bold;
+}
+
+.updated{
+  color:#78848a;
+  font-size:13px;
+  margin-top:5px;
+}
+
+body.dark .updated{
+  color:#9aa89f;
+}
+
+.refresh-btn{
+  background:white;
+  border:1px solid #dce3e6;
+  padding:12px 15px;
+  border-radius:12px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+body.dark .refresh-btn{
+  background:#18231d;
+  color:white;
+  border-color:#304037;
+}
+
+/* CONNECTION */
+
+.connection-row{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  margin-top:15px;
+  flex-wrap:wrap;
+}
+
+.status-pill{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-size:13px;
+  font-weight:bold;
+}
+
+.status-dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#22c55e;
+}
+
+.status-dot.off{
+  background:#ef4444;
+}
+
+.feed{
+  color:#6c7780;
+  font-size:12px;
+}
+
+body.dark .feed{
+  color:#9aa89f;
+}
+
+/* CARDS */
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:17px;
+}
+
+.card{
+  background:white;
+  border-radius:21px;
+  overflow:hidden;
+  min-height:410px;
+  box-shadow:0 8px 25px rgba(0,0,0,.05);
+}
+
+body.dark .card{
+  background:#152019;
+  box-shadow:0 8px 25px rgba(0,0,0,.25);
+}
+
+.card-head{
+  padding:19px;
+  border-bottom:1px solid #e7edef;
+}
+
+body.dark .card-head{
+  border-color:#29372f;
+}
+
+.card-title{
+  font-size:19px;
+  font-weight:bold;
+}
+
+.card-sub{
+  margin-top:5px;
+  font-size:13px;
+  color:#748087;
+}
+
+body.dark .card-sub{
+  color:#9aa89f;
+}
+
+.card-body{
+  padding:0 18px;
+}
+
+.row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  padding:14px 0;
+  border-bottom:1px solid #edf1f2;
+}
+
+body.dark .row{
+  border-color:#29372f;
+}
+
+.row:last-child{
+  border-bottom:0;
+}
+
+.symbol{
+  font-weight:bold;
+  font-size:14px;
+}
+
+.price{
+  margin-top:4px;
+  color:#738087;
+  font-size:12px;
+}
+
+body.dark .price{
+  color:#9aa89f;
+}
+
+.right{
+  text-align:right;
+}
+
+.green{
+  color:#08a968;
+  font-weight:bold;
+}
+
+.red{
+  color:#e53935;
+  font-weight:bold;
+}
+
+.volume{
+  color:#08a968;
+  font-weight:bold;
+  font-size:13px;
+}
+
+.empty{
+  min-height:300px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:#7a858b;
+  font-size:13px;
+}
+
+/* NOTES */
+
+.notes{
+  background:white;
+  margin-top:18px;
+  padding:18px;
+  border-radius:18px;
+  color:#6d787e;
+  font-size:13px;
+  line-height:1.7;
+}
+
+body.dark .notes{
+  background:#152019;
+  color:#a3afa8;
+}
+
+.notes b{
+  color:#17212b;
+}
+
+body.dark .notes b{
+  color:#edf7f0;
+}
+
+/* MOBILE */
+
+@media(max-width:800px){
+
+  .container{
+    padding:12px;
+  }
+
+  h1{
+    font-size:21px;
+  }
+
+  .logo{
+    width:52px;
+    height:52px;
+    font-size:28px;
+  }
+
+  .market-top{
+    align-items:flex-start;
+  }
+
+  .cards{
+    display:flex;
+    overflow-x:auto;
+    gap:13px;
+    scroll-snap-type:x mandatory;
+    padding-bottom:7px;
+  }
+
+  .card{
+    flex:0 0 88%;
+    scroll-snap-align:start;
+  }
+
+  .market-title{
+    font-size:20px;
+  }
+}
+</style>
 </head>
 
 <body>
 
-<div class="app">
+<div class="container">
 
-  <!-- ================= LOGIN ================= -->
+<header>
 
-  <section id="loginSection">
+  <div class="brand">
 
-    <div class="header">
-      <div class="brand">
-        <div class="logo">₹</div>
+    <div class="logo">₹</div>
 
-        <div>
-          <h1>F&O Live Scanner</h1>
-          <p>Angel One SmartAPI</p>
-        </div>
+    <div>
+      <h1>F&O Live Scanner</h1>
+      <div class="subtitle">
+        Live NSE Cash + F&O Market Movers
       </div>
-
-      <button
-        class="theme-btn"
-        id="themeBtn"
-        type="button"
-        onclick="toggleTheme()"
-      >
-        ☀️
-      </button>
     </div>
 
-    <div class="login-card">
+  </div>
 
-      <h2>Connect Angel One</h2>
+  <button
+    class="theme-btn"
+    onclick="toggleTheme()"
+    id="themeBtn"
+  >☀️</button>
 
-      <div class="login-subtitle">
-        Enter your Angel One SmartAPI details to connect the live
-        F&O scanner.
-      </div>
+</header>
 
-      <form id="loginForm">
 
-        <div class="field">
-          <label for="apiKey">API Key</label>
-          <input
-            id="apiKey"
-            name="apiKey"
-            type="password"
-            autocomplete="off"
-            placeholder="Enter API Key"
-          />
+<!-- LOGIN -->
+
+<div
+  id="loginSection"
+  class="login-card"
+>
+
+  <div class="login-title">
+    Angel One SmartAPI
+  </div>
+
+  <div class="login-subtitle">
+    Long TOTP Secret enter karein. Scanner automatically current 6-digit TOTP generate karega.
+  </div>
+
+
+  <label>API Key</label>
+
+  <input
+    id="apiKey"
+    type="password"
+    placeholder="Angel One API Key"
+    autocomplete="off"
+  >
+
+
+  <label>Client ID</label>
+
+  <input
+    id="clientId"
+    type="text"
+    placeholder="Client ID"
+    autocomplete="off"
+  >
+
+
+  <label>MPIN</label>
+
+  <input
+    id="mpin"
+    type="password"
+    placeholder="MPIN"
+    inputmode="numeric"
+    autocomplete="off"
+  >
+
+
+  <label>Long TOTP Secret</label>
+
+  <input
+    id="totpSecret"
+    type="password"
+    placeholder="Letters + numbers wala TOTP Secret"
+    autocomplete="off"
+  >
+
+
+  <button
+    id="connectBtn"
+    class="connect-btn"
+    onclick="login()"
+  >
+    🔐 Connect Angel One
+  </button>
+
+
+  <div
+    id="errorBox"
+    class="error"
+  ></div>
+
+</div>
+
+
+<!-- DASHBOARD -->
+
+<div id="dashboard">
+
+
+  <div class="market-header">
+
+    <div class="market-top">
+
+      <div>
+
+        <div class="market-title">
+          Market Movers
         </div>
 
-        <div class="field">
-          <label for="clientId">Client ID</label>
-          <input
-            id="clientId"
-            name="clientId"
-            type="text"
-            autocomplete="off"
-            placeholder="Enter Client ID"
-          />
-        </div>
-
-        <div class="field">
-          <label for="mpin">MPIN</label>
-          <input
-            id="mpin"
-            name="mpin"
-            type="password"
-            inputmode="numeric"
-            autocomplete="off"
-            placeholder="Enter MPIN"
-          />
-        </div>
-
-        <div class="field">
-          <label for="totpSecret">TOTP Secret</label>
-          <input
-            id="totpSecret"
-            name="totpSecret"
-            type="password"
-            autocomplete="off"
-            placeholder="Enter TOTP Secret"
-          />
-        </div>
-
-        <button
-          id="connectBtn"
-          class="connect-btn"
-          type="submit"
+        <div
+          class="updated"
+          id="updated"
         >
-          🔐 Connect Angel One
-        </button>
-
-      </form>
-
-      <div id="loginMessage" class="message"></div>
-
-      <div class="security-note">
-        Your credentials are sent to your scanner backend only
-        for Angel One authentication.
-      </div>
-
-    </div>
-  </section>
-
-
-  <!-- ================= DASHBOARD ================= -->
-
-  <section id="dashboard">
-
-    <div class="header">
-
-      <div class="brand">
-
-        <div class="logo">₹</div>
-
-        <div>
-          <h1>F&O Live Scanner</h1>
-          <p>Live NSE Cash + F&O Market Movers</p>
+          Waiting for market data...
         </div>
 
       </div>
 
-      <button
-        class="theme-btn"
-        type="button"
-        onclick="toggleTheme()"
-        id="dashboardThemeBtn"
-      >
-        ☀️
-      </button>
-
-    </div>
-
-
-    <div class="topbar">
-
-      <div class="market-title">
-        <h2>Market Movers</h2>
-        <p id="lastUpdated">
-          Waiting for live data...
-        </p>
-      </div>
 
       <button
         class="refresh-btn"
-        onclick="refreshAll()"
+        onclick="loadScanner()"
       >
         ↻ Refresh All
       </button>
 
-      <div class="status-box">
+    </div>
+
+
+    <div class="connection-row">
+
+      <!-- IMPORTANT:
+           This status means Angel One LOGIN,
+           not WebSocket.
+      -->
+
+      <div class="status-pill">
 
         <span
-          id="statusDot"
+          id="loginDot"
           class="status-dot"
         ></span>
 
-        <span id="statusText">
-          Connecting...
+        <span id="loginStatus">
+          Angel One Connected
         </span>
 
       </div>
 
+
+      <div
+        class="feed"
+        id="feedStatus"
+      >
+        Live Feed checking...
+      </div>
+
     </div>
 
+  </div>
 
-    <!-- ================= THREE SCANNERS ================= -->
 
-    <div class="scanner-row">
+  <!-- THREE CARDS -->
 
-      <!-- OI GAINERS -->
+  <div class="cards">
 
-      <div class="scanner-card">
 
-        <div class="scanner-head">
+    <!-- OI GAINERS -->
 
-          <h3>📈 OI Gainers</h3>
+    <div class="card">
 
-          <p>
-            Highest OI increase
-          </p>
+      <div class="card-head">
 
+        <div class="card-title">
+          📈 OI Gainers
         </div>
 
-        <div
-          id="oiGainers"
-          class="stock-list"
-        >
-          <div class="loading">
-            Loading...
-          </div>
+        <div class="card-sub">
+          Highest OI increase
         </div>
 
       </div>
 
+      <div
+        id="oiGainers"
+        class="card-body"
+      >
 
-      <!-- OI LOSERS -->
-
-      <div class="scanner-card">
-
-        <div class="scanner-head">
-
-          <h3>📉 OI Losers</h3>
-
-          <p>
-            Highest OI decrease
-          </p>
-
-        </div>
-
-        <div
-          id="oiLosers"
-          class="stock-list"
-        >
-          <div class="loading">
-            Loading...
-          </div>
-        </div>
-
-      </div>
-
-
-      <!-- VOLUME GAINERS -->
-
-      <div class="scanner-card">
-
-        <div class="scanner-head">
-
-          <h3>🔥 Volume Gainers</h3>
-
-          <p>
-            NSE cash volume increase
-          </p>
-
-        </div>
-
-        <div
-          id="volumeGainers"
-          class="stock-list"
-        >
-          <div class="loading">
-            Collecting live volume...
-          </div>
-        </div>
-
-        <div class="volume-note">
-          Volume is calculated from live NSE cash-market ticks.
+        <div class="empty">
+          Loading OI Gainers...
         </div>
 
       </div>
@@ -678,819 +654,782 @@
     </div>
 
 
-    <div class="notes">
+    <!-- OI LOSERS -->
 
-      <strong>Important:</strong>
+    <div class="card">
 
-      OI data comes from the F&O futures market, but only the
-      underlying cash-stock symbol is displayed.
+      <div class="card-head">
 
-      Price and Change % are from the NSE cash stock feed.
+        <div class="card-title">
+          📉 OI Losers
+        </div>
 
-      Volume Gainers use NSE cash-market volume.
+        <div class="card-sub">
+          Highest OI decrease
+        </div>
+
+      </div>
+
+      <div
+        id="oiLosers"
+        class="card-body"
+      >
+
+        <div class="empty">
+          Loading OI Losers...
+        </div>
+
+      </div>
 
     </div>
 
-  </section>
+
+    <!-- VOLUME GAINERS -->
+
+    <div class="card">
+
+      <div class="card-head">
+
+        <div class="card-title">
+          🔥 Volume Gainers
+        </div>
+
+        <div class="card-sub">
+          NSE Cash Market Volume
+        </div>
+
+      </div>
+
+      <div
+        id="volumeGainers"
+        class="card-body"
+      >
+
+        <div class="empty">
+          Collecting live volume...
+        </div>
+
+      </div>
+
+    </div>
+
+
+  </div>
+
+
+  <div class="notes">
+
+    <b>Important:</b><br>
+
+    • OI data F&O futures se aata hai,
+    lekin screen par underlying cash-stock symbol dikhaya jata hai.<br>
+
+    • Price aur Change % NSE cash stock feed se aate hain.<br>
+
+    • Volume Gainers sirf NSE cash-market volume par based hain,
+    futures volume par nahi.<br>
+
+    • Angel One login status aur WebSocket live-feed status alag dikhaye gaye hain.
+
+  </div>
+
+</div>
 
 </div>
 
 
 <script>
 
-  // ============================================================
-  // THEME
-  // ============================================================
+let refreshTimer = null;
+let statusTimer = null;
 
-  function applyTheme() {
 
-    const saved =
-      localStorage.getItem("scannerTheme") || "light";
+// =================================================
+// THEME
+// =================================================
 
-    if (saved === "dark") {
-      document.body.classList.add("dark");
-    } else {
-      document.body.classList.remove("dark");
-    }
+function toggleTheme(){
 
-    updateThemeButtons();
-  }
+  document.body.classList.toggle("dark");
 
+  const dark =
+    document.body.classList.contains("dark");
 
-  function updateThemeButtons() {
-
-    const isDark =
-      document.body.classList.contains("dark");
-
-    const icon =
-      isDark ? "🌙" : "☀️";
-
-    const btn1 =
-      document.getElementById("themeBtn");
-
-    const btn2 =
-      document.getElementById("dashboardThemeBtn");
-
-    if (btn1) btn1.textContent = icon;
-
-    if (btn2) btn2.textContent = icon;
-  }
-
-
-  function toggleTheme() {
-
-    const isDark =
-      document.body.classList.contains("dark");
-
-    if (isDark) {
-      document.body.classList.remove("dark");
-      localStorage.setItem(
-        "scannerTheme",
-        "light"
-      );
-    } else {
-      document.body.classList.add("dark");
-      localStorage.setItem(
-        "scannerTheme",
-        "dark"
-      );
-    }
-
-    updateThemeButtons();
-  }
-
-
-  applyTheme();
-
-
-  // ============================================================
-  // LOGIN
-  // ============================================================
-
-  const loginForm =
-    document.getElementById("loginForm");
-
-  const loginMessage =
-    document.getElementById("loginMessage");
-
-  const connectBtn =
-    document.getElementById("connectBtn");
-
-
-  loginForm.addEventListener(
-    "submit",
-    async function(event) {
-
-      event.preventDefault();
-
-      loginMessage.className = "message";
-      loginMessage.textContent = "";
-
-      const apiKey =
-        document.getElementById("apiKey").value.trim();
-
-      const clientId =
-        document.getElementById("clientId").value.trim();
-
-      const mpin =
-        document.getElementById("mpin").value.trim();
-
-      const totpSecret =
-        document.getElementById("totpSecret").value.trim();
-
-
-      // IMPORTANT:
-      // Check each value independently.
-
-      if (!apiKey) {
-        showLoginError("API Key is required.");
-        return;
-      }
-
-      if (!clientId) {
-        showLoginError("Client ID is required.");
-        return;
-      }
-
-      if (!mpin) {
-        showLoginError("MPIN is required.");
-        return;
-      }
-
-      if (!totpSecret) {
-        showLoginError("TOTP Secret is required.");
-        return;
-      }
-
-
-      connectBtn.disabled = true;
-      connectBtn.textContent =
-        "⏳ Connecting...";
-
-
-      try {
-
-        const response =
-          await fetch("/api/login", {
-
-            method: "POST",
-
-            headers: {
-              "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-
-              apiKey: apiKey,
-
-              clientId: clientId,
-
-              mpin: mpin,
-
-              // Send secret separately.
-              // Server will generate current OTP.
-              totpSecret: totpSecret
-
-            })
-
-          });
-
-
-        const result =
-          await response.json();
-
-
-        if (!response.ok || !result.success) {
-
-          throw new Error(
-            result.message ||
-            "Angel One login failed."
-          );
-
-        }
-
-
-        loginMessage.className =
-          "message success";
-
-        loginMessage.textContent =
-          "Angel One connected successfully.";
-
-
-        document.getElementById(
-          "loginSection"
-        ).style.display = "none";
-
-
-        document.getElementById(
-          "dashboard"
-        ).style.display = "block";
-
-
-        refreshAll();
-
-
-        // Refresh scanner data every 10 seconds.
-        startAutoRefresh();
-
-
-      } catch (error) {
-
-        console.error(error);
-
-        showLoginError(
-          error.message ||
-          "Unable to connect."
-        );
-
-      } finally {
-
-        connectBtn.disabled = false;
-
-        connectBtn.textContent =
-          "🔐 Connect Angel One";
-
-      }
-
-    }
+  localStorage.setItem(
+    "theme",
+    dark ? "dark" : "light"
   );
 
+  document.getElementById(
+    "themeBtn"
+  ).textContent =
+    dark ? "🌙" : "☀️";
+}
 
-  function showLoginError(message) {
 
-    loginMessage.className =
-      "message error";
+(function(){
 
-    loginMessage.textContent =
-      message;
+  const theme =
+    localStorage.getItem("theme");
 
+  if(theme === "dark"){
+
+    document.body.classList.add("dark");
+
+    document.getElementById(
+      "themeBtn"
+    ).textContent = "🌙";
+  }
+
+})();
+
+
+// =================================================
+// LOGIN
+// =================================================
+
+async function login(){
+
+  const apiKey =
+    document.getElementById(
+      "apiKey"
+    ).value.trim();
+
+  const clientId =
+    document.getElementById(
+      "clientId"
+    ).value.trim();
+
+  const mpin =
+    document.getElementById(
+      "mpin"
+    ).value.trim();
+
+  const totpSecret =
+    document.getElementById(
+      "totpSecret"
+    ).value.trim();
+
+
+  const errorBox =
+    document.getElementById(
+      "errorBox"
+    );
+
+  const connectBtn =
+    document.getElementById(
+      "connectBtn"
+    );
+
+
+  errorBox.style.display =
+    "none";
+
+
+  if(
+    !apiKey ||
+    !clientId ||
+    !mpin ||
+    !totpSecret
+  ){
+
+    errorBox.textContent =
+      "API Key, Client ID, MPIN aur Long TOTP Secret required hai.";
+
+    errorBox.style.display =
+      "block";
+
+    return;
   }
 
 
-  // ============================================================
-  // FORMATTERS
-  // ============================================================
+  connectBtn.disabled =
+    true;
 
-  function formatPrice(value) {
+  connectBtn.textContent =
+    "⏳ Connecting Angel One...";
 
-    if (
-      value === null ||
-      value === undefined ||
-      !Number.isFinite(Number(value))
-    ) {
-      return "—";
-    }
 
-    return "₹" +
-      Number(value).toLocaleString(
-        "en-IN",
+  try{
+
+    const response =
+      await fetch(
+        "/api/login",
         {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:JSON.stringify({
+
+            apiKey,
+            clientId,
+            mpin,
+
+            // LONG ALPHANUMERIC SECRET
+            totpSecret
+
+          })
         }
       );
 
-  }
+
+    const data =
+      await response.json();
 
 
-  function formatPercent(value) {
+    if(
+      !response.ok ||
+      !data.success
+    ){
 
-    if (
-      value === null ||
-      value === undefined ||
-      !Number.isFinite(Number(value))
-    ) {
-      return "—";
-    }
-
-    const n = Number(value);
-
-    return (
-      n >= 0 ? "+" : ""
-    ) +
-      n.toFixed(2) +
-      "%";
-
-  }
-
-
-  function formatVolume(value) {
-
-    if (
-      value === null ||
-      value === undefined
-    ) {
-      return "—";
-    }
-
-    const n = Number(value);
-
-    if (n >= 10000000) {
-      return (
-        (n / 10000000).toFixed(2) +
-        " Cr"
+      throw new Error(
+        data.message ||
+        "Angel One login failed."
       );
     }
 
-    if (n >= 100000) {
-      return (
-        (n / 100000).toFixed(2) +
-        " L"
+
+    // =============================================
+    // LOGIN SUCCESS
+    // =============================================
+
+    document.getElementById(
+      "loginSection"
+    ).style.display =
+      "none";
+
+
+    document.getElementById(
+      "dashboard"
+    ).style.display =
+      "block";
+
+
+    // IMPORTANT:
+    // Angel One login successful means
+    // CONNECTED even if WebSocket is still starting.
+
+    document.getElementById(
+      "loginStatus"
+    ).textContent =
+      "Angel One Connected";
+
+
+    document.getElementById(
+      "loginDot"
+    ).classList.remove("off");
+
+
+    document.getElementById(
+      "feedStatus"
+    ).textContent =
+      "Live Feed starting...";
+
+
+    document.getElementById(
+      "updated"
+    ).textContent =
+      "Connected • Loading market data...";
+
+
+    await loadScanner();
+
+    await updateStatus();
+
+
+    if(refreshTimer){
+
+      clearInterval(
+        refreshTimer
       );
     }
 
-    if (n >= 1000) {
-      return (
-        (n / 1000).toFixed(1) +
-        " K"
+
+    if(statusTimer){
+
+      clearInterval(
+        statusTimer
       );
     }
 
-    return n.toLocaleString("en-IN");
 
-  }
-
-
-  // ============================================================
-  // STOCK ROW
-  // ============================================================
-
-  function createOIRow(item) {
-
-    const price =
-      formatPrice(item.price);
-
-    const change =
-      formatPercent(item.changePercent);
-
-    const oi =
-      formatPercent(item.oiPercent);
-
-
-    const changeClass =
-      Number(item.changePercent) >= 0
-        ? "positive"
-        : "negative";
-
-
-    const oiClass =
-      Number(item.oiPercent) >= 0
-        ? "positive"
-        : "negative";
-
-
-    return `
-      <div class="stock-row">
-
-        <div class="stock-top">
-
-          <div class="stock-symbol">
-            ${escapeHtml(item.symbol)}
-          </div>
-
-          <div class="stock-price">
-            ${price}
-          </div>
-
-        </div>
-
-        <div class="stock-bottom">
-
-          <span class="${changeClass}">
-            ${change}
-          </span>
-
-          <span class="oi-label">
-            OI
-            <b class="${oiClass}">
-              ${oi}
-            </b>
-          </span>
-
-        </div>
-
-      </div>
-    `;
-
-  }
-
-
-  function createVolumeRow(item) {
-
-    const price =
-      formatPrice(item.price);
-
-    const change =
-      formatPercent(item.changePercent);
-
-    const volume =
-      formatVolume(item.currentVolume);
-
-    const volumePercent =
-      formatPercent(item.volumePercent);
-
-
-    const changeClass =
-      Number(item.changePercent) >= 0
-        ? "positive"
-        : "negative";
-
-
-    return `
-      <div class="stock-row">
-
-        <div class="stock-top">
-
-          <div class="stock-symbol">
-            ${escapeHtml(item.symbol)}
-          </div>
-
-          <div class="stock-price">
-            ${price}
-          </div>
-
-        </div>
-
-        <div class="stock-bottom">
-
-          <span class="${changeClass}">
-            ${change}
-          </span>
-
-          <span class="oi-label">
-            Vol
-            <b class="positive">
-              ${volume}
-            </b>
-          </span>
-
-        </div>
-
-        <div class="stock-bottom">
-
-          <span class="oi-label">
-            Volume Increase
-          </span>
-
-          <span class="positive">
-            +${volumePercent}
-          </span>
-
-        </div>
-
-      </div>
-    `;
-
-  }
-
-
-  function escapeHtml(value) {
-
-    return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-
-  }
-
-
-  // ============================================================
-  // LOAD OI GAINERS
-  // ============================================================
-
-  async function loadOIGainers() {
-
-    const box =
-      document.getElementById(
-        "oiGainers"
+    // Scanner refresh
+    refreshTimer =
+      setInterval(
+        loadScanner,
+        10000
       );
 
-    try {
 
-      const response =
-        await fetch(
-          "/api/oi-gainers"
-        );
-
-      const result =
-        await response.json();
-
-
-      if (!response.ok || !result.success) {
-        throw new Error(
-          result.message ||
-          "OI Gainers unavailable."
-        );
-      }
-
-
-      const data =
-        Array.isArray(result.data)
-          ? result.data
-          : [];
-
-
-      if (!data.length) {
-
-        box.innerHTML =
-          `<div class="empty">
-             No OI Gainers data
-           </div>`;
-
-        return;
-      }
-
-
-      box.innerHTML =
-        data.map(createOIRow).join("");
-
-
-    } catch (error) {
-
-      console.error(
-        "OI Gainers:",
-        error
+    // Connection status refresh
+    statusTimer =
+      setInterval(
+        updateStatus,
+        3000
       );
 
-      box.innerHTML =
-        `<div class="empty">
-           Unable to load OI Gainers
-         </div>`;
 
-    }
+  }catch(error){
 
+    errorBox.textContent =
+      error.message ||
+      "Angel One login failed.";
+
+    errorBox.style.display =
+      "block";
+
+  }finally{
+
+    connectBtn.disabled =
+      false;
+
+    connectBtn.textContent =
+      "🔐 Connect Angel One";
   }
+}
 
 
-  // ============================================================
-  // LOAD OI LOSERS
-  // ============================================================
+// =================================================
+// STATUS
+// =================================================
 
-  async function loadOILosers() {
+async function updateStatus(){
 
-    const box =
-      document.getElementById(
-        "oiLosers"
+  try{
+
+    const response =
+      await fetch(
+        "/api/status"
       );
 
-    try {
 
-      const response =
-        await fetch(
-          "/api/oi-losers"
-        );
+    const data =
+      await response.json();
 
-      const result =
-        await response.json();
 
+    // ---------------------------------------------
+    // LOGIN STATUS
+    // ---------------------------------------------
 
-      if (!response.ok || !result.success) {
-        throw new Error(
-          result.message ||
-          "OI Losers unavailable."
-        );
-      }
-
-
-      const data =
-        Array.isArray(result.data)
-          ? result.data
-          : [];
-
-
-      if (!data.length) {
-
-        box.innerHTML =
-          `<div class="empty">
-             No OI Losers data
-           </div>`;
-
-        return;
-      }
-
-
-      box.innerHTML =
-        data.map(createOIRow).join("");
-
-
-    } catch (error) {
-
-      console.error(
-        "OI Losers:",
-        error
-      );
-
-      box.innerHTML =
-        `<div class="empty">
-           Unable to load OI Losers
-         </div>`;
-
-    }
-
-  }
-
-
-  // ============================================================
-  // LOAD VOLUME GAINERS
-  // ============================================================
-
-  async function loadVolumeGainers() {
-
-    const box =
-      document.getElementById(
-        "volumeGainers"
-      );
-
-    try {
-
-      const response =
-        await fetch(
-          "/api/volume-gainers"
-        );
-
-      const result =
-        await response.json();
-
-
-      if (!response.ok || !result.success) {
-        throw new Error(
-          result.message ||
-          "Volume data unavailable."
-        );
-      }
-
-
-      const data =
-        Array.isArray(result.data)
-          ? result.data
-          : [];
-
-
-      if (!data.length) {
-
-        box.innerHTML =
-          `<div class="empty">
-             Collecting live volume...
-           </div>`;
-
-        return;
-      }
-
-
-      box.innerHTML =
-        data
-          .map(createVolumeRow)
-          .join("");
-
-
-    } catch (error) {
-
-      console.error(
-        "Volume Gainers:",
-        error
-      );
-
-      box.innerHTML =
-        `<div class="empty">
-           Collecting live volume...
-         </div>`;
-
-    }
-
-  }
-
-
-  // ============================================================
-  // STATUS
-  // ============================================================
-
-  async function loadStatus() {
-
-    try {
-
-      const response =
-        await fetch("/api/status");
-
-      const result =
-        await response.json();
-
-
-      const dot =
-        document.getElementById(
-          "statusDot"
-        );
-
-      const text =
-        document.getElementById(
-          "statusText"
-        );
-
-
-      if (
-        result.success &&
-        result.loggedIn &&
-        result.websocketRunning
-      ) {
-
-        dot.classList.add("live");
-
-        text.textContent =
-          `LIVE • ${result.liveCashStocks || 0} cash stocks`;
-
-      } else if (
-        result.success &&
-        result.loggedIn
-      ) {
-
-        dot.classList.remove("live");
-
-        text.textContent =
-          "Connected • Starting live feed";
-
-      } else {
-
-        dot.classList.remove("live");
-
-        text.textContent =
-          "Disconnected";
-
-      }
-
-
-    } catch (error) {
-
-      console.error(
-        "Status:",
-        error
-      );
-
-    }
-
-  }
-
-
-  // ============================================================
-  // REFRESH
-  // ============================================================
-
-  let refreshing = false;
-
-  async function refreshAll() {
-
-    if (refreshing) return;
-
-    refreshing = true;
-
-
-    try {
-
-      await Promise.all([
-        loadOIGainers(),
-        loadOILosers(),
-        loadVolumeGainers(),
-        loadStatus()
-      ]);
-
+    if(data.connected){
 
       document.getElementById(
-        "lastUpdated"
+        "loginStatus"
       ).textContent =
-        "Updated • " +
-        new Date().toLocaleTimeString(
+        "Angel One Connected";
+
+      document.getElementById(
+        "loginDot"
+      ).classList.remove("off");
+
+    }else{
+
+      document.getElementById(
+        "loginStatus"
+      ).textContent =
+        "Angel One Disconnected";
+
+      document.getElementById(
+        "loginDot"
+      ).classList.add("off");
+    }
+
+
+    // ---------------------------------------------
+    // WEBSOCKET STATUS
+    // ---------------------------------------------
+
+    if(data.websocket){
+
+      document.getElementById(
+        "feedStatus"
+      ).textContent =
+        `● Live Feed ON • ${data.liveStocks || 0} stocks`;
+
+    }else{
+
+      document.getElementById(
+        "feedStatus"
+      ).textContent =
+        "○ Live Feed connecting...";
+    }
+
+
+    // ---------------------------------------------
+    // UPDATE TIME
+    // ---------------------------------------------
+
+    if(data.lastTickTime){
+
+      const time =
+        new Date(
+          data.lastTickTime
+        ).toLocaleTimeString(
           "en-IN"
         );
 
-
-    } finally {
-
-      refreshing = false;
-
+      document.getElementById(
+        "updated"
+      ).textContent =
+        `Updated • ${time} • ${data.stocks || 0} F&O stocks`;
     }
 
+  }catch(error){
+
+    console.log(
+      "Status error:",
+      error
+    );
   }
+}
 
 
-  // ============================================================
-  // AUTO REFRESH
-  // ============================================================
+// =================================================
+// SCANNER
+// =================================================
 
-  let autoRefreshStarted = false;
+async function loadScanner(){
 
-  function startAutoRefresh() {
+  try{
 
-    if (autoRefreshStarted) return;
+    const response =
+      await fetch(
+        "/api/scanner"
+      );
 
-    autoRefreshStarted = true;
 
-    setInterval(
-      refreshAll,
-      10000
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.success
+    ){
+
+      throw new Error(
+        data.message ||
+        "Scanner data unavailable."
+      );
+    }
+
+
+    renderOI(
+      "oiGainers",
+      data.oiGainers || [],
+      true
     );
 
+
+    renderOI(
+      "oiLosers",
+      data.oiLosers || [],
+      false
+    );
+
+
+    renderVolume(
+      data.volumeGainers || []
+    );
+
+
+    if(data.status){
+
+      const time =
+        data.status.lastTickTime
+          ? new Date(
+              data.status.lastTickTime
+            ).toLocaleTimeString("en-IN")
+          : "Waiting";
+
+
+      document.getElementById(
+        "updated"
+      ).textContent =
+        `Updated • ${time}`;
+    }
+
+
+  }catch(error){
+
+    console.log(
+      "Scanner error:",
+      error
+    );
+
+
+    document.getElementById(
+      "oiGainers"
+    ).innerHTML =
+      `<div class="empty">
+        Unable to load OI Gainers
+      </div>`;
+
+
+    document.getElementById(
+      "oiLosers"
+    ).innerHTML =
+      `<div class="empty">
+        Unable to load OI Losers
+      </div>`;
+  }
+}
+
+
+// =================================================
+// OI RENDER
+// =================================================
+
+function renderOI(
+  elementId,
+  rows,
+  positive
+){
+
+  const container =
+    document.getElementById(
+      elementId
+    );
+
+
+  if(!rows.length){
+
+    container.innerHTML =
+      `<div class="empty">
+        No OI data available
+      </div>`;
+
+    return;
   }
 
+
+  container.innerHTML =
+    rows
+      .slice(0,10)
+      .map(row => {
+
+        const oi =
+          Number(
+            row.oiPercent || 0
+          );
+
+
+        const change =
+          Number(
+            row.changePercent || 0
+          );
+
+
+        return `
+
+        <div class="row">
+
+          <div>
+
+            <div class="symbol">
+              ${escapeHtml(row.symbol)}
+            </div>
+
+            <div class="price">
+
+              ${
+                row.price
+                  ? "₹" +
+                    Number(
+                      row.price
+                    ).toFixed(2)
+                  : "Price waiting..."
+              }
+
+              ${
+                row.price
+                  ? ` • ${
+                      change >= 0
+                        ? "+"
+                        : ""
+                    }${change.toFixed(2)}%`
+                  : ""
+              }
+
+            </div>
+
+          </div>
+
+
+          <div class="right">
+
+            <div class="${
+              positive
+                ? "green"
+                : "red"
+            }">
+
+              ${
+                oi >= 0
+                  ? "+"
+                  : ""
+              }${oi.toFixed(2)}%
+
+            </div>
+
+            <div class="price">
+              OI
+            </div>
+
+          </div>
+
+        </div>
+
+        `;
+      })
+      .join("");
+}
+
+
+// =================================================
+// VOLUME
+// =================================================
+
+function renderVolume(rows){
+
+  const container =
+    document.getElementById(
+      "volumeGainers"
+    );
+
+
+  if(!rows.length){
+
+    container.innerHTML =
+      `<div class="empty">
+        Collecting live NSE cash volume...
+      </div>`;
+
+    return;
+  }
+
+
+  container.innerHTML =
+    rows
+      .slice(0,10)
+      .map(row => {
+
+        return `
+
+        <div class="row">
+
+          <div>
+
+            <div class="symbol">
+              ${escapeHtml(row.symbol)}
+            </div>
+
+            <div class="price">
+
+              ${
+                row.price
+                  ? "₹" +
+                    Number(
+                      row.price
+                    ).toFixed(2)
+                  : "Price waiting..."
+              }
+
+            </div>
+
+          </div>
+
+
+          <div class="right">
+
+            <div class="volume">
+              ${formatVolume(
+                Number(
+                  row.volume || 0
+                )
+              )}
+            </div>
+
+            <div class="price">
+              Volume
+            </div>
+
+          </div>
+
+        </div>
+
+        `;
+      })
+      .join("");
+}
+
+
+// =================================================
+// VOLUME FORMAT
+// =================================================
+
+function formatVolume(value){
+
+  if(value >= 10000000){
+
+    return (
+      value / 10000000
+    ).toFixed(2) + " Cr";
+  }
+
+
+  if(value >= 100000){
+
+    return (
+      value / 100000
+    ).toFixed(2) + " L";
+  }
+
+
+  if(value >= 1000){
+
+    return (
+      value / 1000
+    ).toFixed(1) + " K";
+  }
+
+
+  return String(value);
+}
+
+
+// =================================================
+// HTML ESCAPE
+// =================================================
+
+function escapeHtml(value){
+
+  return String(value)
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+}
 
 </script>
 
