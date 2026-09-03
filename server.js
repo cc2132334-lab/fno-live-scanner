@@ -3,10 +3,9 @@ const cors = require("cors");
 const https = require("https");
 
 const { SmartAPI, WebSocketV2 } = require("smartapi-javascript");
-const { authenticator } = require("otplib");
+const { generate } = require("otplib");
 
 const app = express();
-
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
@@ -37,7 +36,7 @@ const VOLUME_LOOKBACK_MS = 30 * 1000;
 const MAX_HISTORY_PER_STOCK = 60;
 
 // ============================================================
-// HELPERS
+// BASIC HELPERS
 // ============================================================
 
 function cleanSymbol(symbol) {
@@ -75,23 +74,28 @@ function normalizeApiData(result) {
 }
 
 // ============================================================
-// FUTURE SYMBOL -> CASH UNDERLYING
+// FUTURE SYMBOL -> UNDERLYING
 // ============================================================
 
 function getUnderlyingFromFutureSymbol(symbol) {
   if (!symbol) return "";
 
-  const clean = String(symbol)
+  const value = String(symbol)
     .trim()
     .toUpperCase();
 
-  let underlying = clean.replace(
+  // Example:
+  // HEROMOTOCO29SEP26FUT
+  // ->
+  // HEROMOTOCO
+
+  let underlying = value.replace(
     /\d{2}[A-Z]{3}\d{2}FUT$/i,
     ""
   );
 
-  if (underlying === clean) {
-    underlying = clean.replace(
+  if (underlying === value) {
+    underlying = value.replace(
       /FUT$/i,
       ""
     );
@@ -101,46 +105,52 @@ function getUnderlyingFromFutureSymbol(symbol) {
 }
 
 // ============================================================
-// TOTP SECRET CLEANER
+// TOTP SECRET NORMALIZATION
 // ============================================================
 
-function normalizeTotpSecret(secret) {
-  if (!secret) return "";
+function normalizeTotpSecret(input) {
+  if (!input) return "";
 
-  let value = String(secret).trim();
+  let value = String(input).trim();
 
-  // If user accidentally pasted spaces/new lines/hyphens,
-  // remove them.
-  value = value
-    .replace(/\s+/g, "")
-    .replace(/-/g, "")
-    .replace(/=/g, "")
-    .toUpperCase();
+  // If user pasted an otpauth URI:
+  //
+  // otpauth://totp/AngelOne?secret=XXXX
+  //
+  // extract only the secret.
 
-  // If someone pastes an otpauth URI, extract secret.
-  if (value.includes("SECRET=")) {
-    const match = value.match(
-      /SECRET=([A-Z2-7]+)/i
-    );
+  const secretMatch = value.match(
+    /(?:secret=)([A-Za-z2-7]+)(?:&|$)/i
+  );
 
-    if (match && match[1]) {
-      value = match[1].toUpperCase();
-    }
+  if (secretMatch && secretMatch[1]) {
+    value = secretMatch[1];
   }
 
-  return value;
+  // Remove spaces/new lines.
+  value = value.replace(/\s+/g, "");
+
+  // Remove hyphens if pasted as grouped secret.
+  value = value.replace(/-/g, "");
+
+  // Remove accidental "=" padding.
+  value = value.replace(/=/g, "");
+
+  return value.toUpperCase();
 }
 
 // ============================================================
-// LOAD SCRIP MASTER
+// LOAD ANGEL ONE SCRIP MASTER
 // ============================================================
 
 function loadScripMaster() {
   return new Promise((resolve, reject) => {
+
     https
       .get(
         "https://margincalculator.angelone.in/OpenAPI_File/files/OpenAPIScripMaster.json",
         (res) => {
+
           let body = "";
 
           res.on("data", (chunk) => {
@@ -148,12 +158,14 @@ function loadScripMaster() {
           });
 
           res.on("end", () => {
+
             try {
               const data = JSON.parse(body);
               resolve(data);
             } catch (error) {
               reject(error);
             }
+
           });
         }
       )
@@ -162,10 +174,11 @@ function loadScripMaster() {
 }
 
 // ============================================================
-// BUILD F&O UNIVERSE
+// BUILD F&O ELIGIBLE CASH UNIVERSE
 // ============================================================
 
 async function buildUniverse() {
+
   console.log(
     "Loading Angel One scrip master..."
   );
@@ -179,7 +192,10 @@ async function buildUniverse() {
     );
   }
 
-  // NSE CASH STOCKS
+  // ----------------------------------------------------------
+  // NSE CASH EQUITY
+  // ----------------------------------------------------------
+
   const nseCash =
     master.filter(
       (item) =>
@@ -195,6 +211,7 @@ async function buildUniverse() {
     new Map();
 
   for (const item of nseCash) {
+
     const underlying =
       cleanSymbol(
         item.name ||
@@ -215,7 +232,10 @@ async function buildUniverse() {
     );
   }
 
-  // NSE FUTURE STOCKS
+  // ----------------------------------------------------------
+  // NSE STOCK FUTURES
+  // ----------------------------------------------------------
+
   const futures =
     master.filter(
       (item) =>
@@ -228,6 +248,7 @@ async function buildUniverse() {
     new Map();
 
   for (const future of futures) {
+
     const underlying =
       cleanSymbol(
         future.name
@@ -243,6 +264,7 @@ async function buildUniverse() {
     if (!cash) continue;
 
     if (!unique.has(underlying)) {
+
       unique.set(
         underlying,
         {
@@ -253,6 +275,7 @@ async function buildUniverse() {
             cash.cashToken,
         }
       );
+
     }
   }
 
@@ -268,6 +291,7 @@ async function buildUniverse() {
   cashByToken.clear();
 
   for (const stock of cashUniverse) {
+
     cashByUnderlying.set(
       stock.underlying,
       stock
@@ -285,7 +309,7 @@ async function buildUniverse() {
 }
 
 // ============================================================
-// LOGIN
+// ANGEL ONE LOGIN
 // ============================================================
 
 app.post(
@@ -298,7 +322,7 @@ app.post(
         apiKey,
         clientId,
         mpin,
-        totpSecret,
+        totpSecret
       } = req.body;
 
       // ------------------------------------------------------
@@ -309,7 +333,7 @@ app.post(
         return res.status(400).json({
           success: false,
           message:
-            "API Key is required.",
+            "API Key is required."
         });
       }
 
@@ -317,7 +341,7 @@ app.post(
         return res.status(400).json({
           success: false,
           message:
-            "Client ID is required.",
+            "Client ID is required."
         });
       }
 
@@ -325,7 +349,7 @@ app.post(
         return res.status(400).json({
           success: false,
           message:
-            "MPIN is required.",
+            "MPIN is required."
         });
       }
 
@@ -333,46 +357,57 @@ app.post(
         return res.status(400).json({
           success: false,
           message:
-            "TOTP Secret is required.",
+            "TOTP Secret is required."
         });
       }
 
       console.log(
-        `Attempting Angel One login for ${clientId}...`
+        `Angel One login attempt for ${clientId}`
       );
 
       // ------------------------------------------------------
-      // SMART API
+      // CREATE SMART API
       // ------------------------------------------------------
 
       const smartApi =
         new SmartAPI({
-          api_key: apiKey,
+          api_key: apiKey
         });
 
       // ------------------------------------------------------
-      // NORMALIZE SECRET
+      // CLEAN TOTP SECRET
       // ------------------------------------------------------
 
-      const cleanTotpSecret =
+      const cleanSecret =
         normalizeTotpSecret(
           totpSecret
         );
 
-      if (!cleanTotpSecret) {
+      if (!cleanSecret) {
+
         return res.status(400).json({
           success: false,
           message:
-            "TOTP Secret is empty.",
+            "TOTP Secret is empty."
         });
+
       }
 
       console.log(
-        "TOTP Secret received and normalized."
+        "TOTP secret received."
       );
 
       // ------------------------------------------------------
-      // GENERATE CURRENT OTP
+      // GENERATE CURRENT 6 DIGIT TOTP
+      // ------------------------------------------------------
+      //
+      // IMPORTANT:
+      // otplib v13 uses:
+      //
+      // generate({ secret })
+      //
+      // and returns a Promise.
+      //
       // ------------------------------------------------------
 
       let currentTotp;
@@ -380,26 +415,41 @@ app.post(
       try {
 
         currentTotp =
-          authenticator.generate(
-            cleanTotpSecret
-          );
+          await generate({
+            secret: cleanSecret
+          });
 
       } catch (error) {
 
         console.error(
-          "TOTP generation failed:",
-          error.message
+          "TOTP generation error:",
+          error
         );
 
         return res.status(400).json({
           success: false,
           message:
-            "TOTP Secret format is not valid. Please paste the Secret exactly as shown by Angel One.",
+            "TOTP Secret could not be converted to OTP. Please check the Secret."
         });
       }
 
+      if (
+        !currentTotp ||
+        !/^\d{6}$/.test(
+          String(currentTotp)
+        )
+      ) {
+
+        return res.status(400).json({
+          success: false,
+          message:
+            "Unable to generate 6-digit TOTP."
+        });
+
+      }
+
       console.log(
-        "Current 6-digit TOTP generated."
+        "6-digit TOTP generated successfully."
       );
 
       // ------------------------------------------------------
@@ -424,11 +474,14 @@ app.post(
         );
 
         return res.status(401).json({
+
           success: false,
+
           message:
             loginResponse?.message ||
             loginResponse?.errorcode ||
-            "Angel One login failed.",
+            "Angel One login failed."
+
         });
       }
 
@@ -436,11 +489,13 @@ app.post(
         loginResponse.data || {};
 
       if (!data.jwtToken) {
+
         return res.status(401).json({
           success: false,
           message:
-            "Angel One login did not return JWT token.",
+            "Angel One did not return JWT token."
         });
+
       }
 
       // ------------------------------------------------------
@@ -464,11 +519,11 @@ app.post(
           data.feedToken ||
           null,
 
-        smartApi,
+        smartApi
       };
 
       console.log(
-        "================================="
+        "========================================"
       );
 
       console.log(
@@ -476,11 +531,11 @@ app.post(
       );
 
       console.log(
-        "================================="
+        "========================================"
       );
 
       // ------------------------------------------------------
-      // CLEAR OLD MARKET DATA
+      // CLEAR OLD DATA
       // ------------------------------------------------------
 
       priceData.clear();
@@ -490,7 +545,7 @@ app.post(
       volumeHistory.clear();
 
       // ------------------------------------------------------
-      // START CASH WEBSOCKET
+      // START LIVE CASH FEED
       // ------------------------------------------------------
 
       startCashWebSocket();
@@ -503,7 +558,7 @@ app.post(
           "Angel One connected successfully.",
 
         cashStocks:
-          cashUniverse.length,
+          cashUniverse.length
 
       });
 
@@ -514,8 +569,7 @@ app.post(
         error
       );
 
-      currentSession =
-        null;
+      currentSession = null;
 
       return res.status(500).json({
 
@@ -523,7 +577,7 @@ app.post(
 
         message:
           error.message ||
-          "Angel One login failed.",
+          "Angel One login failed."
 
       });
     }
@@ -571,7 +625,7 @@ function startCashWebSocket() {
           currentSession.clientId,
 
         feedtype:
-          currentSession.feedToken,
+          currentSession.feedToken
 
       });
 
@@ -669,7 +723,8 @@ function subscribeCashTokens() {
       exchangeType: 1,
 
       tokens:
-        batch,
+        batch
+
     };
 
     try {
@@ -679,7 +734,7 @@ function subscribeCashTokens() {
       );
 
       console.log(
-        `Subscribed NSE Cash batch ${batchNumber}: ${batch.length}`
+        `Cash batch ${batchNumber} subscribed: ${batch.length}`
       );
 
     } catch (error) {
@@ -693,7 +748,7 @@ function subscribeCashTokens() {
 }
 
 // ============================================================
-// HANDLE CASH TICK
+// HANDLE LIVE CASH TICK
 // ============================================================
 
 function handleCashTick(tick) {
@@ -703,6 +758,10 @@ function handleCashTick(tick) {
     if (!tick) return;
 
     let data = tick;
+
+    // --------------------------------------------------------
+    // BUFFER
+    // --------------------------------------------------------
 
     if (Buffer.isBuffer(data)) {
 
@@ -718,6 +777,10 @@ function handleCashTick(tick) {
         return;
       }
     }
+
+    // --------------------------------------------------------
+    // STRING
+    // --------------------------------------------------------
 
     if (
       typeof data === "string"
@@ -740,6 +803,10 @@ function handleCashTick(tick) {
     ) {
       return;
     }
+
+    // --------------------------------------------------------
+    // TOKEN
+    // --------------------------------------------------------
 
     const token =
       data.token ??
@@ -766,7 +833,7 @@ function handleCashTick(tick) {
         data.ltp
       );
 
-    // Angel One feed price is paise.
+    // Angel One price is in paise.
     if (ltp > 0) {
       ltp =
         ltp / 100;
@@ -814,7 +881,7 @@ function handleCashTick(tick) {
       );
 
     // --------------------------------------------------------
-    // CLOSE
+    // PREVIOUS CLOSE
     // --------------------------------------------------------
 
     let close =
@@ -844,6 +911,7 @@ function handleCashTick(tick) {
         ((ltp - close) /
           close) *
         100;
+
     }
 
     const now =
@@ -877,7 +945,7 @@ function handleCashTick(tick) {
         volume,
 
         updatedAt:
-          now,
+          now
 
       }
     );
@@ -909,7 +977,7 @@ function handleCashTick(tick) {
           changePercent,
 
           updatedAt:
-            now,
+            now
 
         }
       );
@@ -924,6 +992,7 @@ function handleCashTick(tick) {
           stock.underlying,
           []
         );
+
       }
 
       const history =
@@ -936,6 +1005,7 @@ function handleCashTick(tick) {
           history.length - 1
         ];
 
+      // Approximately 1 sample per second.
       if (
         !last ||
         now - last.time >= 1000
@@ -946,9 +1016,10 @@ function handleCashTick(tick) {
           time:
             now,
 
-          volume,
+          volume
 
         });
+
       }
 
       while (
@@ -960,6 +1031,7 @@ function handleCashTick(tick) {
 
       }
 
+      // Keep last 5 minutes.
       while (
         history.length &&
         now - history[0].time >
@@ -974,7 +1046,7 @@ function handleCashTick(tick) {
   } catch (error) {
 
     console.error(
-      "Tick processing error:",
+      "Cash tick error:",
       error.message
     );
   }
@@ -1000,7 +1072,7 @@ app.get(
           success: false,
 
           message:
-            "Please login first.",
+            "Please login first."
 
         });
       }
@@ -1013,7 +1085,7 @@ app.get(
               "PercOIGainers",
 
             expirytype:
-              "NEAR",
+              "NEAR"
 
           }
         );
@@ -1070,9 +1142,10 @@ app.get(
 
               liveUpdatedAt:
                 live?.updatedAt ??
-                null,
+                null
 
             };
+
           })
 
           .filter(
@@ -1080,13 +1153,17 @@ app.get(
               item.symbol
           )
 
+          // HIGHEST OI GAIN FIRST
           .sort(
             (a, b) =>
               b.oiPercent -
               a.oiPercent
           )
 
-          .slice(0, 10);
+          .slice(
+            0,
+            10
+          );
 
       res.json({
 
@@ -1096,7 +1173,7 @@ app.get(
           output,
 
         updatedAt:
-          Date.now(),
+          Date.now()
 
       });
 
@@ -1113,7 +1190,7 @@ app.get(
 
         message:
           error.message ||
-          "Unable to load OI Gainers.",
+          "Unable to load OI Gainers."
 
       });
     }
@@ -1140,7 +1217,7 @@ app.get(
           success: false,
 
           message:
-            "Please login first.",
+            "Please login first."
 
         });
       }
@@ -1153,7 +1230,7 @@ app.get(
               "PercOILosers",
 
             expirytype:
-              "NEAR",
+              "NEAR"
 
           }
         );
@@ -1210,9 +1287,10 @@ app.get(
 
               liveUpdatedAt:
                 live?.updatedAt ??
-                null,
+                null
 
             };
+
           })
 
           .filter(
@@ -1220,14 +1298,17 @@ app.get(
               item.symbol
           )
 
-          // MOST NEGATIVE OI FIRST
+          // MOST NEGATIVE FIRST
           .sort(
             (a, b) =>
               a.oiPercent -
               b.oiPercent
           )
 
-          .slice(0, 10);
+          .slice(
+            0,
+            10
+          );
 
       res.json({
 
@@ -1237,7 +1318,7 @@ app.get(
           output,
 
         updatedAt:
-          Date.now(),
+          Date.now()
 
       });
 
@@ -1254,7 +1335,7 @@ app.get(
 
         message:
           error.message ||
-          "Unable to load OI Losers.",
+          "Unable to load OI Losers."
 
       });
     }
@@ -1338,20 +1419,18 @@ function getVolumeGainers() {
       continue;
     }
 
-    const volumeIncrease =
+    const increase =
       current.volume -
       old.volume;
 
-    if (
-      volumeIncrease <= 0
-    ) {
+    if (increase <= 0) {
       continue;
     }
 
-    const volumePercent =
+    const percent =
       old.volume > 0
         ? (
-            volumeIncrease /
+            increase /
             old.volume
           ) * 100
         : 0;
@@ -1372,12 +1451,14 @@ function getVolumeGainers() {
       previousVolume:
         old.volume,
 
-      volumeIncrease,
+      volumeIncrease:
+        increase,
 
-      volumePercent,
+      volumePercent:
+        percent,
 
       updatedAt:
-        current.updatedAt,
+        current.updatedAt
 
     });
   }
@@ -1429,7 +1510,7 @@ app.get(
         websocketRunning,
 
         updatedAt:
-          Date.now(),
+          Date.now()
 
       });
 
@@ -1446,7 +1527,7 @@ app.get(
 
         message:
           error.message ||
-          "Unable to calculate Volume Gainers.",
+          "Unable to calculate volume gainers."
 
       });
     }
@@ -1480,7 +1561,7 @@ app.get(
         volumeHistory.size,
 
       updatedAt:
-        Date.now(),
+        Date.now()
 
     });
   }
@@ -1523,7 +1604,7 @@ app.post(
         success: true,
 
         message:
-          "Logged out successfully.",
+          "Logged out successfully."
 
       });
 
@@ -1534,7 +1615,7 @@ app.post(
         success: false,
 
         message:
-          error.message,
+          error.message
 
       });
     }
@@ -1542,7 +1623,7 @@ app.post(
 );
 
 // ============================================================
-// FRONTEND
+// FRONTEND FALLBACK
 // ============================================================
 
 app.get(
@@ -1560,7 +1641,7 @@ app.get(
 );
 
 // ============================================================
-// START
+// START SERVER
 // ============================================================
 
 async function startServer() {
@@ -1587,6 +1668,7 @@ async function startServer() {
       error
     );
 
+    // Still start Express.
     app.listen(
       PORT,
       () => {
