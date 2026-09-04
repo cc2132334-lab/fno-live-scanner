@@ -10,34 +10,24 @@ const {
   generate
 } = require("otplib");
 
-
 const app = express();
 
 const PORT =
   process.env.PORT || 10000;
 
-
 app.use(cors());
 
-app.use(
-  express.json({
-    limit: "1mb"
-  })
-);
+app.use(express.json());
 
-app.use(
-  express.static("public")
-);
+app.use(express.static("public"));
 
 
-// ======================================================
-// GLOBAL STATE
-// ======================================================
+// =====================================================
+// STATE
+// =====================================================
 
 let smartApi = null;
-
 let sessionData = null;
-
 let webSocket = null;
 
 let websocketReady = false;
@@ -46,36 +36,41 @@ let fnoCashUniverse = [];
 
 let cashByToken = new Map();
 
+
+// FUTURE TOKEN -> CASH SYMBOL
+let futureTokenToCash = new Map();
+
+
+// FUTURE TRADING SYMBOL -> CASH SYMBOL
+let futureSymbolToCash = new Map();
+
+
 let priceData = {};
 
 let oiGainers = [];
-
 let oiLosers = [];
 
 let oiRefreshTimer = null;
 
 
-// ======================================================
-// INDEX STATE
-// ======================================================
+// =====================================================
+// INDEXES
+// =====================================================
 
 const indexState = {
-
   nifty: false,
-
   sensex: false
-
 };
 
 
 const indexData = {
 
   nifty: {
-    name: "NIFTY",
+    name: "NIFTY 50",
     exchangeType: 1,
     token: "99926000",
     price: null,
-    previousClose: null,
+    close: null,
     change: null,
     changePercent: null,
     timestamp: null
@@ -86,7 +81,7 @@ const indexData = {
     exchangeType: 3,
     token: "99919000",
     price: null,
-    previousClose: null,
+    close: null,
     change: null,
     changePercent: null,
     timestamp: null
@@ -95,17 +90,16 @@ const indexData = {
 };
 
 
-// ======================================================
-// SSE CLIENTS
-// ======================================================
+// =====================================================
+// SSE
+// =====================================================
 
-const streamClients =
-  new Set();
+const clients = new Set();
 
 
-// ======================================================
+// =====================================================
 // ACTIVITY LOG
-// ======================================================
+// =====================================================
 
 let activityLogs = [];
 
@@ -115,7 +109,7 @@ function addLog(
   type = "INFO"
 ) {
 
-  const item = {
+  const log = {
 
     time:
       new Date().toISOString(),
@@ -126,7 +120,7 @@ function addLog(
   };
 
 
-  activityLogs.push(item);
+  activityLogs.push(log);
 
 
   if (
@@ -145,35 +139,35 @@ function addLog(
 
   broadcast(
     "activity",
-    item
+    log
   );
 }
 
 
-// ======================================================
-// SSE BROADCAST
-// ======================================================
+// =====================================================
+// BROADCAST
+// =====================================================
 
 function broadcast(
   event,
   data
 ) {
 
-  const payload =
+  const packet =
     `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
 
 
   for (
-    const client of streamClients
+    const client of clients
   ) {
 
     try {
 
-      client.write(payload);
+      client.write(packet);
 
     } catch (error) {
 
-      streamClients.delete(
+      clients.delete(
         client
       );
     }
@@ -181,9 +175,9 @@ function broadcast(
 }
 
 
-// ======================================================
-// TOTP SECRET NORMALIZE
-// ======================================================
+// =====================================================
+// TOTP SECRET
+// =====================================================
 
 function normalizeTotpSecret(
   input
@@ -199,7 +193,6 @@ function normalizeTotpSecret(
     String(input).trim();
 
 
-  // If complete otpauth URI pasted
   if (
     secret
       .toLowerCase()
@@ -211,29 +204,26 @@ function normalizeTotpSecret(
       const url =
         new URL(secret);
 
-      const uriSecret =
+      const value =
         url.searchParams.get(
           "secret"
         );
 
+      if (value) {
 
-      if (uriSecret) {
-
-        secret =
-          uriSecret;
+        secret = value;
       }
 
     } catch (error) {
 
       addLog(
-        "TOTP URI parsing failed; using entered value.",
+        "Could not parse otpauth URI. Using entered secret.",
         "WARN"
       );
     }
   }
 
 
-  // If secret=XXXX format
   const match =
     secret.match(
       /(?:^|[?&\s])secret=([A-Za-z0-9=]+)/i
@@ -257,21 +247,21 @@ function normalizeTotpSecret(
 }
 
 
-// ======================================================
-// BUILD SYMBOL NAME
-// ======================================================
+// =====================================================
+// CLEAN CASH SYMBOL
+// =====================================================
 
-function cleanCashSymbol(
-  symbol
+function cleanSymbol(
+  value
 ) {
 
-  if (!symbol) {
+  if (!value) {
 
     return "";
   }
 
 
-  return String(symbol)
+  return String(value)
     .replace(
       /-EQ$/i,
       ""
@@ -281,28 +271,301 @@ function cleanCashSymbol(
 }
 
 
-// ======================================================
-// FIND CASH SYMBOL FROM FUTURES SYMBOL
-// ======================================================
+// =====================================================
+// BUILD UNIVERSE
+// =====================================================
 
-function futureToCashSymbol(
-  tradingSymbol
-) {
+async function buildUniverse() {
 
-  if (!tradingSymbol) {
+  addLog(
+    "Downloading Angel One instrument master..."
+  );
 
-    return "";
+
+  const response =
+    await fetch(
+      "https://margincalculator.angelone.in/OpenAPI_File/files/OpenAPIScripMaster.json"
+    );
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      "Angel One instrument master download failed."
+    );
   }
 
 
-  const future =
+  const master =
+    await response.json();
+
+
+  if (
+    !Array.isArray(master)
+  ) {
+
+    throw new Error(
+      "Invalid instrument master."
+    );
+  }
+
+
+  // ---------------------------------------------------
+  // STEP 1
+  // F&O STOCK FUTURES
+  // ---------------------------------------------------
+
+  const fnoNames =
+    new Set();
+
+
+  const futures = [];
+
+
+  for (
+    const item of master
+  ) {
+
+    if (
+      item.exch_seg === "NFO" &&
+      item.instrumenttype === "FUTSTK" &&
+      item.name &&
+      item.token
+    ) {
+
+      const cashSymbol =
+        cleanSymbol(
+          item.name
+        );
+
+
+      if (!cashSymbol) {
+
+        continue;
+      }
+
+
+      fnoNames.add(
+        cashSymbol
+      );
+
+
+      futures.push({
+
+        token:
+          String(
+            item.token
+          ),
+
+        tradingSymbol:
+          String(
+            item.symbol ||
+            item.tradingsymbol ||
+            ""
+          ).toUpperCase(),
+
+        name:
+          cashSymbol
+      });
+    }
+  }
+
+
+  // ---------------------------------------------------
+  // STEP 2
+  // NSE CASH
+  // ---------------------------------------------------
+
+  const cashMap =
+    new Map();
+
+
+  for (
+    const item of master
+  ) {
+
+    if (
+      item.exch_seg === "NSE" &&
+      item.symbol &&
+      item.symbol.endsWith("-EQ") &&
+      item.token
+    ) {
+
+      const symbol =
+        cleanSymbol(
+          item.symbol
+        );
+
+
+      if (
+        fnoNames.has(
+          symbol
+        )
+      ) {
+
+        cashMap.set(
+          symbol,
+          {
+
+            symbol,
+
+            token:
+              String(
+                item.token
+              ),
+
+            tradingSymbol:
+              item.symbol,
+
+            exchangeType:
+              1
+
+          }
+        );
+      }
+    }
+  }
+
+
+  fnoCashUniverse =
+    Array.from(
+      cashMap.values()
+    );
+
+
+  cashByToken =
+    new Map();
+
+
+  for (
+    const cash of
+    fnoCashUniverse
+  ) {
+
+    cashByToken.set(
+      cash.token,
+      cash
+    );
+  }
+
+
+  // ---------------------------------------------------
+  // STEP 3
+  // DIRECT FUTURE TOKEN MAPPING
+  // ---------------------------------------------------
+
+  futureTokenToCash =
+    new Map();
+
+
+  futureSymbolToCash =
+    new Map();
+
+
+  for (
+    const future of futures
+  ) {
+
+    if (
+      cashMap.has(
+        future.name
+      )
+    ) {
+
+      futureTokenToCash.set(
+        future.token,
+        future.name
+      );
+
+
+      if (
+        future.tradingSymbol
+      ) {
+
+        futureSymbolToCash.set(
+          future.tradingSymbol,
+          future.name
+        );
+      }
+    }
+  }
+
+
+  addLog(
+    `F&O cash universe ready: ${fnoCashUniverse.length} stocks.`,
+    "SUCCESS"
+  );
+
+
+  addLog(
+    `Direct futures-to-cash mapping ready: ${futureTokenToCash.size} contracts.`,
+    "SUCCESS"
+  );
+}
+
+
+// =====================================================
+// FUTURE -> CASH SYMBOL
+// =====================================================
+
+function getCashSymbolFromOI(
+  item
+) {
+
+  // -----------------------------------------------
+  // 1. symbolToken direct mapping
+  // -----------------------------------------------
+
+  const token =
     String(
-      tradingSymbol
+      item?.symbolToken ||
+      item?.token ||
+      ""
+    );
+
+
+  if (
+    token &&
+    futureTokenToCash.has(
+      token
+    )
+  ) {
+
+    return futureTokenToCash.get(
+      token
+    );
+  }
+
+
+  // -----------------------------------------------
+  // 2. tradingSymbol direct mapping
+  // -----------------------------------------------
+
+  const tradingSymbol =
+    String(
+      item?.tradingSymbol ||
+      item?.symbol ||
+      ""
     ).toUpperCase();
 
 
-  // Longest symbol first
-  // prevents prefix collision.
+  if (
+    tradingSymbol &&
+    futureSymbolToCash.has(
+      tradingSymbol
+    )
+  ) {
+
+    return futureSymbolToCash.get(
+      tradingSymbol
+    );
+  }
+
+
+  // -----------------------------------------------
+  // 3. fallback by cash universe prefix
+  // -----------------------------------------------
+
   const symbols =
     Array.from(
       cashByToken.values()
@@ -322,10 +585,10 @@ function futureToCashSymbol(
   ) {
 
     if (
-      future.startsWith(
+      tradingSymbol.startsWith(
         symbol
       ) &&
-      future.endsWith(
+      tradingSymbol.endsWith(
         "FUT"
       )
     ) {
@@ -335,178 +598,13 @@ function futureToCashSymbol(
   }
 
 
-  // Fallback:
-  // remove expiry + FUT
-  const match =
-    future.match(
-      /^(.+?)(\d{2}[A-Z]{3}\d{2})FUT$/
-    );
-
-
-  if (
-    match &&
-    match[1]
-  ) {
-
-    return match[1];
-  }
-
-
   return "";
 }
 
 
-// ======================================================
-// DOWNLOAD MASTER + BUILD F&O CASH UNIVERSE
-// ======================================================
-
-async function buildUniverse() {
-
-  addLog(
-    "Downloading Angel One instrument master..."
-  );
-
-
-  const response =
-    await fetch(
-      "https://margincalculator.angelone.in/OpenAPI_File/files/OpenAPIScripMaster.json"
-    );
-
-
-  if (!response.ok) {
-
-    throw new Error(
-      "Instrument master download failed."
-    );
-  }
-
-
-  const master =
-    await response.json();
-
-
-  if (
-    !Array.isArray(master)
-  ) {
-
-    throw new Error(
-      "Invalid instrument master response."
-    );
-  }
-
-
-  // ----------------------------------------------
-  // F&O STOCK NAMES
-  // ----------------------------------------------
-
-  const fnoNames =
-    new Set();
-
-
-  for (
-    const item of master
-  ) {
-
-    if (
-      item.exch_seg === "NFO" &&
-      item.instrumenttype === "FUTSTK" &&
-      item.name
-    ) {
-
-      fnoNames.add(
-        cleanCashSymbol(
-          item.name
-        )
-      );
-    }
-  }
-
-
-  // ----------------------------------------------
-  // NSE CASH EQUITY
-  // ----------------------------------------------
-
-  const map =
-    new Map();
-
-
-  for (
-    const item of master
-  ) {
-
-    if (
-      item.exch_seg === "NSE" &&
-      item.symbol &&
-      item.symbol.endsWith("-EQ") &&
-      item.token
-    ) {
-
-      const symbol =
-        cleanCashSymbol(
-          item.symbol
-        );
-
-
-      if (
-        fnoNames.has(
-          symbol
-        )
-      ) {
-
-        map.set(
-          symbol,
-          {
-            symbol,
-
-            token:
-              String(
-                item.token
-              ),
-
-            tradingSymbol:
-              item.symbol,
-
-            exchangeType:
-              1
-          }
-        );
-      }
-    }
-  }
-
-
-  fnoCashUniverse =
-    Array.from(
-      map.values()
-    );
-
-
-  cashByToken =
-    new Map();
-
-
-  for (
-    const item of
-    fnoCashUniverse
-  ) {
-
-    cashByToken.set(
-      item.token,
-      item
-    );
-  }
-
-
-  addLog(
-    `F&O cash universe ready: ${fnoCashUniverse.length} NSE stocks.`,
-    "SUCCESS"
-  );
-}
-
-
-// ======================================================
+// =====================================================
 // LOGIN
-// ======================================================
+// =====================================================
 
 app.post(
   "/api/login",
@@ -545,13 +643,9 @@ app.post(
 
 
       addLog(
-        `Login started for Client ID ${String(clientId).trim()}.`
+        `Login started for ${String(clientId).trim()}.`
       );
 
-
-      // ------------------------------------------
-      // TOTP SECRET
-      // ------------------------------------------
 
       const secret =
         normalizeTotpSecret(
@@ -561,26 +655,20 @@ app.post(
 
       if (!secret) {
 
-        return res
-          .status(400)
-          .json({
-
-            success: false,
-
-            message:
-              "TOTP Secret empty hai."
-          });
+        throw new Error(
+          "TOTP Secret empty hai."
+        );
       }
 
 
       addLog(
-        `TOTP Secret received. Length: ${secret.length}.`
+        `TOTP Secret received (${secret.length} characters).`
       );
 
 
-      // ------------------------------------------
-      // GENERATE CURRENT 6 DIGIT TOTP
-      // ------------------------------------------
+      // ----------------------------------------------
+      // AUTOMATIC CURRENT TOTP
+      // ----------------------------------------------
 
       const currentTotp =
         await generate({
@@ -589,30 +677,29 @@ app.post(
 
 
       addLog(
-        "Current TOTP generated successfully.",
+        "Current 6-digit TOTP generated.",
         "SUCCESS"
       );
 
 
-      // ------------------------------------------
+      // ----------------------------------------------
       // SMART API
-      // ------------------------------------------
+      // ----------------------------------------------
 
       smartApi =
         new SmartAPI({
+
           api_key:
             String(
               apiKey
             ).trim()
+
         });
 
 
-      // ------------------------------------------
-      // LOGIN
-      // ------------------------------------------
-
       const loginResponse =
         await smartApi.generateSession(
+
           String(
             clientId
           ).trim(),
@@ -631,34 +718,17 @@ app.post(
         !loginResponse.data
       ) {
 
-        addLog(
+        throw new Error(
           loginResponse?.message ||
-          "Angel One login failed.",
-          "ERROR"
+          loginResponse?.errorcode ||
+          "Angel One login failed."
         );
-
-
-        return res
-          .status(401)
-          .json({
-
-            success: false,
-
-            message:
-              loginResponse?.message ||
-              loginResponse?.errorcode ||
-              "Angel One login failed."
-          });
       }
 
 
       sessionData =
         loginResponse.data;
 
-
-      // ------------------------------------------
-      // FEED TOKEN
-      // ------------------------------------------
 
       let feedToken =
         sessionData.feedToken;
@@ -669,11 +739,8 @@ app.post(
         try {
 
           feedToken =
-            smartApi.getfeedToken();
-
-          feedToken =
             await Promise.resolve(
-              feedToken
+              smartApi.getfeedToken()
             );
 
         } catch (error) {
@@ -696,27 +763,16 @@ app.post(
       );
 
 
-      // ------------------------------------------
-      // MASTER
-      // ------------------------------------------
+      // ----------------------------------------------
+      // BUILD SYMBOL UNIVERSE
+      // ----------------------------------------------
 
       await buildUniverse();
 
 
-      // ------------------------------------------
-      // RESET INDEX TOGGLES
-      // ------------------------------------------
-
-      indexState.nifty =
-        false;
-
-      indexState.sensex =
-        false;
-
-
-      // ------------------------------------------
-      // WEBSOCKET
-      // ------------------------------------------
+      // ----------------------------------------------
+      // START WS
+      // ----------------------------------------------
 
       await startWebSocket({
 
@@ -734,19 +790,16 @@ app.post(
           String(
             clientId
           ).trim()
+
       });
 
 
-      // ------------------------------------------
+      // ----------------------------------------------
       // FIRST OI LOAD
-      // ------------------------------------------
+      // ----------------------------------------------
 
       await refreshOI();
 
-
-      // ------------------------------------------
-      // REPEATED OI REFRESH
-      // ------------------------------------------
 
       if (oiRefreshTimer) {
 
@@ -756,20 +809,24 @@ app.post(
       }
 
 
+      // Both gainers and losers
+      // refresh in SAME Promise.all cycle.
+
       oiRefreshTimer =
         setInterval(
-          () => {
+          async () => {
 
-            refreshOI()
-              .catch(
-                error => {
+            try {
 
-                  addLog(
-                    `OI refresh error: ${error.message}`,
-                    "ERROR"
-                  );
-                }
+              await refreshOI();
+
+            } catch (error) {
+
+              addLog(
+                `OI refresh error: ${error.message}`,
+                "ERROR"
               );
+            }
 
           },
           5000
@@ -796,13 +853,14 @@ app.post(
 
         websocket:
           websocketReady
+
       });
 
 
     } catch (error) {
 
       addLog(
-        `Login error: ${error.message}`,
+        `Login failed: ${error.message}`,
         "ERROR"
       );
 
@@ -814,17 +872,17 @@ app.post(
           success: false,
 
           message:
-            error?.message ||
-            "Login failed."
+            error.message ||
+            "Angel One login failed."
         });
     }
   }
 );
 
 
-// ======================================================
-// START WEBSOCKET
-// ======================================================
+// =====================================================
+// WEBSOCKET
+// =====================================================
 
 async function startWebSocket(
   credentials
@@ -844,7 +902,7 @@ async function startWebSocket(
   ) {
 
     throw new Error(
-      "JWT token or feed token missing."
+      "JWT token ya Feed Token missing hai."
     );
   }
 
@@ -881,6 +939,7 @@ async function startWebSocket(
 
       feedtype:
         feedToken
+
     });
 
 
@@ -890,11 +949,12 @@ async function startWebSocket(
       reject
     ) => {
 
-      let settled =
+      let finished =
         false;
 
 
-      webSocket.connect()
+      webSocket
+        .connect()
         .then(
           () => {
 
@@ -945,7 +1005,7 @@ async function startWebSocket(
 
 
                 addLog(
-                  "SmartAPI WebSocket closed.",
+                  "WebSocket closed.",
                   "WARN"
                 );
 
@@ -958,20 +1018,21 @@ async function startWebSocket(
             );
 
 
-            // --------------------------------------
+            // ----------------------------------------
             // SUBSCRIBE F&O CASH STOCKS
-            // --------------------------------------
+            // ----------------------------------------
 
-            subscribeFnoCash();
+            subscribeCashStocks();
 
 
-            if (!settled) {
+            if (!finished) {
 
-              settled =
+              finished =
                 true;
 
               resolve();
             }
+
           }
         )
         .catch(
@@ -987,9 +1048,9 @@ async function startWebSocket(
             );
 
 
-            if (!settled) {
+            if (!finished) {
 
-              settled =
+              finished =
                 true;
 
               reject(error);
@@ -1001,11 +1062,11 @@ async function startWebSocket(
 }
 
 
-// ======================================================
-// SUBSCRIBE F&O CASH STOCKS
-// ======================================================
+// =====================================================
+// SUBSCRIBE CASH STOCKS
+// =====================================================
 
-function subscribeFnoCash() {
+function subscribeCashStocks() {
 
   if (
     !webSocket ||
@@ -1022,8 +1083,9 @@ function subscribeFnoCash() {
     );
 
 
-  // SmartAPI session quota is 1000.
-  // Keep requests comfortably below that.
+  // Quote mode gives live price
+  // and quote information.
+
   const chunkSize =
     100;
 
@@ -1041,114 +1103,37 @@ function subscribeFnoCash() {
       );
 
 
-    try {
+    webSocket.fetchData({
 
-      webSocket.fetchData({
+      correlationID:
+        `cash-${i}`,
 
-        correlationID:
-          `fno${Math.floor(i / chunkSize)}`,
+      action:
+        1,
 
-        action: 1,
+      mode:
+        2,
 
-        mode: 2,
+      exchangeType:
+        1,
 
-        exchangeType: 1,
+      tokens:
+        chunk
 
-        tokens: chunk
-
-      });
-
-    } catch (error) {
-
-      addLog(
-        `F&O cash subscription error: ${error.message}`,
-        "ERROR"
-      );
-    }
+    });
   }
 
 
   addLog(
-    `Subscribed to ${tokens.length} F&O cash stocks for live Quote ticks.`,
+    `Subscribed ${tokens.length} F&O cash stocks for live ticks.`,
     "SUCCESS"
   );
 }
 
 
-// ======================================================
-// INDEX SUBSCRIBE / UNSUBSCRIBE
-// ======================================================
-
-function changeIndexSubscription(
-  indexName,
-  enabled
-) {
-
-  if (
-    !webSocket ||
-    !websocketReady
-  ) {
-
-    throw new Error(
-      "WebSocket is not connected."
-    );
-  }
-
-
-  const item =
-    indexData[indexName];
-
-
-  if (!item) {
-
-    throw new Error(
-      "Invalid index."
-    );
-  }
-
-
-  webSocket.fetchData({
-
-    correlationID:
-      `${indexName}01`,
-
-    action:
-      enabled ? 1 : 0,
-
-    mode: 1,
-
-    exchangeType:
-      item.exchangeType,
-
-    tokens: [
-      item.token
-    ]
-
-  });
-
-
-  indexState[indexName] =
-    enabled;
-
-
-  addLog(
-    `${item.name} live tick ${enabled ? "ON" : "OFF"}.`,
-    enabled
-      ? "SUCCESS"
-      : "INFO"
-  );
-
-
-  broadcast(
-    "indexState",
-    indexState
-  );
-}
-
-
-// ======================================================
-// INDEX TOGGLE API
-// ======================================================
+// =====================================================
+// INDEX TOGGLE
+// =====================================================
 
 app.post(
   "/api/index-toggle",
@@ -1182,9 +1167,58 @@ app.post(
       }
 
 
-      changeIndexSubscription(
-        index,
-        Boolean(enabled)
+      if (
+        !webSocket ||
+        !websocketReady
+      ) {
+
+        throw new Error(
+          "Live WebSocket is not connected."
+        );
+      }
+
+
+      const item =
+        indexData[index];
+
+
+      webSocket.fetchData({
+
+        correlationID:
+          `${index}-toggle`,
+
+        action:
+          enabled ? 1 : 0,
+
+        mode:
+          1,
+
+        exchangeType:
+          item.exchangeType,
+
+        tokens:
+          [
+            item.token
+          ]
+
+      });
+
+
+      indexState[index] =
+        Boolean(enabled);
+
+
+      addLog(
+        `${item.name} tick-by-tick ${enabled ? "ON" : "OFF"}.`,
+        enabled
+          ? "SUCCESS"
+          : "INFO"
+      );
+
+
+      broadcast(
+        "indexState",
+        indexState
       );
 
 
@@ -1192,16 +1226,14 @@ app.post(
 
         success: true,
 
-        indexState,
-
-        indexData
+        indexState
       });
 
 
     } catch (error) {
 
       addLog(
-        `Index toggle error: ${error.message}`,
+        `Index toggle failed: ${error.message}`,
         "ERROR"
       );
 
@@ -1220,9 +1252,9 @@ app.post(
 );
 
 
-// ======================================================
-// HANDLE LIVE TICKS
-// ======================================================
+// =====================================================
+// HANDLE TICK
+// =====================================================
 
 function handleTick(
   tick
@@ -1251,9 +1283,9 @@ function handleTick(
     }
 
 
-    // ------------------------------------------
+    // -----------------------------------------------
     // NIFTY
-    // ------------------------------------------
+    // -----------------------------------------------
 
     if (
       token ===
@@ -1269,9 +1301,9 @@ function handleTick(
     }
 
 
-    // ------------------------------------------
+    // -----------------------------------------------
     // SENSEX
-    // ------------------------------------------
+    // -----------------------------------------------
 
     if (
       token ===
@@ -1287,9 +1319,9 @@ function handleTick(
     }
 
 
-    // ------------------------------------------
+    // -----------------------------------------------
     // CASH STOCK
-    // ------------------------------------------
+    // -----------------------------------------------
 
     const stock =
       cashByToken.get(
@@ -1304,7 +1336,7 @@ function handleTick(
 
 
     const data =
-      parseQuoteTick(
+      parseTick(
         tick
       );
 
@@ -1341,54 +1373,29 @@ function handleTick(
     };
 
 
-    // ------------------------------------------
-    // Only send ticks for stocks currently
-    // visible in OI tables.
-    // ------------------------------------------
-
-    const visible =
-      new Set([
-
-        ...oiGainers.map(
-          x => x.symbol
-        ),
-
-        ...oiLosers.map(
-          x => x.symbol
-        )
-
-      ]);
-
-
-    if (
-      visible.has(
+    // Send every tick to browser.
+    broadcast(
+      "stockTick",
+      priceData[
         stock.symbol
-      )
-    ) {
-
-      broadcast(
-        "stockTick",
-        priceData[
-          stock.symbol
-        ]
-      );
-    }
+      ]
+    );
 
   } catch (error) {
 
     addLog(
-      `Tick processing error: ${error.message}`,
+      `Tick error: ${error.message}`,
       "ERROR"
     );
   }
 }
 
 
-// ======================================================
-// PARSE QUOTE TICK
-// ======================================================
+// =====================================================
+// PARSE TICK
+// =====================================================
 
-function parseQuoteTick(
+function parseTick(
   tick
 ) {
 
@@ -1411,8 +1418,6 @@ function parseQuoteTick(
     );
 
 
-  // SmartAPI binary parser returns price values
-  // in paise for market-feed packets.
   if (
     price > 0
   ) {
@@ -1423,8 +1428,7 @@ function parseQuoteTick(
 
 
   if (
-    close > 0 &&
-    close > 100000
+    close > 0
   ) {
 
     close =
@@ -1432,9 +1436,11 @@ function parseQuoteTick(
   }
 
 
-  let change = null;
+  let change =
+    null;
 
-  let changePercent = null;
+  let changePercent =
+    null;
 
 
   if (
@@ -1474,42 +1480,44 @@ function parseQuoteTick(
 }
 
 
-// ======================================================
-// UPDATE INDEX
-// ======================================================
+// =====================================================
+// INDEX UPDATE
+// =====================================================
 
 function updateIndex(
-  indexName,
+  name,
   tick
 ) {
 
-  const parsed =
-    parseQuoteTick(
+  const data =
+    parseTick(
       tick
     );
 
 
   const item =
-    indexData[
-      indexName
-    ];
+    indexData[name];
+
+
+  if (
+    data.price === null
+  ) {
+
+    return;
+  }
 
 
   item.price =
-    parsed.price;
+    data.price;
 
-
-  item.previousClose =
-    parsed.close;
-
+  item.close =
+    data.close;
 
   item.change =
-    parsed.change;
-
+    data.change;
 
   item.changePercent =
-    parsed.changePercent;
-
+    data.changePercent;
 
   item.timestamp =
     Date.now();
@@ -1518,19 +1526,21 @@ function updateIndex(
   broadcast(
     "indexTick",
     {
+
       index:
-        indexName,
+        name,
 
       data:
         item
+
     }
   );
 }
 
 
-// ======================================================
-// REFRESH OI
-// ======================================================
+// =====================================================
+// OI REFRESH
+// =====================================================
 
 async function refreshOI() {
 
@@ -1540,124 +1550,130 @@ async function refreshOI() {
   }
 
 
-  try {
+  // VERY IMPORTANT:
+  // Gainers + Losers are requested together.
 
-    const [
-      gainersResponse,
-      losersResponse
-    ] =
-      await Promise.all([
+  const [
+    gainersResponse,
+    losersResponse
+  ] =
+    await Promise.all([
 
-        smartApi.gainersLosers({
+      smartApi.gainersLosers({
 
-          datatype:
-            "PercOIGainers",
+        datatype:
+          "PercOIGainers",
 
-          expirytype:
-            "NEAR"
+        expirytype:
+          "NEAR"
 
-        }),
+      }),
 
-        smartApi.gainersLosers({
+      smartApi.gainersLosers({
 
-          datatype:
-            "PercOILosers",
+        datatype:
+          "PercOILosers",
 
-          expirytype:
-            "NEAR"
-        })
+        expirytype:
+          "NEAR"
 
-      ]);
+      })
 
-
-    if (
-      !gainersResponse?.status
-    ) {
-
-      throw new Error(
-        gainersResponse?.message ||
-        "OI Gainers API failed."
-      );
-    }
+    ]);
 
 
-    if (
-      !losersResponse?.status
-    ) {
+  if (
+    !gainersResponse?.status
+  ) {
 
-      throw new Error(
-        losersResponse?.message ||
-        "OI Losers API failed."
-      );
-    }
-
-
-    oiGainers =
-      convertOIRows(
-        gainersResponse.data
-      )
-        .sort(
-          (a, b) =>
-            b.oiPercent -
-            a.oiPercent
-        )
-        .slice(
-          0,
-          10
-        );
-
-
-    oiLosers =
-      convertOIRows(
-        losersResponse.data
-      )
-        .sort(
-          (a, b) =>
-            a.oiPercent -
-            b.oiPercent
-        )
-        .slice(
-          0,
-          10
-        );
-
-
-    broadcast(
-      "oi",
-      {
-        gainers:
-          oiGainers,
-
-        losers:
-          oiLosers
-      }
+    throw new Error(
+      gainersResponse?.message ||
+      "OI Gainers API failed."
     );
-
-
-    addLog(
-      `OI refreshed: ${oiGainers.length} gainers / ${oiLosers.length} losers.`,
-      "SUCCESS"
-    );
-
-
-  } catch (error) {
-
-    addLog(
-      `OI refresh failed: ${error.message}`,
-      "ERROR"
-    );
-
-
-    throw error;
   }
+
+
+  if (
+    !losersResponse?.status
+  ) {
+
+    throw new Error(
+      losersResponse?.message ||
+      "OI Losers API failed."
+    );
+  }
+
+
+  const gainers =
+    convertOI(
+      gainersResponse.data
+    );
+
+
+  const losers =
+    convertOI(
+      losersResponse.data
+    );
+
+
+  // ----------------------------------------------
+  // STRICT OI CHANGE SORTING
+  // ----------------------------------------------
+
+  gainers.sort(
+    (a, b) =>
+      b.oiPercent -
+      a.oiPercent
+  );
+
+
+  losers.sort(
+    (a, b) =>
+      a.oiPercent -
+      b.oiPercent
+  );
+
+
+  oiGainers =
+    gainers.slice(
+      0,
+      10
+    );
+
+
+  oiLosers =
+    losers.slice(
+      0,
+      10
+    );
+
+
+  broadcast(
+    "oi",
+    {
+
+      gainers:
+        oiGainers,
+
+      losers:
+        oiLosers
+
+    }
+  );
+
+
+  addLog(
+    `OI refreshed together: ${oiGainers.length} gainers / ${oiLosers.length} losers.`,
+    "SUCCESS"
+  );
 }
 
 
-// ======================================================
-// CONVERT OI RESPONSE
-// ======================================================
+// =====================================================
+// CONVERT OI
+// =====================================================
 
-function convertOIRows(
+function convertOI(
   rows
 ) {
 
@@ -1673,14 +1689,9 @@ function convertOIRows(
     .map(
       item => {
 
-        const tradingSymbol =
-          item.tradingSymbol ||
-          "";
-
-
         const symbol =
-          futureToCashSymbol(
-            tradingSymbol
+          getCashSymbolFromOI(
+            item
           );
 
 
@@ -1700,6 +1711,7 @@ function convertOIRows(
 
           symbol,
 
+          // THIS is the sorting value
           oiPercent:
             Number(
               item.percentChange ||
@@ -1730,7 +1742,7 @@ function convertOIRows(
             live?.changePercent ??
             null,
 
-          updatedAt:
+          timestamp:
             Date.now()
         };
       }
@@ -1741,9 +1753,9 @@ function convertOIRows(
 }
 
 
-// ======================================================
+// =====================================================
 // STATUS
-// ======================================================
+// =====================================================
 
 function getStatus() {
 
@@ -1769,10 +1781,8 @@ function getStatus() {
     indexes:
       indexState,
 
-    indexData,
+    indexData
 
-    lastUpdate:
-      Date.now()
   };
 }
 
@@ -1791,9 +1801,9 @@ app.get(
 );
 
 
-// ======================================================
-// INITIAL DATA
-// ======================================================
+// =====================================================
+// DATA
+// =====================================================
 
 app.get(
   "/api/data",
@@ -1827,14 +1837,15 @@ app.get(
       oiGainers,
 
       oiLosers
+
     });
   }
 );
 
 
-// ======================================================
-// ACTIVITY LOG API
-// ======================================================
+// =====================================================
+// LOGS
+// =====================================================
 
 app.get(
   "/api/logs",
@@ -1845,18 +1856,20 @@ app.get(
 
     res.json({
 
-      success: true,
+      success:
+        true,
 
       logs:
         activityLogs
+
     });
   }
 );
 
 
-// ======================================================
-// REALTIME STREAM
-// ======================================================
+// =====================================================
+// SSE STREAM
+// =====================================================
 
 app.get(
   "/api/stream",
@@ -1884,14 +1897,18 @@ app.get(
     res.flushHeaders();
 
 
-    streamClients.add(
+    clients.add(
       res
     );
 
 
-    // Initial state
     res.write(
       `event: status\ndata: ${JSON.stringify(getStatus())}\n\n`
+    );
+
+
+    res.write(
+      `event: indexState\ndata: ${JSON.stringify(indexState)}\n\n`
     );
 
 
@@ -1912,7 +1929,7 @@ app.get(
       "close",
       () => {
 
-        streamClients.delete(
+        clients.delete(
           res
         );
       }
@@ -1921,9 +1938,9 @@ app.get(
 );
 
 
-// ======================================================
+// =====================================================
 // LOGOUT
-// ======================================================
+// =====================================================
 
 app.post(
   "/api/logout",
@@ -1955,22 +1972,28 @@ app.post(
       }
 
 
-      webSocket =
-        null;
-
-      websocketReady =
-        false;
-
       smartApi =
         null;
 
       sessionData =
         null;
 
+      webSocket =
+        null;
+
+      websocketReady =
+        false;
+
       fnoCashUniverse =
         [];
 
       cashByToken =
+        new Map();
+
+      futureTokenToCash =
+        new Map();
+
+      futureSymbolToCash =
         new Map();
 
       priceData =
@@ -1991,30 +2014,34 @@ app.post(
 
 
       addLog(
-        "Logged out from Angel One."
+        "Broker logged out.",
+        "INFO"
       );
 
 
       res.json({
 
-        success: true
-      });
+        success:
+          true
 
+      });
 
     } catch (error) {
 
       res.json({
 
-        success: true
+        success:
+          true
+
       });
     }
   }
 );
 
 
-// ======================================================
+// =====================================================
 // FRONTEND
-// ======================================================
+// =====================================================
 
 app.get(
   "/{*splat}",
@@ -2031,9 +2058,9 @@ app.get(
 );
 
 
-// ======================================================
-// START
-// ======================================================
+// =====================================================
+// SERVER
+// =====================================================
 
 app.listen(
   PORT,
