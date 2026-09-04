@@ -1,7 +1,7 @@
 {
   "name": "fno-live-scanner",
-  "version": "1.0.0",
-  "description": "Real-time F&O OI and Volume Scanner",
+  "version": "2.0.0",
+  "description": "Angel One F&O OI Live Scanner",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -9,8 +9,6 @@
   "dependencies": {
     "express": "^5.1.0",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.1",
-    "ws": "^8.18.3",
     "smartapi-javascript": "^1.0.23",
     "otplib": "^13.5.0"
   }
