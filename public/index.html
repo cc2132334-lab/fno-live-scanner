@@ -1,2234 +1,353 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width,initial-scale=1.0"
->
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>F&O Live Scanner</title>
-
-
 <style>
-
-*{
-  box-sizing:border-box;
-}
-
-
-body{
-
-  margin:0;
-
-  background:#07100c;
-
-  color:#edf7f0;
-
-  font-family:
-    Arial,
-    sans-serif;
-}
-
-
-.container{
-
-  max-width:1200px;
-
-  margin:auto;
-
-  padding:15px;
-}
-
-
-/* ================================================
-HEADER
-================================================ */
-
-.header{
-
-  display:flex;
-
-  justify-content:space-between;
-
-  align-items:center;
-
-  margin-bottom:18px;
-}
-
-
-.brand{
-
-  display:flex;
-
-  align-items:center;
-
-  gap:12px;
-}
-
-
-.logo{
-
-  width:52px;
-
-  height:52px;
-
-  border-radius:16px;
-
-  background:#16c784;
-
-  color:#062117;
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:center;
-
-  font-size:27px;
-
-  font-weight:900;
-}
-
-
-.title{
-
-  font-size:22px;
-
-  font-weight:900;
-}
-
-
-.subtitle{
-
-  margin-top:3px;
-
-  color:#718279;
-
-  font-size:11px;
-}
-
-
-.connection{
-
-  padding:9px 12px;
-
-  border-radius:12px;
-
-  background:#10231a;
-
-  border:1px solid #20402e;
-
-  color:#16c784;
-
-  font-size:11px;
-
-  font-weight:bold;
-}
-
-
-/* ================================================
-LOGIN
-================================================ */
-
-.login{
-
-  max-width:500px;
-
-  margin:55px auto;
-
-  background:#101b16;
-
-  border:1px solid #21352a;
-
-  border-radius:22px;
-
-  padding:25px;
-}
-
-
-.login h2{
-
-  margin:0;
-
-  font-size:22px;
-}
-
-
-.login p{
-
-  color:#788980;
-
-  font-size:12px;
-
-  line-height:1.5;
-
-  margin:
-    6px 0 20px;
-}
-
-
-label{
-
-  display:block;
-
-  color:#b9c8c0;
-
-  font-size:12px;
-
-  font-weight:bold;
-
-  margin:
-    13px 0 7px;
-}
-
-
-input{
-
-  width:100%;
-
-  padding:14px;
-
-  background:#08110d;
-
-  color:white;
-
-  border:1px solid #294036;
-
-  border-radius:12px;
-
-  outline:none;
-
-  font-size:14px;
-}
-
-
-input:focus{
-
-  border-color:#16c784;
-
-  box-shadow:
-    0 0 0 3px
-    rgba(22,199,132,.12);
-}
-
-
-.connect{
-
-  width:100%;
-
-  margin-top:20px;
-
-  padding:14px;
-
-  border:0;
-
-  border-radius:13px;
-
-  background:#16c784;
-
-  color:#062117;
-
-  font-weight:900;
-
-  font-size:15px;
-}
-
-
-.error{
-
-  display:none;
-
-  margin-top:13px;
-
-  padding:12px;
-
-  border-radius:10px;
-
-  background:#3b181a;
-
-  color:#ff969d;
-
-  font-size:12px;
-}
-
-
-/* ================================================
-DASHBOARD
-================================================ */
-
-#dashboard{
-
-  display:none;
-}
-
-
-/* ================================================
-INDEX TABS
-================================================ */
-
-.index-panel{
-
-  background:#101b16;
-
-  border:1px solid #21352a;
-
-  border-radius:20px;
-
-  overflow:hidden;
-
-  margin-bottom:16px;
-}
-
-
-.tabs{
-
-  display:flex;
-
-  border-bottom:1px solid #21352a;
-
-  overflow-x:auto;
-}
-
-
-.tab{
-
-  flex:1;
-
-  min-width:140px;
-
-  padding:14px;
-
-  background:transparent;
-
-  color:#718279;
-
-  border:0;
-
-  font-weight:900;
-
-  font-size:14px;
-
-  cursor:pointer;
-
-  position:relative;
-}
-
-
-.tab.active{
-
-  color:#16c784;
-
-  background:#0c1711;
-}
-
-
-.tab.active::after{
-
-  content:"";
-
-  position:absolute;
-
-  left:15%;
-
-  right:15%;
-
-  bottom:0;
-
-  height:2px;
-
-  background:#16c784;
-}
-
-
-.index-content{
-
-  padding:18px;
-}
-
-
-.index-row{
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:space-between;
-
-  gap:15px;
-}
-
-
-.index-name{
-
-  font-size:13px;
-
-  font-weight:900;
-}
-
-
-.live-badge{
-
-  font-size:9px;
-
-  color:#718279;
-
-  margin-top:4px;
-}
-
-
-.index-price{
-
-  font-size:30px;
-
-  font-weight:900;
-
-  margin-top:13px;
-}
-
-
-.index-change{
-
-  margin-top:5px;
-
-  font-size:12px;
-
-  font-weight:bold;
-}
-
-
-.toggle{
-
-  width:49px;
-
-  height:28px;
-
-  border-radius:30px;
-
-  background:#26352d;
-
-  position:relative;
-
-  cursor:pointer;
-
-  flex-shrink:0;
-}
-
-
-.toggle span{
-
-  width:22px;
-
-  height:22px;
-
-  border-radius:50%;
-
-  position:absolute;
-
-  top:3px;
-
-  left:3px;
-
-  background:#718279;
-
-  transition:.2s;
-}
-
-
-.toggle.on{
-
-  background:#16c784;
-}
-
-
-.toggle.on span{
-
-  transform:
-    translateX(21px);
-
-  background:#062117;
-}
-
-
-.green{
-
-  color:#16c784;
-}
-
-
-.red{
-
-  color:#ff5d66;
-}
-
-
-.gray{
-
-  color:#718279;
-}
-
-
-/* ================================================
-OI GRID
-================================================ */
-
-.oi-grid{
-
-  display:grid;
-
-  grid-template-columns:
-    repeat(2,1fr);
-
-  gap:16px;
-}
-
-
-.card{
-
-  background:#101b16;
-
-  border:1px solid #21352a;
-
-  border-radius:20px;
-
-  overflow:hidden;
-}
-
-
-.card-head{
-
-  padding:17px;
-
-  border-bottom:1px solid #21352a;
-}
-
-
-.card-title{
-
-  font-size:17px;
-
-  font-weight:900;
-}
-
-
-.card-sub{
-
-  color:#718279;
-
-  font-size:10px;
-
-  margin-top:4px;
-}
-
-
-.rows{
-
-  padding:
-    0 17px;
-}
-
-
-.row{
-
-  display:grid;
-
-  grid-template-columns:
-    1fr auto;
-
-  gap:10px;
-
-  padding:13px 0;
-
-  border-bottom:1px solid #1a2921;
-}
-
-
-.row:last-child{
-
-  border-bottom:0;
-}
-
-
-.symbol{
-
-  font-size:14px;
-
-  font-weight:900;
-}
-
-
-.price-line{
-
-  margin-top:4px;
-
-  font-size:11px;
-
-  color:#718279;
-}
-
-
-.oi-box{
-
-  text-align:right;
-}
-
-
-.oi-value{
-
-  font-size:13px;
-
-  font-weight:900;
-}
-
-
-.oi-label{
-
-  margin-top:3px;
-
-  color:#718279;
-
-  font-size:9px;
-}
-
-
-.empty{
-
-  min-height:220px;
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:center;
-
-  color:#718279;
-
-  font-size:12px;
-
-  text-align:center;
-}
-
-
-/* ================================================
-ACTIVITY LOG
-================================================ */
-
-.log-card{
-
-  margin-top:16px;
-
-  background:#050a07;
-
-  border:1px solid #21352a;
-
-  border-radius:20px;
-
-  overflow:hidden;
-}
-
-
-.log-head{
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:space-between;
-
-  padding:15px 17px;
-
-  border-bottom:1px solid #21352a;
-}
-
-
-.log-title{
-
-  font-size:16px;
-
-  font-weight:900;
-}
-
-
-.log-live{
-
-  color:#16c784;
-
-  font-size:10px;
-
-  font-weight:900;
-}
-
-
-.logs{
-
-  height:230px;
-
-  overflow-y:auto;
-
-  padding:10px 14px;
-
-  font-family:
-    monospace;
-
-  font-size:10px;
-}
-
-
-.log{
-
-  padding:6px 0;
-
-  border-bottom:1px solid #0e1914;
-
-  line-height:1.4;
-}
-
-
-.log-time{
-
-  color:#526159;
-
-}
-
-
-.log-info{
-
-  color:#a9b8af;
-}
-
-
-.log-success{
-
-  color:#16c784;
-}
-
-
-.log-error{
-
-  color:#ff646d;
-}
-
-
-.log-warn{
-
-  color:#f4c452;
-}
-
-
-/* ================================================
-MOBILE
-================================================ */
-
-@media(max-width:750px){
-
-  .container{
-
-    padding:10px;
-  }
-
-
-  .connection{
-
-    display:none;
-  }
-
-
-  .title{
-
-    font-size:19px;
-  }
-
-
-  .oi-grid{
-
-    grid-template-columns:1fr;
-  }
-
-
-  .tab{
-
-    min-width:50%;
-
-    font-size:13px;
-  }
-
-
-  .index-price{
-
-    font-size:28px;
-  }
-
-}
-
+*{box-sizing:border-box}body{margin:0;background:#07100c;color:#edf7f0;font-family:Arial,sans-serif}.container{max-width:1200px;margin:auto;padding:14px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.brand{display:flex;align-items:center;gap:11px}.logo{width:50px;height:50px;border-radius:15px;background:#16c784;color:#062117;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900}.title{font-size:21px;font-weight:900}.subtitle{margin-top:3px;color:#718279;font-size:11px}.connection{padding:8px 11px;border-radius:11px;background:#10231a;border:1px solid #20402e;color:#16c784;font-size:10px;font-weight:bold}.login{max-width:500px;margin:50px auto;background:#101b16;border:1px solid #21352a;border-radius:20px;padding:23px}.login h2{margin:0;font-size:21px}.login p{color:#788980;font-size:12px;line-height:1.5;margin:6px 0 18px}label{display:block;color:#b9c8c0;font-size:11px;font-weight:bold;margin:12px 0 6px}input{width:100%;padding:13px;background:#08110d;color:white;border:1px solid #294036;border-radius:11px;outline:0;font-size:13px}input:focus{border-color:#16c784}.connect{width:100%;margin-top:18px;padding:13px;border:0;border-radius:12px;background:#16c784;color:#062117;font-weight:900;font-size:14px}.error{display:none;margin-top:12px;padding:11px;border-radius:10px;background:#3b181a;color:#ff969d;font-size:11px}#dashboard{display:none}.index-panel{background:#101b16;border:1px solid #21352a;border-radius:19px;overflow:hidden;margin-bottom:15px}.tabs{display:flex;border-bottom:1px solid #21352a}.tab{flex:1;padding:13px;background:transparent;color:#718279;border:0;font-weight:900;font-size:13px;position:relative}.tab.active{color:#16c784;background:#0c1711}.tab.active:after{content:"";position:absolute;left:15%;right:15%;bottom:0;height:2px;background:#16c784}.index-content{padding:17px}.index-row{display:flex;justify-content:space-between;align-items:center}.index-name{font-size:13px;font-weight:900}.live-badge{font-size:9px;color:#718279;margin-top:4px}.toggle{width:48px;height:27px;border-radius:30px;background:#26352d;position:relative;cursor:pointer}.toggle span{width:21px;height:21px;border-radius:50%;position:absolute;top:3px;left:3px;background:#718279;transition:.2s}.toggle.on{background:#16c784}.toggle.on span{transform:translateX(21px);background:#062117}.index-price{font-size:29px;font-weight:900;margin-top:13px}.index-change{margin-top:4px;font-size:12px;font-weight:bold}.green{color:#16c784}.red{color:#ff5d66}.gray{color:#718279}.oi-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.card{background:#101b16;border:1px solid #21352a;border-radius:19px;overflow:hidden}.card-head{padding:16px;border-bottom:1px solid #21352a}.card-title{font-size:16px;font-weight:900}.card-sub{color:#718279;font-size:10px;margin-top:4px}.rows{padding:0 16px}.row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px 0;border-bottom:1px solid #1a2921}.row:last-child{border-bottom:0}.symbol{font-size:14px;font-weight:900}.price-line{margin-top:4px;font-size:11px;color:#718279}.oi-box{text-align:right}.oi-value{font-size:13px;font-weight:900}.oi-label{margin-top:3px;color:#718279;font-size:9px}.empty{min-height:200px;display:flex;align-items:center;justify-content:center;color:#718279;font-size:12px}.log-card{margin-top:15px;background:#050a07;border:1px solid #21352a;border-radius:19px;overflow:hidden}.log-head{display:flex;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #21352a}.log-title{font-size:15px;font-weight:900}.log-live{color:#16c784;font-size:9px;font-weight:900}.logs{height:210px;overflow-y:auto;padding:9px 13px;font-family:monospace;font-size:10px}.log{padding:5px 0;border-bottom:1px solid #0e1914;line-height:1.4}.log-time{color:#526159}.log-info{color:#a9b8af}.log-success{color:#16c784}.log-error{color:#ff646d}.log-warn{color:#f4c452}@media(max-width:750px){.container{padding:10px}.connection{display:none}.title{font-size:18px}.oi-grid{grid-template-columns:1fr}.tab{min-width:50%}.index-price{font-size:27px}}
 </style>
-
 </head>
-
-
 <body>
-
-
 <div class="container">
-
-
-<!-- ==============================================
-HEADER
-================================================ -->
-
 <div class="header">
-
-  <div class="brand">
-
-    <div class="logo">
-      ₹
-    </div>
-
-    <div>
-
-      <div class="title">
-        F&O Live Scanner
-      </div>
-
-      <div class="subtitle">
-        Angel One • Tick-by-Tick
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <div
-    class="connection"
-    id="connection"
-  >
-    ● Broker Disconnected
-  </div>
-
+<div class="brand">
+<div class="logo">₹</div>
+<div><div class="title">F&O Live Scanner</div><div class="subtitle">Angel One • Tick-by-Tick</div></div>
+</div>
+<div class="connection" id="connection">● Broker Disconnected</div>
 </div>
 
-
-<!-- ==============================================
-LOGIN
-================================================ -->
-
-<div
-  class="login"
-  id="login"
->
-
-  <h2>
-    Connect Broker
-  </h2>
-
-  <p>
-    Long alphanumeric TOTP Secret enter karein.
-    Current 6-digit TOTP automatically generate hoga.
-  </p>
-
-
-  <label>
-    API Key
-  </label>
-
-  <input
-    id="apiKey"
-    type="password"
-    autocomplete="off"
-    placeholder="Angel One API Key"
-  >
-
-
-  <label>
-    Client ID
-  </label>
-
-  <input
-    id="clientId"
-    type="text"
-    autocomplete="off"
-    placeholder="Client ID"
-  >
-
-
-  <label>
-    MPIN
-  </label>
-
-  <input
-    id="mpin"
-    type="password"
-    inputmode="numeric"
-    autocomplete="off"
-    placeholder="MPIN"
-  >
-
-
-  <label>
-    Long TOTP Secret
-  </label>
-
-  <input
-    id="totpSecret"
-    type="password"
-    autocomplete="off"
-    placeholder="Letters + numbers wala Secret"
-  >
-
-
-  <button
-    class="connect"
-    id="connectBtn"
-    onclick="loginBroker()"
-  >
-    🔐 Connect Angel One
-  </button>
-
-
-  <div
-    class="error"
-    id="errorBox"
-  ></div>
-
+<div class="login" id="login">
+<h2>Connect Broker</h2>
+<p>Angel One credentials enter karein. Long alphanumeric TOTP Secret se current OTP automatically generate hoga.</p>
+<label>API Key</label>
+<input id="apiKey" type="password" autocomplete="off" placeholder="Angel One API Key">
+<label>Client ID</label>
+<input id="clientId" type="text" autocomplete="off" placeholder="Client ID">
+<label>MPIN</label>
+<input id="mpin" type="password" inputmode="numeric" autocomplete="off" placeholder="MPIN">
+<label>Long TOTP Secret</label>
+<input id="totpSecret" type="password" autocomplete="off" placeholder="Letters + numbers wala Secret">
+<button class="connect" id="connectBtn" onclick="loginBroker()">🔐 Connect Angel One</button>
+<div class="error" id="errorBox"></div>
 </div>
 
-
-<!-- ==============================================
-DASHBOARD
-================================================ -->
-
-<div
-  id="dashboard"
->
-
-
-<!-- ==============================================
-NIFTY / SENSEX HORIZONTAL TABS
-================================================ -->
-
+<div id="dashboard">
 <div class="index-panel">
-
-
-  <div class="tabs">
-
-    <button
-      class="tab active"
-      id="niftyTab"
-      onclick="selectTab('nifty')"
-    >
-      NIFTY 50
-    </button>
-
-
-    <button
-      class="tab"
-      id="sensexTab"
-      onclick="selectTab('sensex')"
-    >
-      SENSEX
-    </button>
-
-  </div>
-
-
-  <div class="index-content">
-
-
-    <!-- NIFTY -->
-
-    <div
-      id="niftyContent"
-    >
-
-      <div class="index-row">
-
-        <div>
-
-          <div class="index-name">
-            NIFTY 50
-          </div>
-
-          <div
-            class="live-badge"
-            id="niftyLive"
-          >
-            ● Tick OFF
-          </div>
-
-        </div>
-
-
-        <div
-          class="toggle"
-          id="niftyToggle"
-          onclick="toggleIndex('nifty')"
-        >
-
-          <span></span>
-
-        </div>
-
-      </div>
-
-
-      <div
-        class="index-price"
-        id="niftyPrice"
-      >
-        —
-      </div>
-
-
-      <div
-        class="index-change gray"
-        id="niftyChange"
-      >
-        Live tick OFF
-      </div>
-
-    </div>
-
-
-    <!-- SENSEX -->
-
-    <div
-      id="sensexContent"
-      style="display:none;"
-    >
-
-      <div class="index-row">
-
-        <div>
-
-          <div class="index-name">
-            SENSEX
-          </div>
-
-          <div
-            class="live-badge"
-            id="sensexLive"
-          >
-            ● Tick OFF
-          </div>
-
-        </div>
-
-
-        <div
-          class="toggle"
-          id="sensexToggle"
-          onclick="toggleIndex('sensex')"
-        >
-
-          <span></span>
-
-        </div>
-
-      </div>
-
-
-      <div
-        class="index-price"
-        id="sensexPrice"
-      >
-        —
-      </div>
-
-
-      <div
-        class="index-change gray"
-        id="sensexChange"
-      >
-        Live tick OFF
-      </div>
-
-    </div>
-
-
-  </div>
-
+<div class="tabs">
+<button class="tab active" id="niftyTab" onclick="selectTab('nifty')">NIFTY 50</button>
+<button class="tab" id="sensexTab" onclick="selectTab('sensex')">SENSEX</button>
 </div>
 
+<div class="index-content">
+<div id="niftyContent">
+<div class="index-row">
+<div><div class="index-name">NIFTY 50</div><div class="live-badge" id="niftyLive">● Tick OFF</div></div>
+<div class="toggle" id="niftyToggle" onclick="toggleIndex('nifty')"><span></span></div>
+</div>
+<div class="index-price" id="niftyPrice">—</div>
+<div class="index-change gray" id="niftyChange">Live tick OFF</div>
+</div>
 
-<!-- ==============================================
-OI
-================================================ -->
+<div id="sensexContent" style="display:none">
+<div class="index-row">
+<div><div class="index-name">SENSEX</div><div class="live-badge" id="sensexLive">● Tick OFF</div></div>
+<div class="toggle" id="sensexToggle" onclick="toggleIndex('sensex')"><span></span></div>
+</div>
+<div class="index-price" id="sensexPrice">—</div>
+<div class="index-change gray" id="sensexChange">Live tick OFF</div>
+</div>
+</div>
+</div>
 
 <div class="oi-grid">
-
-
-  <!-- GAINERS -->
-
-  <div class="card">
-
-    <div class="card-head">
-
-      <div class="card-title">
-        📈 Top 10 OI Gainers
-      </div>
-
-      <div class="card-sub">
-        Sorted by OI Change %
-      </div>
-
-    </div>
-
-
-    <div
-      class="rows"
-      id="oiGainers"
-    >
-
-      <div class="empty">
-        Waiting for OI data...
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <!-- LOSERS -->
-
-  <div class="card">
-
-    <div class="card-head">
-
-      <div class="card-title">
-        📉 Top 10 OI Losers
-      </div>
-
-      <div class="card-sub">
-        Sorted by OI Change %
-      </div>
-
-    </div>
-
-
-    <div
-      class="rows"
-      id="oiLosers"
-    >
-
-      <div class="empty">
-        Waiting for OI data...
-      </div>
-
-    </div>
-
-  </div>
-
-
+<div class="card">
+<div class="card-head"><div class="card-title">📈 Top 10 OI Gainers</div><div class="card-sub">Sorted by OI Change % • Live Cash Price</div></div>
+<div class="rows" id="oiGainers"><div class="empty">Waiting for OI data...</div></div>
 </div>
 
-
-<!-- ==============================================
-ACTIVITY LOG
-================================================ -->
+<div class="card">
+<div class="card-head"><div class="card-title">📉 Top 10 OI Losers</div><div class="card-sub">Sorted by OI Change % • Live Cash Price</div></div>
+<div class="rows" id="oiLosers"><div class="empty">Waiting for OI data...</div></div>
+</div>
+</div>
 
 <div class="log-card">
-
-  <div class="log-head">
-
-    <div class="log-title">
-      Activity Log
-    </div>
-
-    <div
-      class="log-live"
-      id="logLive"
-    >
-      LIVE
-    </div>
-
-  </div>
-
-
-  <div
-    class="logs"
-    id="logs"
-  >
-
-    <div class="log">
-
-      <span class="log-info">
-        Waiting for broker connection...
-      </span>
-
-    </div>
-
-  </div>
-
+<div class="log-head"><div class="log-title">Activity Log</div><div class="log-live" id="logLive">LIVE</div></div>
+<div class="logs" id="logs"><div class="log"><span class="log-info">Waiting for broker connection...</span></div></div>
 </div>
-
-
 </div>
-
-
 </div>
-
 
 <script>
+let stream=null;
 
+function saveCache(){
+  try{
+    localStorage.setItem("fnoLastData",JSON.stringify({
+      indexes:window.lastIndexes||{},
+      indexState:window.lastIndexState||{},
+      gainers:window.lastGainers||[],
+      losers:window.lastLosers||[]
+    }));
+  }catch(e){}
+}
 
-// ====================================================
-// GLOBAL
-// ====================================================
-
-let stream = null;
-
-let selectedTab =
-  "nifty";
-
-
-// ====================================================
-// LOGIN
-// ====================================================
+function loadCache(){
+  try{
+    const data=JSON.parse(localStorage.getItem("fnoLastData")||"null");
+    if(!data)return;
+    window.lastIndexes=data.indexes||{};
+    window.lastIndexState=data.indexState||{};
+    window.lastGainers=data.gainers||[];
+    window.lastLosers=data.losers||[];
+    if(data.indexes){
+      if(data.indexes.nifty)updateIndex("nifty",data.indexes.nifty);
+      if(data.indexes.sensex)updateIndex("sensex",data.indexes.sensex);
+    }
+    if(data.gainers?.length)renderOI("oiGainers",data.gainers,true);
+    if(data.losers?.length)renderOI("oiLosers",data.losers,false);
+  }catch(e){}
+}
 
 async function loginBroker(){
+  const apiKey=document.getElementById("apiKey").value.trim();
+  const clientId=document.getElementById("clientId").value.trim();
+  const mpin=document.getElementById("mpin").value.trim();
+  const totpSecret=document.getElementById("totpSecret").value.trim();
+  const button=document.getElementById("connectBtn");
+  document.getElementById("errorBox").style.display="none";
 
-  const apiKey =
-    document.getElementById(
-      "apiKey"
-    ).value.trim();
-
-
-  const clientId =
-    document.getElementById(
-      "clientId"
-    ).value.trim();
-
-
-  const mpin =
-    document.getElementById(
-      "mpin"
-    ).value.trim();
-
-
-  const totpSecret =
-    document.getElementById(
-      "totpSecret"
-    ).value.trim();
-
-
-  const button =
-    document.getElementById(
-      "connectBtn"
-    );
-
-
-  const error =
-    document.getElementById(
-      "errorBox"
-    );
-
-
-  error.style.display =
-    "none";
-
-
-  if(
-    !apiKey ||
-    !clientId ||
-    !mpin ||
-    !totpSecret
-  ){
-
-    showError(
-      "API Key, Client ID, MPIN aur Long TOTP Secret required hai."
-    );
-
+  if(!apiKey||!clientId||!mpin||!totpSecret){
+    showError("API Key, Client ID, MPIN aur Long TOTP Secret required hai.");
     return;
   }
 
-
-  button.disabled =
-    true;
-
-  button.textContent =
-    "⏳ Connecting...";
-
+  button.disabled=true;
+  button.textContent="⏳ Connecting...";
 
   try{
+    const response=await fetch("/api/login",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({apiKey,clientId,mpin,totpSecret})
+    });
 
-    const response =
-      await fetch(
-        "/api/login",
-        {
+    const data=await response.json();
+    if(!response.ok||!data.success)throw new Error(data.message||"Login failed.");
 
-          method:
-            "POST",
-
-          headers:{
-            "Content-Type":
-              "application/json"
-          },
-
-          body:
-            JSON.stringify({
-
-              apiKey,
-
-              clientId,
-
-              mpin,
-
-              totpSecret
-
-            })
-
-        }
-      );
-
-
-    const data =
-      await response.json();
-
-
-    if(
-      !response.ok ||
-      !data.success
-    ){
-
-      throw new Error(
-        data.message ||
-        "Login failed."
-      );
-    }
-
-
-    document.getElementById(
-      "login"
-    ).style.display =
-      "none";
-
-
-    document.getElementById(
-      "dashboard"
-    ).style.display =
-      "block";
-
-
-    document.getElementById(
-      "connection"
-    ).textContent =
-      "● Broker Connected";
-
-
-    addLocalLog(
-      "Broker connected successfully.",
-      "success"
-    );
-
-
+    document.getElementById("login").style.display="none";
+    document.getElementById("dashboard").style.display="block";
+    document.getElementById("connection").textContent="● Broker Connected";
+    addLocalLog("Broker connected successfully.","success");
     connectStream();
-
-
+    loadCache();
   }catch(error){
-
-    showError(
-      error.message
-    );
-
+    showError(error.message);
   }finally{
-
-    button.disabled =
-      false;
-
-    button.textContent =
-      "🔐 Connect Angel One";
+    button.disabled=false;
+    button.textContent="🔐 Connect Angel One";
   }
 }
 
-
-// ====================================================
-// ERROR
-// ====================================================
-
-function showError(
-  message
-){
-
-  const box =
-    document.getElementById(
-      "errorBox"
-    );
-
-
-  box.textContent =
-    message;
-
-
-  box.style.display =
-    "block";
+function showError(message){
+  const box=document.getElementById("errorBox");
+  box.textContent=message;
+  box.style.display="block";
 }
 
-
-// ====================================================
-// TAB
-// ====================================================
-
-function selectTab(
-  tab
-){
-
-  selectedTab =
-    tab;
-
-
-  document.getElementById(
-    "niftyTab"
-  ).classList.toggle(
-    "active",
-    tab === "nifty"
-  );
-
-
-  document.getElementById(
-    "sensexTab"
-  ).classList.toggle(
-    "active",
-    tab === "sensex"
-  );
-
-
-  document.getElementById(
-    "niftyContent"
-  ).style.display =
-    tab === "nifty"
-      ? "block"
-      : "none";
-
-
-  document.getElementById(
-    "sensexContent"
-  ).style.display =
-    tab === "sensex"
-      ? "block"
-      : "none";
+function selectTab(tab){
+  document.getElementById("niftyTab").classList.toggle("active",tab==="nifty");
+  document.getElementById("sensexTab").classList.toggle("active",tab==="sensex");
+  document.getElementById("niftyContent").style.display=tab==="nifty"?"block":"none";
+  document.getElementById("sensexContent").style.display=tab==="sensex"?"block":"none";
 }
 
-
-// ====================================================
-// INDEX TOGGLE
-// ====================================================
-
-async function toggleIndex(
-  index
-){
-
-  const toggle =
-    document.getElementById(
-      index +
-      "Toggle"
-    );
-
-
-  const enabled =
-    !toggle.classList.contains(
-      "on"
-    );
-
+async function toggleIndex(index){
+  const toggle=document.getElementById(index+"Toggle");
+  const enabled=!toggle.classList.contains("on");
 
   try{
+    const response=await fetch("/api/index-toggle",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({index,enabled})
+    });
 
-    const response =
-      await fetch(
-        "/api/index-toggle",
-        {
-
-          method:
-            "POST",
-
-          headers:{
-            "Content-Type":
-              "application/json"
-          },
-
-          body:
-            JSON.stringify({
-
-              index,
-
-              enabled
-
-            })
-
-        }
-      );
-
-
-    const data =
-      await response.json();
-
-
-    if(
-      !response.ok ||
-      !data.success
-    ){
-
-      throw new Error(
-        data.message ||
-        "Index toggle failed."
-      );
-    }
-
-
-    updateToggle(
-      index,
-      enabled
-    );
-
-
+    const data=await response.json();
+    if(!response.ok||!data.success)throw new Error(data.message||"Toggle failed.");
+    updateToggle(index,enabled);
   }catch(error){
-
-    addLocalLog(
-      error.message,
-      "error"
-    );
+    addLocalLog(error.message,"error");
   }
 }
 
+function updateToggle(index,enabled){
+  document.getElementById(index+"Toggle").classList.toggle("on",enabled);
+  const live=document.getElementById(index+"Live");
+  live.textContent=enabled?"● Tick-by-tick LIVE":"● Tick OFF";
+  live.className=enabled?"live-badge green":"live-badge";
 
-// ====================================================
-// UPDATE TOGGLE
-// ====================================================
-
-function updateToggle(
-  index,
-  enabled
-){
-
-  const toggle =
-    document.getElementById(
-      index +
-      "Toggle"
-    );
-
-
-  const live =
-    document.getElementById(
-      index +
-      "Live"
-    );
-
-
-  toggle.classList.toggle(
-    "on",
-    enabled
-  );
-
-
-  if(enabled){
-
-    live.textContent =
-      "● Tick-by-tick LIVE";
-
-    live.className =
-      "live-badge green";
-
-  }else{
-
-    live.textContent =
-      "● Tick OFF";
-
-    live.className =
-      "live-badge";
-  }
+  window.lastIndexState=window.lastIndexState||{};
+  window.lastIndexState[index]=enabled;
+  saveCache();
 }
 
+function updateIndex(index,data){
+  if(!data)return;
 
-// ====================================================
-// SSE
-// ====================================================
+  document.getElementById(index+"Price").textContent=
+    data.price!=null?"₹"+Number(data.price).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}):"—";
+
+  if(data.changePercent!=null){
+    const sign=data.change>=0?"+":"";
+    const el=document.getElementById(index+"Change");
+    el.textContent=`${sign}${Number(data.change).toFixed(2)} (${sign}${Number(data.changePercent).toFixed(2)}%)`;
+    el.className="index-change "+(data.change>=0?"green":"red");
+  }
+
+  window.lastIndexes=window.lastIndexes||{};
+  window.lastIndexes[index]=data;
+  saveCache();
+}
 
 function connectStream(){
+  if(stream)stream.close();
+  stream=new EventSource("/api/stream");
 
-  if(stream){
+  stream.addEventListener("status",e=>{
+    try{
+      const data=JSON.parse(e.data);
+      if(data.connected)document.getElementById("connection").textContent="● Broker Connected";
+    }catch(err){}
+  });
 
-    stream.close();
-  }
+  stream.addEventListener("indexState",e=>{
+    const state=JSON.parse(e.data);
+    updateToggle("nifty",state.nifty);
+    updateToggle("sensex",state.sensex);
+  });
 
+  stream.addEventListener("indexTick",e=>{
+    const data=JSON.parse(e.data);
+    updateIndex(data.index,data.data);
+  });
 
-  stream =
-    new EventSource(
-      "/api/stream"
-    );
+  stream.addEventListener("oi",e=>{
+    const data=JSON.parse(e.data);
 
-
-  // ----------------------------------------------
-  // STATUS
-  // ----------------------------------------------
-
-  stream.addEventListener(
-    "status",
-    event => {
-
-      try{
-
-        const data =
-          JSON.parse(
-            event.data
-          );
-
-
-        if(data.connected){
-
-          document.getElementById(
-            "connection"
-          ).textContent =
-            "● Broker Connected";
-        }
-
-
-        if(data.indexState){
-
-          updateToggle(
-            "nifty",
-            data.indexState.nifty
-          );
-
-
-          updateToggle(
-            "sensex",
-            data.indexState.sensex
-          );
-        }
-
-      }catch(error){}
+    // Empty list kabhi purana valid list replace nahi karegi.
+    if(data.gainers?.length){
+      window.lastGainers=data.gainers;
+      renderOI("oiGainers",data.gainers,true);
     }
-  );
 
-
-  // ----------------------------------------------
-  // INDEX STATE
-  // ----------------------------------------------
-
-  stream.addEventListener(
-    "indexState",
-    event => {
-
-      const state =
-        JSON.parse(
-          event.data
-        );
-
-
-      updateToggle(
-        "nifty",
-        state.nifty
-      );
-
-
-      updateToggle(
-        "sensex",
-        state.sensex
-      );
+    if(data.losers?.length){
+      window.lastLosers=data.losers;
+      renderOI("oiLosers",data.losers,false);
     }
-  );
 
+    saveCache();
+  });
 
-  // ----------------------------------------------
-  // INDEX TICK
-  // ----------------------------------------------
+  stream.addEventListener("stockTick",e=>{
+    updateStockPrice(JSON.parse(e.data));
+  });
 
-  stream.addEventListener(
-    "indexTick",
-    event => {
+  stream.addEventListener("activity",e=>{
+    addActivity(JSON.parse(e.data));
+  });
 
-      const payload =
-        JSON.parse(
-          event.data
-        );
+  stream.addEventListener("logs",e=>{
+    document.getElementById("logs").innerHTML="";
+    JSON.parse(e.data).forEach(addActivity);
+  });
 
+  stream.onopen=()=>{
+    document.getElementById("logLive").textContent="LIVE";
+    document.getElementById("logLive").style.color="#16c784";
+  };
 
-      updateIndex(
-        payload.index,
-        payload.data
-      );
-    }
-  );
-
-
-  // ----------------------------------------------
-  // OI
-  // ----------------------------------------------
-
-  stream.addEventListener(
-    "oi",
-    event => {
-
-      const data =
-        JSON.parse(
-          event.data
-        );
-
-
-      renderOI(
-        "oiGainers",
-        data.gainers,
-        true
-      );
-
-
-      renderOI(
-        "oiLosers",
-        data.losers,
-        false
-      );
-    }
-  );
-
-
-  // ----------------------------------------------
-  // STOCK TICK
-  // ----------------------------------------------
-
-  stream.addEventListener(
-    "stockTick",
-    event => {
-
-      const tick =
-        JSON.parse(
-          event.data
-        );
-
-
-      updateStockPrice(
-        tick
-      );
-    }
-  );
-
-
-  // ----------------------------------------------
-  // ACTIVITY
-  // ----------------------------------------------
-
-  stream.addEventListener(
-    "activity",
-    event => {
-
-      const log =
-        JSON.parse(
-          event.data
-        );
-
-
-      addActivity(
-        log
-      );
-    }
-  );
-
-
-  // ----------------------------------------------
-  // OLD LOGS
-  // ----------------------------------------------
-
-  stream.addEventListener(
-    "logs",
-    event => {
-
-      const logs =
-        JSON.parse(
-          event.data
-        );
-
-
-      document.getElementById(
-        "logs"
-      ).innerHTML =
-        "";
-
-
-      logs.forEach(
-        log => {
-
-          addActivity(
-            log
-          );
-        }
-      );
-    }
-  );
-
-
-  stream.onopen =
-    () => {
-
-      document.getElementById(
-        "logLive"
-      ).textContent =
-        "LIVE";
-
-      document.getElementById(
-        "logLive"
-      ).style.color =
-        "#16c784";
-    };
-
-
-  stream.onerror =
-    () => {
-
-      document.getElementById(
-        "logLive"
-      ).textContent =
-        "RECONNECTING";
-
-      document.getElementById(
-        "logLive"
-      ).style.color =
-        "#f4c452";
-    };
+  stream.onerror=()=>{
+    document.getElementById("logLive").textContent="RECONNECTING";
+    document.getElementById("logLive").style.color="#f4c452";
+  };
 }
 
+function renderOI(id,rows,positive){
+  const container=document.getElementById(id);
 
-// ====================================================
-// INDEX DISPLAY
-// ====================================================
-
-function updateIndex(
-  index,
-  data
-){
-
-  const price =
-    document.getElementById(
-      index +
-      "Price"
-    );
-
-
-  const change =
-    document.getElementById(
-      index +
-      "Change"
-    );
-
-
-  if(
-    data.price === null ||
-    data.price === undefined
-  ){
-
+  if(!rows?.length){
+    if(container.querySelector(".row"))return;
+    container.innerHTML='<div class="empty">OI data waiting...</div>';
     return;
   }
 
+  container.innerHTML=rows.slice(0,10).map(row=>{
+    const oi=Number(row.oiPercent||0);
+    const price=row.price;
+    const change=row.changePercent;
 
-  price.textContent =
-    "₹" +
-    Number(
-      data.price
-    ).toLocaleString(
-      "en-IN",
-      {
-        minimumFractionDigits:
-          2,
-
-        maximumFractionDigits:
-          2
-      }
-    );
-
-
-  if(
-    data.changePercent !== null &&
-    data.changePercent !== undefined
-  ){
-
-    const sign =
-      data.change >= 0
-        ? "+"
-        : "";
-
-
-    change.textContent =
-      `${sign}${Number(
-        data.change
-      ).toFixed(2)}
-      (${sign}${Number(
-        data.changePercent
-      ).toFixed(2)}%)`;
-
-
-    change.className =
-      "index-change " +
-      (
-        data.change >= 0
-          ? "green"
-          : "red"
-      );
-  }
-}
-
-
-// ====================================================
-// RENDER OI
-// ====================================================
-
-function renderOI(
-  id,
-  rows,
-  positive
-){
-
-  const container =
-    document.getElementById(
-      id
-    );
-
-
-  if(
-    !rows ||
-    !rows.length
-  ){
-
-    container.innerHTML =
-      `
-      <div class="empty">
-        OI data waiting...
+    return `
+    <div class="row" data-symbol="${escapeHtml(row.symbol)}">
+      <div>
+        <div class="symbol">${escapeHtml(row.symbol)}</div>
+        <div class="price-line">
+          <span class="live-price">${price!=null?"₹"+Number(price).toFixed(2):"Live price..."}</span>
+          <span class="live-change ${change!=null?(change>=0?"green":"red"):""}">
+            ${change!=null?` • ${change>=0?"+":""}${Number(change).toFixed(2)}%`:""}
+          </span>
+        </div>
       </div>
-      `;
-
-    return;
-  }
-
-
-  container.innerHTML =
-    rows
-      .slice(0,10)
-      .map(
-        row => {
-
-          const oi =
-            Number(
-              row.oiPercent ||
-              0
-            );
-
-
-          const price =
-            row.price;
-
-
-          const change =
-            row.changePercent;
-
-
-          return `
-
-          <div
-            class="row"
-            data-symbol="${escapeHtml(
-              row.symbol
-            )}"
-          >
-
-            <div>
-
-              <div class="symbol">
-                ${escapeHtml(
-                  row.symbol
-                )}
-              </div>
-
-
-              <div class="price-line">
-
-                <span
-                  class="live-price"
-                >
-
-                  ${
-                    price !== null &&
-                    price !== undefined
-                      ? "₹" +
-                        Number(
-                          price
-                        ).toFixed(2)
-                      : "Live price..."
-                  }
-
-                </span>
-
-
-                <span
-                  class="live-change ${
-                    change !== null &&
-                    change !== undefined
-                      ? (
-                          change >= 0
-                            ? "green"
-                            : "red"
-                        )
-                      : ""
-                  }"
-                >
-
-                  ${
-                    change !== null &&
-                    change !== undefined
-                      ? ` • ${
-                          change >= 0
-                            ? "+"
-                            : ""
-                        }${Number(
-                          change
-                        ).toFixed(2)}%`
-                      : ""
-                  }
-
-                </span>
-
-              </div>
-
-            </div>
-
-
-            <div class="oi-box">
-
-              <div
-                class="oi-value ${
-                  positive
-                    ? "green"
-                    : "red"
-                }"
-              >
-
-                ${
-                  oi >= 0
-                    ? "+"
-                    : ""
-                }${oi.toFixed(2)}%
-
-              </div>
-
-
-              <div class="oi-label">
-                OI Change
-              </div>
-
-            </div>
-
-          </div>
-
-          `;
-        }
-      )
-      .join("");
+      <div class="oi-box">
+        <div class="oi-value ${positive?"green":"red"}">${oi>=0?"+":""}${oi.toFixed(2)}%</div>
+        <div class="oi-label">OI Change</div>
+      </div>
+    </div>`;
+  }).join("");
 }
 
+function updateStockPrice(tick){
+  document.querySelectorAll(`.row[data-symbol="${CSS.escape(tick.symbol)}"]`).forEach(row=>{
+    const price=row.querySelector(".live-price");
+    const change=row.querySelector(".live-change");
 
-// ====================================================
-// UPDATE LIVE STOCK PRICE
-// ====================================================
+    if(tick.price!=null)price.textContent="₹"+Number(tick.price).toFixed(2);
 
-function updateStockPrice(
-  tick
-){
-
-  const rows =
-    document.querySelectorAll(
-      `.row[data-symbol="${CSS.escape(
-        tick.symbol
-      )}"]`
-    );
-
-
-  rows.forEach(
-    row => {
-
-      const price =
-        row.querySelector(
-          ".live-price"
-        );
-
-
-      const change =
-        row.querySelector(
-          ".live-change"
-        );
-
-
-      if(
-        tick.price !== null &&
-        tick.price !== undefined
-      ){
-
-        price.textContent =
-          "₹" +
-          Number(
-            tick.price
-          ).toFixed(2);
-      }
-
-
-      if(
-        tick.changePercent !== null &&
-        tick.changePercent !== undefined
-      ){
-
-        const sign =
-          tick.changePercent >= 0
-            ? "+"
-            : "";
-
-
-        change.textContent =
-          ` • ${sign}${Number(
-            tick.changePercent
-          ).toFixed(2)}%`;
-
-
-        change.className =
-          "live-change " +
-          (
-            tick.changePercent >= 0
-              ? "green"
-              : "red"
-          );
-      }
+    if(tick.changePercent!=null){
+      change.textContent=` • ${tick.changePercent>=0?"+":""}${Number(tick.changePercent).toFixed(2)}%`;
+      change.className="live-change "+(tick.changePercent>=0?"green":"red");
     }
-  );
-}
-
-
-// ====================================================
-// ACTIVITY
-// ====================================================
-
-function addActivity(
-  log
-){
-
-  const container =
-    document.getElementById(
-      "logs"
-    );
-
-
-  const time =
-    new Date(
-      log.time
-    ).toLocaleTimeString(
-      "en-IN"
-    );
-
-
-  const type =
-    String(
-      log.type ||
-      "INFO"
-    ).toLowerCase();
-
-
-  const item =
-    document.createElement(
-      "div"
-    );
-
-
-  item.className =
-    "log";
-
-
-  item.innerHTML =
-    `
-    <span class="log-time">
-      [${time}]
-    </span>
-
-    <span class="log-${type}">
-      ${escapeHtml(
-        log.message
-      )}
-    </span>
-    `;
-
-
-  container.appendChild(
-    item
-  );
-
-
-  while(
-    container.children.length >
-    300
-  ){
-
-    container.removeChild(
-      container.firstChild
-    );
-  }
-
-
-  container.scrollTop =
-    container.scrollHeight;
-}
-
-
-// ====================================================
-// LOCAL LOG
-// ====================================================
-
-function addLocalLog(
-  message,
-  type = "info"
-){
-
-  addActivity({
-
-    time:
-      new Date().toISOString(),
-
-    type,
-
-    message
-
   });
 }
 
+function addActivity(log){
+  const container=document.getElementById("logs");
+  const div=document.createElement("div");
+  const type=String(log.type||"INFO").toLowerCase();
+  const time=new Date(log.time).toLocaleTimeString("en-IN");
 
-// ====================================================
-// ESCAPE HTML
-// ====================================================
+  div.className="log";
+  div.innerHTML=`<span class="log-time">[${time}]</span> <span class="log-${type}">${escapeHtml(log.message)}</span>`;
+  container.appendChild(div);
 
-function escapeHtml(
-  value
-){
-
-  return String(
-    value
-  )
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
+  while(container.children.length>300)container.removeChild(container.firstChild);
+  container.scrollTop=container.scrollHeight;
 }
 
+function addLocalLog(message,type="info"){
+  addActivity({time:new Date().toISOString(),type,message});
+}
+
+function escapeHtml(value){
+  return String(value)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
 </script>
-
 </body>
-
-  </html>
+</html>
