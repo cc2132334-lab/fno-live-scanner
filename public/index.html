@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -8,12 +7,10 @@
 
 <meta
   name="viewport"
-  content="width=device-width, initial-scale=1.0"
+  content="width=device-width,initial-scale=1.0"
 >
 
-<title>
-F&O Live Scanner
-</title>
+<title>F&O Live Scanner</title>
 
 
 <style>
@@ -27,46 +24,39 @@ body{
 
   margin:0;
 
+  background:#07100c;
+
+  color:#edf7f0;
+
   font-family:
-    Inter,
     Arial,
     sans-serif;
-
-  background:
-    #07110d;
-
-  color:
-    #edf7f0;
 }
 
 
 .container{
 
-  max-width:
-    1200px;
+  max-width:1200px;
 
   margin:auto;
 
-  padding:
-    18px;
+  padding:15px;
 }
 
 
-/* =================================================
+/* ================================================
 HEADER
-================================================= */
+================================================ */
 
 .header{
 
   display:flex;
 
-  justify-content:
-    space-between;
+  justify-content:space-between;
 
   align-items:center;
 
-  margin-bottom:
-    18px;
+  margin-bottom:18px;
 }
 
 
@@ -88,8 +78,9 @@ HEADER
 
   border-radius:16px;
 
-  background:
-    #16c784;
+  background:#16c784;
+
+  color:#062117;
 
   display:flex;
 
@@ -97,9 +88,7 @@ HEADER
 
   justify-content:center;
 
-  color:#062117;
-
-  font-size:28px;
+  font-size:27px;
 
   font-weight:900;
 }
@@ -107,98 +96,78 @@ HEADER
 
 .title{
 
-  font-size:23px;
+  font-size:22px;
 
-  font-weight:800;
+  font-weight:900;
 }
 
 
 .subtitle{
 
-  color:#82938a;
-
-  font-size:12px;
-
   margin-top:3px;
+
+  color:#718279;
+
+  font-size:11px;
 }
 
 
 .connection{
 
-  padding:
-    9px 13px;
+  padding:9px 12px;
 
-  border-radius:
-    12px;
+  border-radius:12px;
 
-  background:
-    #10231a;
+  background:#10231a;
 
-  border:
-    1px solid
-    #1c3a2a;
+  border:1px solid #20402e;
 
-  font-size:12px;
+  color:#16c784;
 
-  color:
-    #7ef0b8;
+  font-size:11px;
+
+  font-weight:bold;
 }
 
 
-/* =================================================
+/* ================================================
 LOGIN
-================================================= */
+================================================ */
 
 .login{
 
-  max-width:
-    500px;
+  max-width:500px;
 
-  margin:
-    50px auto;
+  margin:55px auto;
 
-  background:
-    #101b16;
+  background:#101b16;
 
-  border:
-    1px solid
-    #21352a;
+  border:1px solid #21352a;
 
-  border-radius:
-    22px;
+  border-radius:22px;
 
-  padding:
-    25px;
-
-  box-shadow:
-    0 20px 60px
-    rgba(0,0,0,.35);
+  padding:25px;
 }
 
 
 .login h2{
 
-  margin:
-    0 0 5px;
+  margin:0;
 
-  font-size:
-    22px;
+  font-size:22px;
 }
 
 
 .login p{
 
+  color:#788980;
+
+  font-size:12px;
+
+  line-height:1.5;
+
   margin:
-    0 0 22px;
-
-  color:
-    #82938a;
-
-  font-size:
-    13px;
-
-  line-height:
-    1.5;
+    6px 0 20px;
 }
 
 
@@ -206,17 +175,14 @@ label{
 
   display:block;
 
+  color:#b9c8c0;
+
+  font-size:12px;
+
+  font-weight:bold;
+
   margin:
     13px 0 7px;
-
-  font-size:
-    12px;
-
-  font-weight:
-    700;
-
-  color:
-    #b9c9c0;
 }
 
 
@@ -224,32 +190,25 @@ input{
 
   width:100%;
 
-  padding:
-    14px;
+  padding:14px;
 
-  border-radius:
-    12px;
-
-  border:
-    1px solid
-    #294036;
-
-  background:
-    #08120e;
+  background:#08110d;
 
   color:white;
 
+  border:1px solid #294036;
+
+  border-radius:12px;
+
   outline:none;
 
-  font-size:
-    14px;
+  font-size:14px;
 }
 
 
 input:focus{
 
-  border-color:
-    #16c784;
+  border-color:#16c784;
 
   box-shadow:
     0 0 0 3px
@@ -261,36 +220,21 @@ input:focus{
 
   width:100%;
 
-  margin-top:
-    20px;
+  margin-top:20px;
 
-  padding:
-    14px;
+  padding:14px;
 
   border:0;
 
-  border-radius:
-    13px;
+  border-radius:13px;
 
-  background:
-    #16c784;
+  background:#16c784;
 
-  color:
-    #052017;
+  color:#062117;
 
-  font-size:
-    15px;
+  font-weight:900;
 
-  font-weight:
-    900;
-
-  cursor:pointer;
-}
-
-
-.connect:disabled{
-
-  opacity:.55;
+  font-size:15px;
 }
 
 
@@ -298,29 +242,23 @@ input:focus{
 
   display:none;
 
-  margin-top:
-    13px;
+  margin-top:13px;
 
-  padding:
-    12px;
+  padding:12px;
 
-  border-radius:
-    11px;
+  border-radius:10px;
 
-  background:
-    #391719;
+  background:#3b181a;
 
-  color:
-    #ff9d9d;
+  color:#ff969d;
 
-  font-size:
-    12px;
+  font-size:12px;
 }
 
 
-/* =================================================
+/* ================================================
 DASHBOARD
-================================================= */
+================================================ */
 
 #dashboard{
 
@@ -328,106 +266,173 @@ DASHBOARD
 }
 
 
-.section{
+/* ================================================
+INDEX TABS
+================================================ */
 
-  margin-bottom:
-    17px;
+.index-panel{
+
+  background:#101b16;
+
+  border:1px solid #21352a;
+
+  border-radius:20px;
+
+  overflow:hidden;
+
+  margin-bottom:16px;
 }
 
 
-/* =================================================
-INDEX CARDS
-================================================= */
-
-.index-grid{
-
-  display:grid;
-
-  grid-template-columns:
-    repeat(2,1fr);
-
-  gap:
-    15px;
-}
-
-
-.index-card{
-
-  background:
-    #101b16;
-
-  border:
-    1px solid
-    #21352a;
-
-  border-radius:
-    20px;
-
-  padding:
-    18px;
-}
-
-
-.index-top{
+.tabs{
 
   display:flex;
 
-  justify-content:
-    space-between;
+  border-bottom:1px solid #21352a;
+
+  overflow-x:auto;
+}
+
+
+.tab{
+
+  flex:1;
+
+  min-width:140px;
+
+  padding:14px;
+
+  background:transparent;
+
+  color:#718279;
+
+  border:0;
+
+  font-weight:900;
+
+  font-size:14px;
+
+  cursor:pointer;
+
+  position:relative;
+}
+
+
+.tab.active{
+
+  color:#16c784;
+
+  background:#0c1711;
+}
+
+
+.tab.active::after{
+
+  content:"";
+
+  position:absolute;
+
+  left:15%;
+
+  right:15%;
+
+  bottom:0;
+
+  height:2px;
+
+  background:#16c784;
+}
+
+
+.index-content{
+
+  padding:18px;
+}
+
+
+.index-row{
+
+  display:flex;
 
   align-items:center;
+
+  justify-content:space-between;
+
+  gap:15px;
 }
 
 
 .index-name{
 
-  font-size:
-    15px;
+  font-size:13px;
 
-  font-weight:
-    800;
+  font-weight:900;
+}
+
+
+.live-badge{
+
+  font-size:9px;
+
+  color:#718279;
+
+  margin-top:4px;
+}
+
+
+.index-price{
+
+  font-size:30px;
+
+  font-weight:900;
+
+  margin-top:13px;
+}
+
+
+.index-change{
+
+  margin-top:5px;
+
+  font-size:12px;
+
+  font-weight:bold;
 }
 
 
 .toggle{
 
-  width:
-    48px;
+  width:49px;
 
-  height:
-    27px;
+  height:28px;
 
-  border-radius:
-    30px;
+  border-radius:30px;
 
-  background:
-    #26342d;
+  background:#26352d;
 
   position:relative;
 
   cursor:pointer;
 
-  transition:.2s;
+  flex-shrink:0;
 }
 
 
 .toggle span{
 
-  position:absolute;
+  width:22px;
 
-  width:
-    21px;
-
-  height:
-    21px;
-
-  left:3px;
-
-  top:3px;
+  height:22px;
 
   border-radius:50%;
 
-  background:#82938a;
+  position:absolute;
+
+  top:3px;
+
+  left:3px;
+
+  background:#718279;
 
   transition:.2s;
 }
@@ -435,8 +440,7 @@ INDEX CARDS
 
 .toggle.on{
 
-  background:
-    #16c784;
+  background:#16c784;
 }
 
 
@@ -445,67 +449,31 @@ INDEX CARDS
   transform:
     translateX(21px);
 
-  background:
-    #062117;
-}
-
-
-.index-price{
-
-  margin-top:
-    17px;
-
-  font-size:
-    29px;
-
-  font-weight:
-    900;
-
-  letter-spacing:
-    -.5px;
-}
-
-
-.index-change{
-
-  margin-top:
-    5px;
-
-  font-size:
-    13px;
-
-  font-weight:
-    700;
+  background:#062117;
 }
 
 
 .green{
 
-  color:
-    #16c784;
+  color:#16c784;
 }
 
 
 .red{
 
-  color:
-    #ff5c65;
+  color:#ff5d66;
 }
 
 
-.waiting{
+.gray{
 
-  color:
-    #718279;
-
-  font-size:
-    13px;
+  color:#718279;
 }
 
 
-/* =================================================
-OI
-================================================= */
+/* ================================================
+OI GRID
+================================================ */
 
 .oi-grid{
 
@@ -514,22 +482,17 @@ OI
   grid-template-columns:
     repeat(2,1fr);
 
-  gap:
-    15px;
+  gap:16px;
 }
 
 
 .card{
 
-  background:
-    #101b16;
+  background:#101b16;
 
-  border:
-    1px solid
-    #21352a;
+  border:1px solid #21352a;
 
-  border-radius:
-    20px;
+  border-radius:20px;
 
   overflow:hidden;
 }
@@ -537,35 +500,27 @@ OI
 
 .card-head{
 
-  padding:
-    17px;
+  padding:17px;
 
-  border-bottom:
-    1px solid
-    #21352a;
+  border-bottom:1px solid #21352a;
 }
 
 
 .card-title{
 
-  font-size:
-    17px;
+  font-size:17px;
 
-  font-weight:
-    900;
+  font-weight:900;
 }
 
 
 .card-sub{
 
-  margin-top:
-    4px;
+  color:#718279;
 
-  color:
-    #718279;
+  font-size:10px;
 
-  font-size:
-    11px;
+  margin-top:4px;
 }
 
 
@@ -583,77 +538,65 @@ OI
   grid-template-columns:
     1fr auto;
 
-  gap:
-    10px;
+  gap:10px;
 
-  padding:
-    13px 0;
+  padding:13px 0;
 
-  border-bottom:
-    1px solid
-    #192820;
+  border-bottom:1px solid #1a2921;
 }
 
 
 .row:last-child{
 
-  border-bottom:
-    0;
+  border-bottom:0;
 }
 
 
 .symbol{
 
-  font-size:
-    14px;
+  font-size:14px;
 
-  font-weight:
-    800;
+  font-weight:900;
 }
 
 
-.stock-price{
+.price-line{
 
-  margin-top:
-    4px;
+  margin-top:4px;
 
-  color:
-    #718279;
+  font-size:11px;
 
-  font-size:
-    11px;
+  color:#718279;
 }
 
 
-.oi{
+.oi-box{
 
   text-align:right;
+}
 
-  font-size:
-    13px;
 
-  font-weight:
-    900;
+.oi-value{
+
+  font-size:13px;
+
+  font-weight:900;
 }
 
 
 .oi-label{
 
-  margin-top:
-    3px;
+  margin-top:3px;
 
-  color:
-    #718279;
+  color:#718279;
 
-  font-size:
-    10px;
+  font-size:9px;
 }
 
 
 .empty{
 
-  min-height:
-    190px;
+  min-height:220px;
 
   display:flex;
 
@@ -661,31 +604,27 @@ OI
 
   justify-content:center;
 
-  color:
-    #718279;
+  color:#718279;
 
-  font-size:
-    12px;
+  font-size:12px;
 
   text-align:center;
 }
 
 
-/* =================================================
+/* ================================================
 ACTIVITY LOG
-================================================= */
+================================================ */
 
 .log-card{
 
-  background:
-    #050b08;
+  margin-top:16px;
 
-  border:
-    1px solid
-    #21352a;
+  background:#050a07;
 
-  border-radius:
-    20px;
+  border:1px solid #21352a;
+
+  border-radius:20px;
 
   overflow:hidden;
 }
@@ -693,159 +632,101 @@ ACTIVITY LOG
 
 .log-head{
 
-  padding:
-    15px 17px;
-
   display:flex;
-
-  justify-content:
-    space-between;
 
   align-items:center;
 
-  border-bottom:
-    1px solid
-    #21352a;
+  justify-content:space-between;
+
+  padding:15px 17px;
+
+  border-bottom:1px solid #21352a;
 }
 
 
 .log-title{
 
-  font-size:
-    16px;
+  font-size:16px;
 
-  font-weight:
-    900;
+  font-weight:900;
 }
 
 
-.log-status{
+.log-live{
 
-  color:
-    #16c784;
+  color:#16c784;
 
-  font-size:
-    10px;
+  font-size:10px;
 
-  font-weight:
-    800;
+  font-weight:900;
 }
 
 
 .logs{
 
-  height:
-    230px;
+  height:230px;
 
-  overflow-y:
-    auto;
+  overflow-y:auto;
 
-  padding:
-    10px 14px;
+  padding:10px 14px;
 
   font-family:
     monospace;
 
-  font-size:
-    11px;
+  font-size:10px;
 }
 
 
 .log{
 
-  padding:
-    5px 0;
+  padding:6px 0;
 
-  border-bottom:
-    1px solid
-    #0e1914;
+  border-bottom:1px solid #0e1914;
 
-  line-height:
-    1.4;
+  line-height:1.4;
 }
 
 
 .log-time{
 
-  color:
-    #52635a;
+  color:#526159;
+
 }
 
 
 .log-info{
 
-  color:
-    #a9b8af;
+  color:#a9b8af;
 }
 
 
 .log-success{
 
-  color:
-    #16c784;
+  color:#16c784;
 }
 
 
 .log-error{
 
-  color:
-    #ff646d;
+  color:#ff646d;
 }
 
 
 .log-warn{
 
-  color:
-    #f5c451;
+  color:#f4c452;
 }
 
 
-/* =================================================
-BOTTOM
-================================================= */
-
-.footer{
-
-  margin-top:
-    15px;
-
-  color:
-    #56665d;
-
-  font-size:
-    10px;
-
-  text-align:center;
-}
-
-
-/* =================================================
+/* ================================================
 MOBILE
-================================================= */
+================================================ */
 
-@media(
-  max-width:750px
-){
+@media(max-width:750px){
 
   .container{
 
-    padding:
-      12px;
-  }
-
-
-  .index-grid,
-  .oi-grid{
-
-    grid-template-columns:
-      1fr;
-  }
-
-
-  .title{
-
-    font-size:
-      19px;
+    padding:10px;
   }
 
 
@@ -855,10 +736,29 @@ MOBILE
   }
 
 
+  .title{
+
+    font-size:19px;
+  }
+
+
+  .oi-grid{
+
+    grid-template-columns:1fr;
+  }
+
+
+  .tab{
+
+    min-width:50%;
+
+    font-size:13px;
+  }
+
+
   .index-price{
 
-    font-size:
-      27px;
+    font-size:28px;
   }
 
 }
@@ -874,9 +774,9 @@ MOBILE
 <div class="container">
 
 
-<!-- =================================================
+<!-- ==============================================
 HEADER
-================================================= -->
+================================================ -->
 
 <div class="header">
 
@@ -893,7 +793,7 @@ HEADER
       </div>
 
       <div class="subtitle">
-        Angel One • Real-Time Market Feed
+        Angel One • Tick-by-Tick
       </div>
 
     </div>
@@ -911,9 +811,9 @@ HEADER
 </div>
 
 
-<!-- =================================================
+<!-- ==============================================
 LOGIN
-================================================= -->
+================================================ -->
 
 <div
   class="login"
@@ -925,9 +825,8 @@ LOGIN
   </h2>
 
   <p>
-    Angel One SmartAPI credentials enter karein.
-    Long alphanumeric TOTP Secret se current OTP
-    automatically generate hoga.
+    Long alphanumeric TOTP Secret enter karein.
+    Current 6-digit TOTP automatically generate hoga.
   </p>
 
 
@@ -976,7 +875,7 @@ LOGIN
     id="totpSecret"
     type="password"
     autocomplete="off"
-    placeholder="Letters + numbers wala TOTP Secret"
+    placeholder="Letters + numbers wala Secret"
   >
 
 
@@ -997,222 +896,194 @@ LOGIN
 </div>
 
 
-<!-- =================================================
+<!-- ==============================================
 DASHBOARD
-================================================= -->
+================================================ -->
 
 <div
   id="dashboard"
 >
 
 
-  <!-- =================================================
-  INDEX LIVE
-  ================================================= -->
+<!-- ==============================================
+NIFTY / SENSEX HORIZONTAL TABS
+================================================ -->
 
-  <div class="section">
-
-    <div class="index-grid">
+<div class="index-panel">
 
 
-      <!-- NIFTY -->
+  <div class="tabs">
 
-      <div class="index-card">
+    <button
+      class="tab active"
+      id="niftyTab"
+      onclick="selectTab('nifty')"
+    >
+      NIFTY 50
+    </button>
 
-        <div class="index-top">
+
+    <button
+      class="tab"
+      id="sensexTab"
+      onclick="selectTab('sensex')"
+    >
+      SENSEX
+    </button>
+
+  </div>
+
+
+  <div class="index-content">
+
+
+    <!-- NIFTY -->
+
+    <div
+      id="niftyContent"
+    >
+
+      <div class="index-row">
+
+        <div>
 
           <div class="index-name">
             NIFTY 50
           </div>
 
           <div
-            class="toggle"
-            id="niftyToggle"
-            onclick="toggleIndex('nifty')"
+            class="live-badge"
+            id="niftyLive"
           >
-
-            <span></span>
-
+            ● Tick OFF
           </div>
 
         </div>
 
 
         <div
-          class="index-price"
-          id="niftyPrice"
-        >
-          —
-        </div>
-
-
-        <div
-          class="index-change"
-          id="niftyChange"
-        >
-          Live tick OFF
-        </div>
-
-      </div>
-
-
-      <!-- SENSEX -->
-
-      <div class="index-card">
-
-        <div class="index-top">
-
-          <div class="index-name">
-            SENSEX
-          </div>
-
-          <div
-            class="toggle"
-            id="sensexToggle"
-            onclick="toggleIndex('sensex')"
-          >
-
-            <span></span>
-
-          </div>
-
-        </div>
-
-
-        <div
-          class="index-price"
-          id="sensexPrice"
-        >
-          —
-        </div>
-
-
-        <div
-          class="index-change"
-          id="sensexChange"
-        >
-          Live tick OFF
-        </div>
-
-      </div>
-
-
-    </div>
-
-  </div>
-
-
-  <!-- =================================================
-  OI
-  ================================================= -->
-
-  <div class="section">
-
-    <div class="oi-grid">
-
-
-      <!-- OI GAINERS -->
-
-      <div class="card">
-
-        <div class="card-head">
-
-          <div class="card-title">
-            📈 Top 10 OI Gainers
-          </div>
-
-          <div class="card-sub">
-            F&O OI • Cash symbol displayed
-          </div>
-
-        </div>
-
-
-        <div
-          class="rows"
-          id="oiGainers"
+          class="toggle"
+          id="niftyToggle"
+          onclick="toggleIndex('nifty')"
         >
 
-          <div class="empty">
-            Waiting for OI data...
-          </div>
+          <span></span>
 
-        </div>
-
-      </div>
-
-
-      <!-- OI LOSERS -->
-
-      <div class="card">
-
-        <div class="card-head">
-
-          <div class="card-title">
-            📉 Top 10 OI Losers
-          </div>
-
-          <div class="card-sub">
-            F&O OI • Cash symbol displayed
-          </div>
-
-        </div>
-
-
-        <div
-          class="rows"
-          id="oiLosers"
-        >
-
-          <div class="empty">
-            Waiting for OI data...
-          </div>
-
-        </div>
-
-      </div>
-
-
-    </div>
-
-  </div>
-
-
-  <!-- =================================================
-  ACTIVITY LOG
-  ================================================= -->
-
-  <div class="section">
-
-    <div class="log-card">
-
-      <div class="log-head">
-
-        <div class="log-title">
-          Activity Log
-        </div>
-
-        <div
-          class="log-status"
-          id="logStatus"
-        >
-          LIVE
         </div>
 
       </div>
 
 
       <div
-        class="logs"
-        id="logs"
+        class="index-price"
+        id="niftyPrice"
       >
+        —
+      </div>
 
-        <div class="log">
-          <span class="log-info">
-            Waiting for broker connection...
-          </span>
+
+      <div
+        class="index-change gray"
+        id="niftyChange"
+      >
+        Live tick OFF
+      </div>
+
+    </div>
+
+
+    <!-- SENSEX -->
+
+    <div
+      id="sensexContent"
+      style="display:none;"
+    >
+
+      <div class="index-row">
+
+        <div>
+
+          <div class="index-name">
+            SENSEX
+          </div>
+
+          <div
+            class="live-badge"
+            id="sensexLive"
+          >
+            ● Tick OFF
+          </div>
+
         </div>
 
+
+        <div
+          class="toggle"
+          id="sensexToggle"
+          onclick="toggleIndex('sensex')"
+        >
+
+          <span></span>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="index-price"
+        id="sensexPrice"
+      >
+        —
+      </div>
+
+
+      <div
+        class="index-change gray"
+        id="sensexChange"
+      >
+        Live tick OFF
+      </div>
+
+    </div>
+
+
+  </div>
+
+</div>
+
+
+<!-- ==============================================
+OI
+================================================ -->
+
+<div class="oi-grid">
+
+
+  <!-- GAINERS -->
+
+  <div class="card">
+
+    <div class="card-head">
+
+      <div class="card-title">
+        📈 Top 10 OI Gainers
+      </div>
+
+      <div class="card-sub">
+        Sorted by OI Change %
+      </div>
+
+    </div>
+
+
+    <div
+      class="rows"
+      id="oiGainers"
+    >
+
+      <div class="empty">
+        Waiting for OI data...
       </div>
 
     </div>
@@ -1220,12 +1091,78 @@ DASHBOARD
   </div>
 
 
-  <div class="footer">
+  <!-- LOSERS -->
 
-    Live market data is provided by Angel One SmartAPI.
-    This scanner does not place orders.
+  <div class="card">
+
+    <div class="card-head">
+
+      <div class="card-title">
+        📉 Top 10 OI Losers
+      </div>
+
+      <div class="card-sub">
+        Sorted by OI Change %
+      </div>
+
+    </div>
+
+
+    <div
+      class="rows"
+      id="oiLosers"
+    >
+
+      <div class="empty">
+        Waiting for OI data...
+      </div>
+
+    </div>
 
   </div>
+
+
+</div>
+
+
+<!-- ==============================================
+ACTIVITY LOG
+================================================ -->
+
+<div class="log-card">
+
+  <div class="log-head">
+
+    <div class="log-title">
+      Activity Log
+    </div>
+
+    <div
+      class="log-live"
+      id="logLive"
+    >
+      LIVE
+    </div>
+
+  </div>
+
+
+  <div
+    class="logs"
+    id="logs"
+  >
+
+    <div class="log">
+
+      <span class="log-info">
+        Waiting for broker connection...
+      </span>
+
+    </div>
+
+  </div>
+
+</div>
 
 
 </div>
@@ -1237,18 +1174,19 @@ DASHBOARD
 <script>
 
 
-// ======================================================
+// ====================================================
 // GLOBAL
-// ======================================================
+// ====================================================
 
-let eventStream = null;
+let stream = null;
 
-let connected = false;
+let selectedTab =
+  "nifty";
 
 
-// ======================================================
+// ====================================================
 // LOGIN
-// ======================================================
+// ====================================================
 
 async function loginBroker(){
 
@@ -1282,13 +1220,13 @@ async function loginBroker(){
     );
 
 
-  const errorBox =
+  const error =
     document.getElementById(
       "errorBox"
     );
 
 
-  errorBox.style.display =
+  error.style.display =
     "none";
 
 
@@ -1341,6 +1279,7 @@ async function loginBroker(){
               totpSecret
 
             })
+
         }
       );
 
@@ -1356,13 +1295,9 @@ async function loginBroker(){
 
       throw new Error(
         data.message ||
-        "Broker login failed."
+        "Login failed."
       );
     }
-
-
-    connected =
-      true;
 
 
     document.getElementById(
@@ -1377,13 +1312,14 @@ async function loginBroker(){
       "block";
 
 
-    updateConnection(
-      true
-    );
+    document.getElementById(
+      "connection"
+    ).textContent =
+      "● Broker Connected";
 
 
     addLocalLog(
-      "Broker login successful.",
+      "Broker connected successfully.",
       "success"
     );
 
@@ -1408,42 +1344,9 @@ async function loginBroker(){
 }
 
 
-// ======================================================
-// CONNECTION
-// ======================================================
-
-function updateConnection(
-  state
-){
-
-  const el =
-    document.getElementById(
-      "connection"
-    );
-
-
-  if(state){
-
-    el.textContent =
-      "● Broker Connected";
-
-    el.style.color =
-      "#16c784";
-
-  }else{
-
-    el.textContent =
-      "● Broker Disconnected";
-
-    el.style.color =
-      "#ff646d";
-  }
-}
-
-
-// ======================================================
+// ====================================================
 // ERROR
-// ======================================================
+// ====================================================
 
 function showError(
   message
@@ -1464,19 +1367,193 @@ function showError(
 }
 
 
-// ======================================================
-// SSE STREAM
-// ======================================================
+// ====================================================
+// TAB
+// ====================================================
+
+function selectTab(
+  tab
+){
+
+  selectedTab =
+    tab;
+
+
+  document.getElementById(
+    "niftyTab"
+  ).classList.toggle(
+    "active",
+    tab === "nifty"
+  );
+
+
+  document.getElementById(
+    "sensexTab"
+  ).classList.toggle(
+    "active",
+    tab === "sensex"
+  );
+
+
+  document.getElementById(
+    "niftyContent"
+  ).style.display =
+    tab === "nifty"
+      ? "block"
+      : "none";
+
+
+  document.getElementById(
+    "sensexContent"
+  ).style.display =
+    tab === "sensex"
+      ? "block"
+      : "none";
+}
+
+
+// ====================================================
+// INDEX TOGGLE
+// ====================================================
+
+async function toggleIndex(
+  index
+){
+
+  const toggle =
+    document.getElementById(
+      index +
+      "Toggle"
+    );
+
+
+  const enabled =
+    !toggle.classList.contains(
+      "on"
+    );
+
+
+  try{
+
+    const response =
+      await fetch(
+        "/api/index-toggle",
+        {
+
+          method:
+            "POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+
+              index,
+
+              enabled
+
+            })
+
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.success
+    ){
+
+      throw new Error(
+        data.message ||
+        "Index toggle failed."
+      );
+    }
+
+
+    updateToggle(
+      index,
+      enabled
+    );
+
+
+  }catch(error){
+
+    addLocalLog(
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+// ====================================================
+// UPDATE TOGGLE
+// ====================================================
+
+function updateToggle(
+  index,
+  enabled
+){
+
+  const toggle =
+    document.getElementById(
+      index +
+      "Toggle"
+    );
+
+
+  const live =
+    document.getElementById(
+      index +
+      "Live"
+    );
+
+
+  toggle.classList.toggle(
+    "on",
+    enabled
+  );
+
+
+  if(enabled){
+
+    live.textContent =
+      "● Tick-by-tick LIVE";
+
+    live.className =
+      "live-badge green";
+
+  }else{
+
+    live.textContent =
+      "● Tick OFF";
+
+    live.className =
+      "live-badge";
+  }
+}
+
+
+// ====================================================
+// SSE
+// ====================================================
 
 function connectStream(){
 
-  if(eventStream){
+  if(stream){
 
-    eventStream.close();
+    stream.close();
   }
 
 
-  eventStream =
+  stream =
     new EventSource(
       "/api/stream"
     );
@@ -1486,7 +1563,7 @@ function connectStream(){
   // STATUS
   // ----------------------------------------------
 
-  eventStream.addEventListener(
+  stream.addEventListener(
     "status",
     event => {
 
@@ -1500,10 +1577,25 @@ function connectStream(){
 
         if(data.connected){
 
-          updateConnection(
-            true
+          document.getElementById(
+            "connection"
+          ).textContent =
+            "● Broker Connected";
+        }
+
+
+        if(data.indexState){
+
+          updateToggle(
+            "nifty",
+            data.indexState.nifty
           );
 
+
+          updateToggle(
+            "sensex",
+            data.indexState.sensex
+          );
         }
 
       }catch(error){}
@@ -1512,50 +1604,10 @@ function connectStream(){
 
 
   // ----------------------------------------------
-  // LOGIN
-  // ----------------------------------------------
-
-  eventStream.addEventListener(
-    "login",
-    event => {
-
-      connected =
-        true;
-
-      updateConnection(
-        true
-      );
-    }
-  );
-
-
-  // ----------------------------------------------
-  // INDEX TICK
-  // ----------------------------------------------
-
-  eventStream.addEventListener(
-    "indexTick",
-    event => {
-
-      const payload =
-        JSON.parse(
-          event.data
-        );
-
-
-      updateIndex(
-        payload.index,
-        payload.data
-      );
-    }
-  );
-
-
-  // ----------------------------------------------
   // INDEX STATE
   // ----------------------------------------------
 
-  eventStream.addEventListener(
+  stream.addEventListener(
     "indexState",
     event => {
 
@@ -1580,10 +1632,32 @@ function connectStream(){
 
 
   // ----------------------------------------------
+  // INDEX TICK
+  // ----------------------------------------------
+
+  stream.addEventListener(
+    "indexTick",
+    event => {
+
+      const payload =
+        JSON.parse(
+          event.data
+        );
+
+
+      updateIndex(
+        payload.index,
+        payload.data
+      );
+    }
+  );
+
+
+  // ----------------------------------------------
   // OI
   // ----------------------------------------------
 
-  eventStream.addEventListener(
+  stream.addEventListener(
     "oi",
     event => {
 
@@ -1613,7 +1687,7 @@ function connectStream(){
   // STOCK TICK
   // ----------------------------------------------
 
-  eventStream.addEventListener(
+  stream.addEventListener(
     "stockTick",
     event => {
 
@@ -1623,7 +1697,7 @@ function connectStream(){
         );
 
 
-      updateStockTick(
+      updateStockPrice(
         tick
       );
     }
@@ -1634,7 +1708,7 @@ function connectStream(){
   // ACTIVITY
   // ----------------------------------------------
 
-  eventStream.addEventListener(
+  stream.addEventListener(
     "activity",
     event => {
 
@@ -1655,7 +1729,7 @@ function connectStream(){
   // OLD LOGS
   // ----------------------------------------------
 
-  eventStream.addEventListener(
+  stream.addEventListener(
     "logs",
     event => {
 
@@ -1683,188 +1757,40 @@ function connectStream(){
   );
 
 
-  eventStream.onerror =
+  stream.onopen =
     () => {
 
       document.getElementById(
-        "logStatus"
-      ).textContent =
-        "RECONNECTING";
-
-      document.getElementById(
-        "logStatus"
-      ).style.color =
-        "#f5c451";
-    };
-
-
-  eventStream.onopen =
-    () => {
-
-      document.getElementById(
-        "logStatus"
+        "logLive"
       ).textContent =
         "LIVE";
 
       document.getElementById(
-        "logStatus"
+        "logLive"
       ).style.color =
         "#16c784";
+    };
+
+
+  stream.onerror =
+    () => {
+
+      document.getElementById(
+        "logLive"
+      ).textContent =
+        "RECONNECTING";
+
+      document.getElementById(
+        "logLive"
+      ).style.color =
+        "#f4c452";
     };
 }
 
 
-// ======================================================
-// TOGGLE INDEX
-// ======================================================
-
-async function toggleIndex(
-  index
-){
-
-  const toggle =
-    document.getElementById(
-      index + "Toggle"
-    );
-
-
-  const enabled =
-    !toggle.classList.contains(
-      "on"
-    );
-
-
-  try{
-
-    toggle.style.opacity =
-      ".5";
-
-
-    const response =
-      await fetch(
-        "/api/index-toggle",
-        {
-
-          method:
-            "POST",
-
-          headers:{
-            "Content-Type":
-              "application/json"
-          },
-
-          body:
-            JSON.stringify({
-
-              index,
-
-              enabled
-
-            })
-        }
-      );
-
-
-    const data =
-      await response.json();
-
-
-    if(
-      !response.ok ||
-      !data.success
-    ){
-
-      throw new Error(
-        data.message ||
-        "Toggle failed."
-      );
-    }
-
-
-    updateToggle(
-      index,
-      enabled
-    );
-
-
-  }catch(error){
-
-    addLocalLog(
-      error.message,
-      "error"
-    );
-
-
-    updateToggle(
-      index,
-      !enabled
-    );
-
-  }finally{
-
-    toggle.style.opacity =
-      "1";
-  }
-}
-
-
-// ======================================================
-// UPDATE TOGGLE
-// ======================================================
-
-function updateToggle(
-  index,
-  enabled
-){
-
-  const toggle =
-    document.getElementById(
-      index + "Toggle"
-    );
-
-
-  if(enabled){
-
-    toggle.classList.add(
-      "on"
-    );
-
-  }else{
-
-    toggle.classList.remove(
-      "on"
-    );
-  }
-
-
-  const change =
-    document.getElementById(
-      index + "Change"
-    );
-
-
-  if(!enabled){
-
-    change.textContent =
-      "Live tick OFF";
-
-    change.className =
-      "index-change";
-
-  }else{
-
-    change.textContent =
-      "Waiting for live tick...";
-
-    change.className =
-      "index-change waiting";
-  }
-}
-
-
-// ======================================================
+// ====================================================
 // INDEX DISPLAY
-// ======================================================
+// ====================================================
 
 function updateIndex(
   index,
@@ -1873,13 +1799,15 @@ function updateIndex(
 
   const price =
     document.getElementById(
-      index + "Price"
+      index +
+      "Price"
     );
 
 
   const change =
     document.getElementById(
-      index + "Change"
+      index +
+      "Change"
     );
 
 
@@ -1887,9 +1815,6 @@ function updateIndex(
     data.price === null ||
     data.price === undefined
   ){
-
-    price.textContent =
-      "—";
 
     return;
   }
@@ -1938,31 +1863,23 @@ function updateIndex(
           ? "green"
           : "red"
       );
-
-  }else{
-
-    change.textContent =
-      "Live tick received";
-
-    change.className =
-      "index-change green";
   }
 }
 
 
-// ======================================================
-// OI RENDER
-// ======================================================
+// ====================================================
+// RENDER OI
+// ====================================================
 
 function renderOI(
-  elementId,
+  id,
   rows,
   positive
 ){
 
   const container =
     document.getElementById(
-      elementId
+      id
     );
 
 
@@ -2021,13 +1938,10 @@ function renderOI(
               </div>
 
 
-              <div class="stock-price">
+              <div class="price-line">
 
                 <span
                   class="live-price"
-                  data-price="${escapeHtml(
-                    row.symbol
-                  )}"
                 >
 
                   ${
@@ -2037,40 +1951,49 @@ function renderOI(
                         Number(
                           price
                         ).toFixed(2)
-                      : "Live price waiting..."
+                      : "Live price..."
                   }
 
                 </span>
 
 
-                ${
-                  change !== null &&
-                  change !== undefined
-                    ? ` • <span class="${
-                        change >= 0
-                          ? "green"
-                          : "red"
-                      }">
-                      ${
-                        change >= 0
-                          ? "+"
-                          : ""
-                      }${Number(
-                        change
-                      ).toFixed(2)}%
-                    </span>`
-                    : ""
-                }
+                <span
+                  class="live-change ${
+                    change !== null &&
+                    change !== undefined
+                      ? (
+                          change >= 0
+                            ? "green"
+                            : "red"
+                        )
+                      : ""
+                  }"
+                >
+
+                  ${
+                    change !== null &&
+                    change !== undefined
+                      ? ` • ${
+                          change >= 0
+                            ? "+"
+                            : ""
+                        }${Number(
+                          change
+                        ).toFixed(2)}%`
+                      : ""
+                  }
+
+                </span>
 
               </div>
 
             </div>
 
 
-            <div class="oi">
+            <div class="oi-box">
 
               <div
-                class="${
+                class="oi-value ${
                   positive
                     ? "green"
                     : "red"
@@ -2101,11 +2024,11 @@ function renderOI(
 }
 
 
-// ======================================================
-// UPDATE STOCK TICK
-// ======================================================
+// ====================================================
+// UPDATE LIVE STOCK PRICE
+// ====================================================
 
-function updateStockTick(
+function updateStockPrice(
   tick
 ){
 
@@ -2120,16 +2043,16 @@ function updateStockTick(
   rows.forEach(
     row => {
 
-      const priceEl =
+      const price =
         row.querySelector(
           ".live-price"
         );
 
 
-      if(!priceEl){
-
-        return;
-      }
+      const change =
+        row.querySelector(
+          ".live-change"
+        );
 
 
       if(
@@ -2137,7 +2060,7 @@ function updateStockTick(
         tick.price !== undefined
       ){
 
-        priceEl.textContent =
+        price.textContent =
           "₹" +
           Number(
             tick.price
@@ -2145,66 +2068,39 @@ function updateStockTick(
       }
 
 
-      const stockPrice =
-        row.querySelector(
-          ".stock-price"
-        );
-
-
       if(
         tick.changePercent !== null &&
         tick.changePercent !== undefined
       ){
 
-        const oldChange =
-          stockPrice.querySelector(
-            ".tick-change"
-          );
+        const sign =
+          tick.changePercent >= 0
+            ? "+"
+            : "";
 
 
-        if(oldChange){
-
-          oldChange.remove();
-        }
-
-
-        const span =
-          document.createElement(
-            "span"
-          );
+        change.textContent =
+          ` • ${sign}${Number(
+            tick.changePercent
+          ).toFixed(2)}%`;
 
 
-        span.className =
-          "tick-change " +
+        change.className =
+          "live-change " +
           (
             tick.changePercent >= 0
               ? "green"
               : "red"
           );
-
-
-        span.textContent =
-          ` • ${
-            tick.changePercent >= 0
-              ? "+"
-              : ""
-          }${Number(
-            tick.changePercent
-          ).toFixed(2)}%`;
-
-
-        stockPrice.appendChild(
-          span
-        );
       }
     }
   );
 }
 
 
-// ======================================================
-// ACTIVITY LOG
-// ======================================================
+// ====================================================
+// ACTIVITY
+// ====================================================
 
 function addActivity(
   log
@@ -2231,17 +2127,17 @@ function addActivity(
     ).toLowerCase();
 
 
-  const div =
+  const item =
     document.createElement(
       "div"
     );
 
 
-  div.className =
+  item.className =
     "log";
 
 
-  div.innerHTML =
+  item.innerHTML =
     `
     <span class="log-time">
       [${time}]
@@ -2256,7 +2152,7 @@ function addActivity(
 
 
   container.appendChild(
-    div
+    item
   );
 
 
@@ -2276,13 +2172,13 @@ function addActivity(
 }
 
 
-// ======================================================
+// ====================================================
 // LOCAL LOG
-// ======================================================
+// ====================================================
 
 function addLocalLog(
   message,
-  type
+  type = "info"
 ){
 
   addActivity({
@@ -2290,17 +2186,17 @@ function addLocalLog(
     time:
       new Date().toISOString(),
 
-    type:
-      type || "info",
+    type,
 
     message
+
   });
 }
 
 
-// ======================================================
-// ESCAPE
-// ======================================================
+// ====================================================
+// ESCAPE HTML
+// ====================================================
 
 function escapeHtml(
   value
@@ -2333,7 +2229,6 @@ function escapeHtml(
 
 </script>
 
-
 </body>
 
-            </html>
+  </html>
