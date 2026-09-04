@@ -1,617 +1,1218 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>F&O Live Scanner</title>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+F&O Live Scanner
+</title>
+
 
 <style>
+
 *{
   box-sizing:border-box;
 }
 
+
 body{
+
   margin:0;
-  font-family:Arial,sans-serif;
-  background:#eef3f5;
-  color:#17212b;
-  transition:.25s;
+
+  font-family:
+    Inter,
+    Arial,
+    sans-serif;
+
+  background:
+    #07110d;
+
+  color:
+    #edf7f0;
 }
 
-body.dark{
-  background:#0c1410;
-  color:#edf7f0;
-}
 
 .container{
-  max-width:1250px;
+
+  max-width:
+    1200px;
+
   margin:auto;
-  padding:18px;
+
+  padding:
+    18px;
 }
 
-/* HEADER */
 
-header{
+/* =================================================
+HEADER
+================================================= */
+
+.header{
+
   display:flex;
-  justify-content:space-between;
+
+  justify-content:
+    space-between;
+
   align-items:center;
-  margin-bottom:22px;
+
+  margin-bottom:
+    18px;
 }
+
 
 .brand{
+
   display:flex;
+
   align-items:center;
-  gap:13px;
+
+  gap:12px;
 }
+
 
 .logo{
-  width:58px;
-  height:58px;
-  border-radius:17px;
-  background:#08ad70;
-  color:#10231a;
+
+  width:52px;
+
+  height:52px;
+
+  border-radius:16px;
+
+  background:
+    #16c784;
+
   display:flex;
+
   align-items:center;
+
   justify-content:center;
-  font-size:32px;
-  font-weight:bold;
+
+  color:#062117;
+
+  font-size:28px;
+
+  font-weight:900;
 }
 
-h1{
-  margin:0;
-  font-size:26px;
+
+.title{
+
+  font-size:23px;
+
+  font-weight:800;
 }
+
 
 .subtitle{
-  margin-top:4px;
-  color:#6c7780;
-  font-size:14px;
+
+  color:#82938a;
+
+  font-size:12px;
+
+  margin-top:3px;
 }
 
-body.dark .subtitle{
-  color:#9aa89f;
+
+.connection{
+
+  padding:
+    9px 13px;
+
+  border-radius:
+    12px;
+
+  background:
+    #10231a;
+
+  border:
+    1px solid
+    #1c3a2a;
+
+  font-size:12px;
+
+  color:
+    #7ef0b8;
 }
 
-.theme-btn{
-  width:54px;
-  height:54px;
-  border-radius:50%;
-  background:white;
-  border:1px solid #dce3e6;
-  font-size:25px;
-  cursor:pointer;
+
+/* =================================================
+LOGIN
+================================================= */
+
+.login{
+
+  max-width:
+    500px;
+
+  margin:
+    50px auto;
+
+  background:
+    #101b16;
+
+  border:
+    1px solid
+    #21352a;
+
+  border-radius:
+    22px;
+
+  padding:
+    25px;
+
+  box-shadow:
+    0 20px 60px
+    rgba(0,0,0,.35);
 }
 
-body.dark .theme-btn{
-  background:#18231d;
-  border-color:#2b3931;
+
+.login h2{
+
+  margin:
+    0 0 5px;
+
+  font-size:
+    22px;
 }
 
-/* LOGIN */
 
-.login-card{
-  max-width:520px;
-  margin:45px auto;
-  background:white;
-  padding:27px;
-  border-radius:23px;
-  box-shadow:0 12px 35px rgba(0,0,0,.08);
+.login p{
+
+  margin:
+    0 0 22px;
+
+  color:
+    #82938a;
+
+  font-size:
+    13px;
+
+  line-height:
+    1.5;
 }
 
-body.dark .login-card{
-  background:#152019;
-  box-shadow:0 12px 35px rgba(0,0,0,.3);
-}
-
-.login-title{
-  font-size:23px;
-  font-weight:bold;
-}
-
-.login-subtitle{
-  color:#718078;
-  font-size:13px;
-  margin-top:5px;
-  margin-bottom:22px;
-}
-
-body.dark .login-subtitle{
-  color:#9aa89f;
-}
 
 label{
+
   display:block;
-  margin:14px 0 7px;
-  font-size:13px;
-  font-weight:bold;
+
+  margin:
+    13px 0 7px;
+
+  font-size:
+    12px;
+
+  font-weight:
+    700;
+
+  color:
+    #b9c9c0;
 }
+
 
 input{
+
   width:100%;
-  padding:14px;
-  border:1px solid #d5dfe0;
-  border-radius:12px;
-  font-size:15px;
+
+  padding:
+    14px;
+
+  border-radius:
+    12px;
+
+  border:
+    1px solid
+    #294036;
+
+  background:
+    #08120e;
+
+  color:white;
+
   outline:none;
-  background:white;
-  color:#17212b;
+
+  font-size:
+    14px;
 }
+
 
 input:focus{
-  border-color:#08ad70;
-  box-shadow:0 0 0 3px rgba(8,173,112,.12);
+
+  border-color:
+    #16c784;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(22,199,132,.12);
 }
 
-body.dark input{
-  background:#0e1712;
-  color:white;
-  border-color:#304037;
-}
 
-.connect-btn{
+.connect{
+
   width:100%;
-  margin-top:21px;
-  padding:15px;
+
+  margin-top:
+    20px;
+
+  padding:
+    14px;
+
   border:0;
-  border-radius:13px;
-  background:#08ad70;
-  color:white;
-  font-size:16px;
-  font-weight:bold;
+
+  border-radius:
+    13px;
+
+  background:
+    #16c784;
+
+  color:
+    #052017;
+
+  font-size:
+    15px;
+
+  font-weight:
+    900;
+
   cursor:pointer;
 }
 
-.connect-btn:disabled{
-  opacity:.6;
+
+.connect:disabled{
+
+  opacity:.55;
 }
+
 
 .error{
+
   display:none;
-  margin-top:15px;
-  padding:12px;
-  border-radius:11px;
-  background:#fee2e2;
-  color:#991b1b;
-  font-size:13px;
+
+  margin-top:
+    13px;
+
+  padding:
+    12px;
+
+  border-radius:
+    11px;
+
+  background:
+    #391719;
+
+  color:
+    #ff9d9d;
+
+  font-size:
+    12px;
 }
 
-body.dark .error{
-  background:#401b1b;
-  color:#ffb6b6;
-}
 
-/* DASHBOARD */
+/* =================================================
+DASHBOARD
+================================================= */
 
 #dashboard{
+
   display:none;
 }
 
-.market-header{
-  background:white;
-  padding:18px;
-  border-radius:18px;
-  margin-bottom:17px;
+
+.section{
+
+  margin-bottom:
+    17px;
 }
 
-body.dark .market-header{
-  background:#152019;
+
+/* =================================================
+INDEX CARDS
+================================================= */
+
+.index-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(2,1fr);
+
+  gap:
+    15px;
 }
 
-.market-top{
+
+.index-card{
+
+  background:
+    #101b16;
+
+  border:
+    1px solid
+    #21352a;
+
+  border-radius:
+    20px;
+
+  padding:
+    18px;
+}
+
+
+.index-top{
+
   display:flex;
-  justify-content:space-between;
+
+  justify-content:
+    space-between;
+
   align-items:center;
-  gap:10px;
 }
 
-.market-title{
-  font-size:22px;
-  font-weight:bold;
+
+.index-name{
+
+  font-size:
+    15px;
+
+  font-weight:
+    800;
 }
 
-.updated{
-  color:#78848a;
-  font-size:13px;
-  margin-top:5px;
-}
 
-body.dark .updated{
-  color:#9aa89f;
-}
+.toggle{
 
-.refresh-btn{
-  background:white;
-  border:1px solid #dce3e6;
-  padding:12px 15px;
-  border-radius:12px;
-  font-weight:bold;
+  width:
+    48px;
+
+  height:
+    27px;
+
+  border-radius:
+    30px;
+
+  background:
+    #26342d;
+
+  position:relative;
+
   cursor:pointer;
+
+  transition:.2s;
 }
 
-body.dark .refresh-btn{
-  background:#18231d;
-  color:white;
-  border-color:#304037;
-}
 
-/* CONNECTION */
+.toggle span{
 
-.connection-row{
-  display:flex;
-  align-items:center;
-  gap:15px;
-  margin-top:15px;
-  flex-wrap:wrap;
-}
+  position:absolute;
 
-.status-pill{
-  display:flex;
-  align-items:center;
-  gap:7px;
-  font-size:13px;
-  font-weight:bold;
-}
+  width:
+    21px;
 
-.status-dot{
-  width:10px;
-  height:10px;
+  height:
+    21px;
+
+  left:3px;
+
+  top:3px;
+
   border-radius:50%;
-  background:#22c55e;
+
+  background:#82938a;
+
+  transition:.2s;
 }
 
-.status-dot.off{
-  background:#ef4444;
+
+.toggle.on{
+
+  background:
+    #16c784;
 }
 
-.feed{
-  color:#6c7780;
-  font-size:12px;
+
+.toggle.on span{
+
+  transform:
+    translateX(21px);
+
+  background:
+    #062117;
 }
 
-body.dark .feed{
-  color:#9aa89f;
+
+.index-price{
+
+  margin-top:
+    17px;
+
+  font-size:
+    29px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    -.5px;
 }
 
-/* CARDS */
 
-.cards{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:17px;
+.index-change{
+
+  margin-top:
+    5px;
+
+  font-size:
+    13px;
+
+  font-weight:
+    700;
 }
 
-.card{
-  background:white;
-  border-radius:21px;
-  overflow:hidden;
-  min-height:410px;
-  box-shadow:0 8px 25px rgba(0,0,0,.05);
-}
-
-body.dark .card{
-  background:#152019;
-  box-shadow:0 8px 25px rgba(0,0,0,.25);
-}
-
-.card-head{
-  padding:19px;
-  border-bottom:1px solid #e7edef;
-}
-
-body.dark .card-head{
-  border-color:#29372f;
-}
-
-.card-title{
-  font-size:19px;
-  font-weight:bold;
-}
-
-.card-sub{
-  margin-top:5px;
-  font-size:13px;
-  color:#748087;
-}
-
-body.dark .card-sub{
-  color:#9aa89f;
-}
-
-.card-body{
-  padding:0 18px;
-}
-
-.row{
-  display:grid;
-  grid-template-columns:1fr auto;
-  padding:14px 0;
-  border-bottom:1px solid #edf1f2;
-}
-
-body.dark .row{
-  border-color:#29372f;
-}
-
-.row:last-child{
-  border-bottom:0;
-}
-
-.symbol{
-  font-weight:bold;
-  font-size:14px;
-}
-
-.price{
-  margin-top:4px;
-  color:#738087;
-  font-size:12px;
-}
-
-body.dark .price{
-  color:#9aa89f;
-}
-
-.right{
-  text-align:right;
-}
 
 .green{
-  color:#08a968;
-  font-weight:bold;
+
+  color:
+    #16c784;
 }
+
 
 .red{
-  color:#e53935;
-  font-weight:bold;
+
+  color:
+    #ff5c65;
 }
 
-.volume{
-  color:#08a968;
-  font-weight:bold;
-  font-size:13px;
+
+.waiting{
+
+  color:
+    #718279;
+
+  font-size:
+    13px;
 }
+
+
+/* =================================================
+OI
+================================================= */
+
+.oi-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(2,1fr);
+
+  gap:
+    15px;
+}
+
+
+.card{
+
+  background:
+    #101b16;
+
+  border:
+    1px solid
+    #21352a;
+
+  border-radius:
+    20px;
+
+  overflow:hidden;
+}
+
+
+.card-head{
+
+  padding:
+    17px;
+
+  border-bottom:
+    1px solid
+    #21352a;
+}
+
+
+.card-title{
+
+  font-size:
+    17px;
+
+  font-weight:
+    900;
+}
+
+
+.card-sub{
+
+  margin-top:
+    4px;
+
+  color:
+    #718279;
+
+  font-size:
+    11px;
+}
+
+
+.rows{
+
+  padding:
+    0 17px;
+}
+
+
+.row{
+
+  display:grid;
+
+  grid-template-columns:
+    1fr auto;
+
+  gap:
+    10px;
+
+  padding:
+    13px 0;
+
+  border-bottom:
+    1px solid
+    #192820;
+}
+
+
+.row:last-child{
+
+  border-bottom:
+    0;
+}
+
+
+.symbol{
+
+  font-size:
+    14px;
+
+  font-weight:
+    800;
+}
+
+
+.stock-price{
+
+  margin-top:
+    4px;
+
+  color:
+    #718279;
+
+  font-size:
+    11px;
+}
+
+
+.oi{
+
+  text-align:right;
+
+  font-size:
+    13px;
+
+  font-weight:
+    900;
+}
+
+
+.oi-label{
+
+  margin-top:
+    3px;
+
+  color:
+    #718279;
+
+  font-size:
+    10px;
+}
+
 
 .empty{
-  min-height:300px;
+
+  min-height:
+    190px;
+
   display:flex;
+
   align-items:center;
+
   justify-content:center;
+
+  color:
+    #718279;
+
+  font-size:
+    12px;
+
   text-align:center;
-  color:#7a858b;
-  font-size:13px;
 }
 
-/* NOTES */
 
-.notes{
-  background:white;
-  margin-top:18px;
-  padding:18px;
-  border-radius:18px;
-  color:#6d787e;
-  font-size:13px;
-  line-height:1.7;
+/* =================================================
+ACTIVITY LOG
+================================================= */
+
+.log-card{
+
+  background:
+    #050b08;
+
+  border:
+    1px solid
+    #21352a;
+
+  border-radius:
+    20px;
+
+  overflow:hidden;
 }
 
-body.dark .notes{
-  background:#152019;
-  color:#a3afa8;
+
+.log-head{
+
+  padding:
+    15px 17px;
+
+  display:flex;
+
+  justify-content:
+    space-between;
+
+  align-items:center;
+
+  border-bottom:
+    1px solid
+    #21352a;
 }
 
-.notes b{
-  color:#17212b;
+
+.log-title{
+
+  font-size:
+    16px;
+
+  font-weight:
+    900;
 }
 
-body.dark .notes b{
-  color:#edf7f0;
+
+.log-status{
+
+  color:
+    #16c784;
+
+  font-size:
+    10px;
+
+  font-weight:
+    800;
 }
 
-/* MOBILE */
 
-@media(max-width:800px){
+.logs{
+
+  height:
+    230px;
+
+  overflow-y:
+    auto;
+
+  padding:
+    10px 14px;
+
+  font-family:
+    monospace;
+
+  font-size:
+    11px;
+}
+
+
+.log{
+
+  padding:
+    5px 0;
+
+  border-bottom:
+    1px solid
+    #0e1914;
+
+  line-height:
+    1.4;
+}
+
+
+.log-time{
+
+  color:
+    #52635a;
+}
+
+
+.log-info{
+
+  color:
+    #a9b8af;
+}
+
+
+.log-success{
+
+  color:
+    #16c784;
+}
+
+
+.log-error{
+
+  color:
+    #ff646d;
+}
+
+
+.log-warn{
+
+  color:
+    #f5c451;
+}
+
+
+/* =================================================
+BOTTOM
+================================================= */
+
+.footer{
+
+  margin-top:
+    15px;
+
+  color:
+    #56665d;
+
+  font-size:
+    10px;
+
+  text-align:center;
+}
+
+
+/* =================================================
+MOBILE
+================================================= */
+
+@media(
+  max-width:750px
+){
 
   .container{
-    padding:12px;
+
+    padding:
+      12px;
   }
 
-  h1{
-    font-size:21px;
+
+  .index-grid,
+  .oi-grid{
+
+    grid-template-columns:
+      1fr;
   }
 
-  .logo{
-    width:52px;
-    height:52px;
-    font-size:28px;
+
+  .title{
+
+    font-size:
+      19px;
   }
 
-  .market-top{
-    align-items:flex-start;
+
+  .connection{
+
+    display:none;
   }
 
-  .cards{
-    display:flex;
-    overflow-x:auto;
-    gap:13px;
-    scroll-snap-type:x mandatory;
-    padding-bottom:7px;
+
+  .index-price{
+
+    font-size:
+      27px;
   }
 
-  .card{
-    flex:0 0 88%;
-    scroll-snap-align:start;
-  }
-
-  .market-title{
-    font-size:20px;
-  }
 }
+
 </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
 
-<header>
+
+<!-- =================================================
+HEADER
+================================================= -->
+
+<div class="header">
 
   <div class="brand">
 
-    <div class="logo">₹</div>
+    <div class="logo">
+      ₹
+    </div>
 
     <div>
-      <h1>F&O Live Scanner</h1>
-      <div class="subtitle">
-        Live NSE Cash + F&O Market Movers
+
+      <div class="title">
+        F&O Live Scanner
       </div>
+
+      <div class="subtitle">
+        Angel One • Real-Time Market Feed
+      </div>
+
     </div>
 
   </div>
 
-  <button
-    class="theme-btn"
-    onclick="toggleTheme()"
-    id="themeBtn"
-  >☀️</button>
 
-</header>
+  <div
+    class="connection"
+    id="connection"
+  >
+    ● Broker Disconnected
+  </div>
+
+</div>
 
 
-<!-- LOGIN -->
+<!-- =================================================
+LOGIN
+================================================= -->
 
 <div
-  id="loginSection"
-  class="login-card"
+  class="login"
+  id="login"
 >
 
-  <div class="login-title">
-    Angel One SmartAPI
-  </div>
+  <h2>
+    Connect Broker
+  </h2>
 
-  <div class="login-subtitle">
-    Long TOTP Secret enter karein. Scanner automatically current 6-digit TOTP generate karega.
-  </div>
+  <p>
+    Angel One SmartAPI credentials enter karein.
+    Long alphanumeric TOTP Secret se current OTP
+    automatically generate hoga.
+  </p>
 
 
-  <label>API Key</label>
+  <label>
+    API Key
+  </label>
 
   <input
     id="apiKey"
     type="password"
-    placeholder="Angel One API Key"
     autocomplete="off"
+    placeholder="Angel One API Key"
   >
 
 
-  <label>Client ID</label>
+  <label>
+    Client ID
+  </label>
 
   <input
     id="clientId"
     type="text"
-    placeholder="Client ID"
     autocomplete="off"
+    placeholder="Client ID"
   >
 
 
-  <label>MPIN</label>
+  <label>
+    MPIN
+  </label>
 
   <input
     id="mpin"
     type="password"
-    placeholder="MPIN"
     inputmode="numeric"
     autocomplete="off"
+    placeholder="MPIN"
   >
 
 
-  <label>Long TOTP Secret</label>
+  <label>
+    Long TOTP Secret
+  </label>
 
   <input
     id="totpSecret"
     type="password"
-    placeholder="Letters + numbers wala TOTP Secret"
     autocomplete="off"
+    placeholder="Letters + numbers wala TOTP Secret"
   >
 
 
   <button
+    class="connect"
     id="connectBtn"
-    class="connect-btn"
-    onclick="login()"
+    onclick="loginBroker()"
   >
     🔐 Connect Angel One
   </button>
 
 
   <div
-    id="errorBox"
     class="error"
+    id="errorBox"
   ></div>
 
 </div>
 
 
-<!-- DASHBOARD -->
+<!-- =================================================
+DASHBOARD
+================================================= -->
 
-<div id="dashboard">
+<div
+  id="dashboard"
+>
 
 
-  <div class="market-header">
+  <!-- =================================================
+  INDEX LIVE
+  ================================================= -->
 
-    <div class="market-top">
+  <div class="section">
 
-      <div>
+    <div class="index-grid">
 
-        <div class="market-title">
-          Market Movers
+
+      <!-- NIFTY -->
+
+      <div class="index-card">
+
+        <div class="index-top">
+
+          <div class="index-name">
+            NIFTY 50
+          </div>
+
+          <div
+            class="toggle"
+            id="niftyToggle"
+            onclick="toggleIndex('nifty')"
+          >
+
+            <span></span>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="index-price"
+          id="niftyPrice"
+        >
+          —
+        </div>
+
+
+        <div
+          class="index-change"
+          id="niftyChange"
+        >
+          Live tick OFF
+        </div>
+
+      </div>
+
+
+      <!-- SENSEX -->
+
+      <div class="index-card">
+
+        <div class="index-top">
+
+          <div class="index-name">
+            SENSEX
+          </div>
+
+          <div
+            class="toggle"
+            id="sensexToggle"
+            onclick="toggleIndex('sensex')"
+          >
+
+            <span></span>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="index-price"
+          id="sensexPrice"
+        >
+          —
+        </div>
+
+
+        <div
+          class="index-change"
+          id="sensexChange"
+        >
+          Live tick OFF
+        </div>
+
+      </div>
+
+
+    </div>
+
+  </div>
+
+
+  <!-- =================================================
+  OI
+  ================================================= -->
+
+  <div class="section">
+
+    <div class="oi-grid">
+
+
+      <!-- OI GAINERS -->
+
+      <div class="card">
+
+        <div class="card-head">
+
+          <div class="card-title">
+            📈 Top 10 OI Gainers
+          </div>
+
+          <div class="card-sub">
+            F&O OI • Cash symbol displayed
+          </div>
+
+        </div>
+
+
+        <div
+          class="rows"
+          id="oiGainers"
+        >
+
+          <div class="empty">
+            Waiting for OI data...
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- OI LOSERS -->
+
+      <div class="card">
+
+        <div class="card-head">
+
+          <div class="card-title">
+            📉 Top 10 OI Losers
+          </div>
+
+          <div class="card-sub">
+            F&O OI • Cash symbol displayed
+          </div>
+
+        </div>
+
+
+        <div
+          class="rows"
+          id="oiLosers"
+        >
+
+          <div class="empty">
+            Waiting for OI data...
+          </div>
+
+        </div>
+
+      </div>
+
+
+    </div>
+
+  </div>
+
+
+  <!-- =================================================
+  ACTIVITY LOG
+  ================================================= -->
+
+  <div class="section">
+
+    <div class="log-card">
+
+      <div class="log-head">
+
+        <div class="log-title">
+          Activity Log
         </div>
 
         <div
-          class="updated"
-          id="updated"
+          class="log-status"
+          id="logStatus"
         >
-          Waiting for market data...
+          LIVE
         </div>
 
       </div>
 
 
-      <button
-        class="refresh-btn"
-        onclick="loadScanner()"
-      >
-        ↻ Refresh All
-      </button>
-
-    </div>
-
-
-    <div class="connection-row">
-
-      <!-- IMPORTANT:
-           This status means Angel One LOGIN,
-           not WebSocket.
-      -->
-
-      <div class="status-pill">
-
-        <span
-          id="loginDot"
-          class="status-dot"
-        ></span>
-
-        <span id="loginStatus">
-          Angel One Connected
-        </span>
-
-      </div>
-
-
       <div
-        class="feed"
-        id="feedStatus"
+        class="logs"
+        id="logs"
       >
-        Live Feed checking...
+
+        <div class="log">
+          <span class="log-info">
+            Waiting for broker connection...
+          </span>
+        </div>
+
       </div>
 
     </div>
@@ -619,191 +1220,55 @@ body.dark .notes b{
   </div>
 
 
-  <!-- THREE CARDS -->
+  <div class="footer">
 
-  <div class="cards">
-
-
-    <!-- OI GAINERS -->
-
-    <div class="card">
-
-      <div class="card-head">
-
-        <div class="card-title">
-          📈 OI Gainers
-        </div>
-
-        <div class="card-sub">
-          Highest OI increase
-        </div>
-
-      </div>
-
-      <div
-        id="oiGainers"
-        class="card-body"
-      >
-
-        <div class="empty">
-          Loading OI Gainers...
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- OI LOSERS -->
-
-    <div class="card">
-
-      <div class="card-head">
-
-        <div class="card-title">
-          📉 OI Losers
-        </div>
-
-        <div class="card-sub">
-          Highest OI decrease
-        </div>
-
-      </div>
-
-      <div
-        id="oiLosers"
-        class="card-body"
-      >
-
-        <div class="empty">
-          Loading OI Losers...
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- VOLUME GAINERS -->
-
-    <div class="card">
-
-      <div class="card-head">
-
-        <div class="card-title">
-          🔥 Volume Gainers
-        </div>
-
-        <div class="card-sub">
-          NSE Cash Market Volume
-        </div>
-
-      </div>
-
-      <div
-        id="volumeGainers"
-        class="card-body"
-      >
-
-        <div class="empty">
-          Collecting live volume...
-        </div>
-
-      </div>
-
-    </div>
-
+    Live market data is provided by Angel One SmartAPI.
+    This scanner does not place orders.
 
   </div>
 
-
-  <div class="notes">
-
-    <b>Important:</b><br>
-
-    • OI data F&O futures se aata hai,
-    lekin screen par underlying cash-stock symbol dikhaya jata hai.<br>
-
-    • Price aur Change % NSE cash stock feed se aate hain.<br>
-
-    • Volume Gainers sirf NSE cash-market volume par based hain,
-    futures volume par nahi.<br>
-
-    • Angel One login status aur WebSocket live-feed status alag dikhaye gaye hain.
-
-  </div>
 
 </div>
+
 
 </div>
 
 
 <script>
 
-let refreshTimer = null;
-let statusTimer = null;
+
+// ======================================================
+// GLOBAL
+// ======================================================
+
+let eventStream = null;
+
+let connected = false;
 
 
-// =================================================
-// THEME
-// =================================================
-
-function toggleTheme(){
-
-  document.body.classList.toggle("dark");
-
-  const dark =
-    document.body.classList.contains("dark");
-
-  localStorage.setItem(
-    "theme",
-    dark ? "dark" : "light"
-  );
-
-  document.getElementById(
-    "themeBtn"
-  ).textContent =
-    dark ? "🌙" : "☀️";
-}
-
-
-(function(){
-
-  const theme =
-    localStorage.getItem("theme");
-
-  if(theme === "dark"){
-
-    document.body.classList.add("dark");
-
-    document.getElementById(
-      "themeBtn"
-    ).textContent = "🌙";
-  }
-
-})();
-
-
-// =================================================
+// ======================================================
 // LOGIN
-// =================================================
+// ======================================================
 
-async function login(){
+async function loginBroker(){
 
   const apiKey =
     document.getElementById(
       "apiKey"
     ).value.trim();
 
+
   const clientId =
     document.getElementById(
       "clientId"
     ).value.trim();
 
+
   const mpin =
     document.getElementById(
       "mpin"
     ).value.trim();
+
 
   const totpSecret =
     document.getElementById(
@@ -811,14 +1276,15 @@ async function login(){
     ).value.trim();
 
 
+  const button =
+    document.getElementById(
+      "connectBtn"
+    );
+
+
   const errorBox =
     document.getElementById(
       "errorBox"
-    );
-
-  const connectBtn =
-    document.getElementById(
-      "connectBtn"
     );
 
 
@@ -833,21 +1299,19 @@ async function login(){
     !totpSecret
   ){
 
-    errorBox.textContent =
-      "API Key, Client ID, MPIN aur Long TOTP Secret required hai.";
-
-    errorBox.style.display =
-      "block";
+    showError(
+      "API Key, Client ID, MPIN aur Long TOTP Secret required hai."
+    );
 
     return;
   }
 
 
-  connectBtn.disabled =
+  button.disabled =
     true;
 
-  connectBtn.textContent =
-    "⏳ Connecting Angel One...";
+  button.textContent =
+    "⏳ Connecting...";
 
 
   try{
@@ -856,23 +1320,27 @@ async function login(){
       await fetch(
         "/api/login",
         {
-          method:"POST",
+
+          method:
+            "POST",
 
           headers:{
             "Content-Type":
               "application/json"
           },
 
-          body:JSON.stringify({
+          body:
+            JSON.stringify({
 
-            apiKey,
-            clientId,
-            mpin,
+              apiKey,
 
-            // LONG ALPHANUMERIC SECRET
-            totpSecret
+              clientId,
 
-          })
+              mpin,
+
+              totpSecret
+
+            })
         }
       );
 
@@ -888,17 +1356,17 @@ async function login(){
 
       throw new Error(
         data.message ||
-        "Angel One login failed."
+        "Broker login failed."
       );
     }
 
 
-    // =============================================
-    // LOGIN SUCCESS
-    // =============================================
+    connected =
+      true;
+
 
     document.getElementById(
-      "loginSection"
+      "login"
     ).style.display =
       "none";
 
@@ -909,196 +1377,391 @@ async function login(){
       "block";
 
 
-    // IMPORTANT:
-    // Angel One login successful means
-    // CONNECTED even if WebSocket is still starting.
-
-    document.getElementById(
-      "loginStatus"
-    ).textContent =
-      "Angel One Connected";
+    updateConnection(
+      true
+    );
 
 
-    document.getElementById(
-      "loginDot"
-    ).classList.remove("off");
+    addLocalLog(
+      "Broker login successful.",
+      "success"
+    );
 
 
-    document.getElementById(
-      "feedStatus"
-    ).textContent =
-      "Live Feed starting...";
-
-
-    document.getElementById(
-      "updated"
-    ).textContent =
-      "Connected • Loading market data...";
-
-
-    await loadScanner();
-
-    await updateStatus();
-
-
-    if(refreshTimer){
-
-      clearInterval(
-        refreshTimer
-      );
-    }
-
-
-    if(statusTimer){
-
-      clearInterval(
-        statusTimer
-      );
-    }
-
-
-    // Scanner refresh
-    refreshTimer =
-      setInterval(
-        loadScanner,
-        10000
-      );
-
-
-    // Connection status refresh
-    statusTimer =
-      setInterval(
-        updateStatus,
-        3000
-      );
+    connectStream();
 
 
   }catch(error){
 
-    errorBox.textContent =
-      error.message ||
-      "Angel One login failed.";
-
-    errorBox.style.display =
-      "block";
+    showError(
+      error.message
+    );
 
   }finally{
 
-    connectBtn.disabled =
+    button.disabled =
       false;
 
-    connectBtn.textContent =
+    button.textContent =
       "🔐 Connect Angel One";
   }
 }
 
 
-// =================================================
-// STATUS
-// =================================================
+// ======================================================
+// CONNECTION
+// ======================================================
 
-async function updateStatus(){
+function updateConnection(
+  state
+){
 
-  try{
-
-    const response =
-      await fetch(
-        "/api/status"
-      );
-
-
-    const data =
-      await response.json();
-
-
-    // ---------------------------------------------
-    // LOGIN STATUS
-    // ---------------------------------------------
-
-    if(data.connected){
-
-      document.getElementById(
-        "loginStatus"
-      ).textContent =
-        "Angel One Connected";
-
-      document.getElementById(
-        "loginDot"
-      ).classList.remove("off");
-
-    }else{
-
-      document.getElementById(
-        "loginStatus"
-      ).textContent =
-        "Angel One Disconnected";
-
-      document.getElementById(
-        "loginDot"
-      ).classList.add("off");
-    }
-
-
-    // ---------------------------------------------
-    // WEBSOCKET STATUS
-    // ---------------------------------------------
-
-    if(data.websocket){
-
-      document.getElementById(
-        "feedStatus"
-      ).textContent =
-        `● Live Feed ON • ${data.liveStocks || 0} stocks`;
-
-    }else{
-
-      document.getElementById(
-        "feedStatus"
-      ).textContent =
-        "○ Live Feed connecting...";
-    }
-
-
-    // ---------------------------------------------
-    // UPDATE TIME
-    // ---------------------------------------------
-
-    if(data.lastTickTime){
-
-      const time =
-        new Date(
-          data.lastTickTime
-        ).toLocaleTimeString(
-          "en-IN"
-        );
-
-      document.getElementById(
-        "updated"
-      ).textContent =
-        `Updated • ${time} • ${data.stocks || 0} F&O stocks`;
-    }
-
-  }catch(error){
-
-    console.log(
-      "Status error:",
-      error
+  const el =
+    document.getElementById(
+      "connection"
     );
+
+
+  if(state){
+
+    el.textContent =
+      "● Broker Connected";
+
+    el.style.color =
+      "#16c784";
+
+  }else{
+
+    el.textContent =
+      "● Broker Disconnected";
+
+    el.style.color =
+      "#ff646d";
   }
 }
 
 
-// =================================================
-// SCANNER
-// =================================================
+// ======================================================
+// ERROR
+// ======================================================
 
-async function loadScanner(){
+function showError(
+  message
+){
+
+  const box =
+    document.getElementById(
+      "errorBox"
+    );
+
+
+  box.textContent =
+    message;
+
+
+  box.style.display =
+    "block";
+}
+
+
+// ======================================================
+// SSE STREAM
+// ======================================================
+
+function connectStream(){
+
+  if(eventStream){
+
+    eventStream.close();
+  }
+
+
+  eventStream =
+    new EventSource(
+      "/api/stream"
+    );
+
+
+  // ----------------------------------------------
+  // STATUS
+  // ----------------------------------------------
+
+  eventStream.addEventListener(
+    "status",
+    event => {
+
+      try{
+
+        const data =
+          JSON.parse(
+            event.data
+          );
+
+
+        if(data.connected){
+
+          updateConnection(
+            true
+          );
+
+        }
+
+      }catch(error){}
+    }
+  );
+
+
+  // ----------------------------------------------
+  // LOGIN
+  // ----------------------------------------------
+
+  eventStream.addEventListener(
+    "login",
+    event => {
+
+      connected =
+        true;
+
+      updateConnection(
+        true
+      );
+    }
+  );
+
+
+  // ----------------------------------------------
+  // INDEX TICK
+  // ----------------------------------------------
+
+  eventStream.addEventListener(
+    "indexTick",
+    event => {
+
+      const payload =
+        JSON.parse(
+          event.data
+        );
+
+
+      updateIndex(
+        payload.index,
+        payload.data
+      );
+    }
+  );
+
+
+  // ----------------------------------------------
+  // INDEX STATE
+  // ----------------------------------------------
+
+  eventStream.addEventListener(
+    "indexState",
+    event => {
+
+      const state =
+        JSON.parse(
+          event.data
+        );
+
+
+      updateToggle(
+        "nifty",
+        state.nifty
+      );
+
+
+      updateToggle(
+        "sensex",
+        state.sensex
+      );
+    }
+  );
+
+
+  // ----------------------------------------------
+  // OI
+  // ----------------------------------------------
+
+  eventStream.addEventListener(
+    "oi",
+    event => {
+
+      const data =
+        JSON.parse(
+          event.data
+        );
+
+
+      renderOI(
+        "oiGainers",
+        data.gainers,
+        true
+      );
+
+
+      renderOI(
+        "oiLosers",
+        data.losers,
+        false
+      );
+    }
+  );
+
+
+  // ----------------------------------------------
+  // STOCK TICK
+  // ----------------------------------------------
+
+  eventStream.addEventListener(
+    "stockTick",
+    event => {
+
+      const tick =
+        JSON.parse(
+          event.data
+        );
+
+
+      updateStockTick(
+        tick
+      );
+    }
+  );
+
+
+  // ----------------------------------------------
+  // ACTIVITY
+  // ----------------------------------------------
+
+  eventStream.addEventListener(
+    "activity",
+    event => {
+
+      const log =
+        JSON.parse(
+          event.data
+        );
+
+
+      addActivity(
+        log
+      );
+    }
+  );
+
+
+  // ----------------------------------------------
+  // OLD LOGS
+  // ----------------------------------------------
+
+  eventStream.addEventListener(
+    "logs",
+    event => {
+
+      const logs =
+        JSON.parse(
+          event.data
+        );
+
+
+      document.getElementById(
+        "logs"
+      ).innerHTML =
+        "";
+
+
+      logs.forEach(
+        log => {
+
+          addActivity(
+            log
+          );
+        }
+      );
+    }
+  );
+
+
+  eventStream.onerror =
+    () => {
+
+      document.getElementById(
+        "logStatus"
+      ).textContent =
+        "RECONNECTING";
+
+      document.getElementById(
+        "logStatus"
+      ).style.color =
+        "#f5c451";
+    };
+
+
+  eventStream.onopen =
+    () => {
+
+      document.getElementById(
+        "logStatus"
+      ).textContent =
+        "LIVE";
+
+      document.getElementById(
+        "logStatus"
+      ).style.color =
+        "#16c784";
+    };
+}
+
+
+// ======================================================
+// TOGGLE INDEX
+// ======================================================
+
+async function toggleIndex(
+  index
+){
+
+  const toggle =
+    document.getElementById(
+      index + "Toggle"
+    );
+
+
+  const enabled =
+    !toggle.classList.contains(
+      "on"
+    );
+
 
   try{
 
+    toggle.style.opacity =
+      ".5";
+
+
     const response =
       await fetch(
-        "/api/scanner"
+        "/api/index-toggle",
+        {
+
+          method:
+            "POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+
+              index,
+
+              enabled
+
+            })
+        }
       );
 
 
@@ -1113,76 +1776,183 @@ async function loadScanner(){
 
       throw new Error(
         data.message ||
-        "Scanner data unavailable."
+        "Toggle failed."
       );
     }
 
 
-    renderOI(
-      "oiGainers",
-      data.oiGainers || [],
-      true
+    updateToggle(
+      index,
+      enabled
     );
-
-
-    renderOI(
-      "oiLosers",
-      data.oiLosers || [],
-      false
-    );
-
-
-    renderVolume(
-      data.volumeGainers || []
-    );
-
-
-    if(data.status){
-
-      const time =
-        data.status.lastTickTime
-          ? new Date(
-              data.status.lastTickTime
-            ).toLocaleTimeString("en-IN")
-          : "Waiting";
-
-
-      document.getElementById(
-        "updated"
-      ).textContent =
-        `Updated • ${time}`;
-    }
 
 
   }catch(error){
 
-    console.log(
-      "Scanner error:",
-      error
+    addLocalLog(
+      error.message,
+      "error"
     );
 
 
-    document.getElementById(
-      "oiGainers"
-    ).innerHTML =
-      `<div class="empty">
-        Unable to load OI Gainers
-      </div>`;
+    updateToggle(
+      index,
+      !enabled
+    );
 
+  }finally{
 
-    document.getElementById(
-      "oiLosers"
-    ).innerHTML =
-      `<div class="empty">
-        Unable to load OI Losers
-      </div>`;
+    toggle.style.opacity =
+      "1";
   }
 }
 
 
-// =================================================
+// ======================================================
+// UPDATE TOGGLE
+// ======================================================
+
+function updateToggle(
+  index,
+  enabled
+){
+
+  const toggle =
+    document.getElementById(
+      index + "Toggle"
+    );
+
+
+  if(enabled){
+
+    toggle.classList.add(
+      "on"
+    );
+
+  }else{
+
+    toggle.classList.remove(
+      "on"
+    );
+  }
+
+
+  const change =
+    document.getElementById(
+      index + "Change"
+    );
+
+
+  if(!enabled){
+
+    change.textContent =
+      "Live tick OFF";
+
+    change.className =
+      "index-change";
+
+  }else{
+
+    change.textContent =
+      "Waiting for live tick...";
+
+    change.className =
+      "index-change waiting";
+  }
+}
+
+
+// ======================================================
+// INDEX DISPLAY
+// ======================================================
+
+function updateIndex(
+  index,
+  data
+){
+
+  const price =
+    document.getElementById(
+      index + "Price"
+    );
+
+
+  const change =
+    document.getElementById(
+      index + "Change"
+    );
+
+
+  if(
+    data.price === null ||
+    data.price === undefined
+  ){
+
+    price.textContent =
+      "—";
+
+    return;
+  }
+
+
+  price.textContent =
+    "₹" +
+    Number(
+      data.price
+    ).toLocaleString(
+      "en-IN",
+      {
+        minimumFractionDigits:
+          2,
+
+        maximumFractionDigits:
+          2
+      }
+    );
+
+
+  if(
+    data.changePercent !== null &&
+    data.changePercent !== undefined
+  ){
+
+    const sign =
+      data.change >= 0
+        ? "+"
+        : "";
+
+
+    change.textContent =
+      `${sign}${Number(
+        data.change
+      ).toFixed(2)}
+      (${sign}${Number(
+        data.changePercent
+      ).toFixed(2)}%)`;
+
+
+    change.className =
+      "index-change " +
+      (
+        data.change >= 0
+          ? "green"
+          : "red"
+      );
+
+  }else{
+
+    change.textContent =
+      "Live tick received";
+
+    change.className =
+      "index-change green";
+  }
+}
+
+
+// ======================================================
 // OI RENDER
-// =================================================
+// ======================================================
 
 function renderOI(
   elementId,
@@ -1196,12 +1966,17 @@ function renderOI(
     );
 
 
-  if(!rows.length){
+  if(
+    !rows ||
+    !rows.length
+  ){
 
     container.innerHTML =
-      `<div class="empty">
-        No OI data available
-      </div>`;
+      `
+      <div class="empty">
+        OI data waiting...
+      </div>
+      `;
 
     return;
   }
@@ -1210,205 +1985,330 @@ function renderOI(
   container.innerHTML =
     rows
       .slice(0,10)
-      .map(row => {
+      .map(
+        row => {
 
-        const oi =
-          Number(
-            row.oiPercent || 0
-          );
-
-
-        const change =
-          Number(
-            row.changePercent || 0
-          );
+          const oi =
+            Number(
+              row.oiPercent ||
+              0
+            );
 
 
-        return `
+          const price =
+            row.price;
 
-        <div class="row">
 
-          <div>
+          const change =
+            row.changePercent;
 
-            <div class="symbol">
-              ${escapeHtml(row.symbol)}
+
+          return `
+
+          <div
+            class="row"
+            data-symbol="${escapeHtml(
+              row.symbol
+            )}"
+          >
+
+            <div>
+
+              <div class="symbol">
+                ${escapeHtml(
+                  row.symbol
+                )}
+              </div>
+
+
+              <div class="stock-price">
+
+                <span
+                  class="live-price"
+                  data-price="${escapeHtml(
+                    row.symbol
+                  )}"
+                >
+
+                  ${
+                    price !== null &&
+                    price !== undefined
+                      ? "₹" +
+                        Number(
+                          price
+                        ).toFixed(2)
+                      : "Live price waiting..."
+                  }
+
+                </span>
+
+
+                ${
+                  change !== null &&
+                  change !== undefined
+                    ? ` • <span class="${
+                        change >= 0
+                          ? "green"
+                          : "red"
+                      }">
+                      ${
+                        change >= 0
+                          ? "+"
+                          : ""
+                      }${Number(
+                        change
+                      ).toFixed(2)}%
+                    </span>`
+                    : ""
+                }
+
+              </div>
+
             </div>
 
-            <div class="price">
 
-              ${
-                row.price
-                  ? "₹" +
-                    Number(
-                      row.price
-                    ).toFixed(2)
-                  : "Price waiting..."
-              }
+            <div class="oi">
 
-              ${
-                row.price
-                  ? ` • ${
-                      change >= 0
-                        ? "+"
-                        : ""
-                    }${change.toFixed(2)}%`
-                  : ""
-              }
+              <div
+                class="${
+                  positive
+                    ? "green"
+                    : "red"
+                }"
+              >
+
+                ${
+                  oi >= 0
+                    ? "+"
+                    : ""
+                }${oi.toFixed(2)}%
+
+              </div>
+
+
+              <div class="oi-label">
+                OI Change
+              </div>
 
             </div>
 
           </div>
 
-
-          <div class="right">
-
-            <div class="${
-              positive
-                ? "green"
-                : "red"
-            }">
-
-              ${
-                oi >= 0
-                  ? "+"
-                  : ""
-              }${oi.toFixed(2)}%
-
-            </div>
-
-            <div class="price">
-              OI
-            </div>
-
-          </div>
-
-        </div>
-
-        `;
-      })
+          `;
+        }
+      )
       .join("");
 }
 
 
-// =================================================
-// VOLUME
-// =================================================
+// ======================================================
+// UPDATE STOCK TICK
+// ======================================================
 
-function renderVolume(rows){
+function updateStockTick(
+  tick
+){
 
-  const container =
-    document.getElementById(
-      "volumeGainers"
+  const rows =
+    document.querySelectorAll(
+      `.row[data-symbol="${CSS.escape(
+        tick.symbol
+      )}"]`
     );
 
 
-  if(!rows.length){
+  rows.forEach(
+    row => {
 
-    container.innerHTML =
-      `<div class="empty">
-        Collecting live NSE cash volume...
-      </div>`;
-
-    return;
-  }
+      const priceEl =
+        row.querySelector(
+          ".live-price"
+        );
 
 
-  container.innerHTML =
-    rows
-      .slice(0,10)
-      .map(row => {
+      if(!priceEl){
 
-        return `
-
-        <div class="row">
-
-          <div>
-
-            <div class="symbol">
-              ${escapeHtml(row.symbol)}
-            </div>
-
-            <div class="price">
-
-              ${
-                row.price
-                  ? "₹" +
-                    Number(
-                      row.price
-                    ).toFixed(2)
-                  : "Price waiting..."
-              }
-
-            </div>
-
-          </div>
+        return;
+      }
 
 
-          <div class="right">
+      if(
+        tick.price !== null &&
+        tick.price !== undefined
+      ){
 
-            <div class="volume">
-              ${formatVolume(
-                Number(
-                  row.volume || 0
-                )
-              )}
-            </div>
+        priceEl.textContent =
+          "₹" +
+          Number(
+            tick.price
+          ).toFixed(2);
+      }
 
-            <div class="price">
-              Volume
-            </div>
 
-          </div>
+      const stockPrice =
+        row.querySelector(
+          ".stock-price"
+        );
 
-        </div>
 
-        `;
-      })
-      .join("");
+      if(
+        tick.changePercent !== null &&
+        tick.changePercent !== undefined
+      ){
+
+        const oldChange =
+          stockPrice.querySelector(
+            ".tick-change"
+          );
+
+
+        if(oldChange){
+
+          oldChange.remove();
+        }
+
+
+        const span =
+          document.createElement(
+            "span"
+          );
+
+
+        span.className =
+          "tick-change " +
+          (
+            tick.changePercent >= 0
+              ? "green"
+              : "red"
+          );
+
+
+        span.textContent =
+          ` • ${
+            tick.changePercent >= 0
+              ? "+"
+              : ""
+          }${Number(
+            tick.changePercent
+          ).toFixed(2)}%`;
+
+
+        stockPrice.appendChild(
+          span
+        );
+      }
+    }
+  );
 }
 
 
-// =================================================
-// VOLUME FORMAT
-// =================================================
+// ======================================================
+// ACTIVITY LOG
+// ======================================================
 
-function formatVolume(value){
+function addActivity(
+  log
+){
 
-  if(value >= 10000000){
+  const container =
+    document.getElementById(
+      "logs"
+    );
 
-    return (
-      value / 10000000
-    ).toFixed(2) + " Cr";
+
+  const time =
+    new Date(
+      log.time
+    ).toLocaleTimeString(
+      "en-IN"
+    );
+
+
+  const type =
+    String(
+      log.type ||
+      "INFO"
+    ).toLowerCase();
+
+
+  const div =
+    document.createElement(
+      "div"
+    );
+
+
+  div.className =
+    "log";
+
+
+  div.innerHTML =
+    `
+    <span class="log-time">
+      [${time}]
+    </span>
+
+    <span class="log-${type}">
+      ${escapeHtml(
+        log.message
+      )}
+    </span>
+    `;
+
+
+  container.appendChild(
+    div
+  );
+
+
+  while(
+    container.children.length >
+    300
+  ){
+
+    container.removeChild(
+      container.firstChild
+    );
   }
 
 
-  if(value >= 100000){
-
-    return (
-      value / 100000
-    ).toFixed(2) + " L";
-  }
-
-
-  if(value >= 1000){
-
-    return (
-      value / 1000
-    ).toFixed(1) + " K";
-  }
-
-
-  return String(value);
+  container.scrollTop =
+    container.scrollHeight;
 }
 
 
-// =================================================
-// HTML ESCAPE
-// =================================================
+// ======================================================
+// LOCAL LOG
+// ======================================================
 
-function escapeHtml(value){
+function addLocalLog(
+  message,
+  type
+){
 
-  return String(value)
+  addActivity({
+
+    time:
+      new Date().toISOString(),
+
+    type:
+      type || "info",
+
+    message
+  });
+}
+
+
+// ======================================================
+// ESCAPE
+// ======================================================
+
+function escapeHtml(
+  value
+){
+
+  return String(
+    value
+  )
     .replace(
       /&/g,
       "&amp;"
@@ -1433,5 +2333,7 @@ function escapeHtml(value){
 
 </script>
 
+
 </body>
-</html>
+
+            </html>
