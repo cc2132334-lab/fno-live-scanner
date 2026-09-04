@@ -5,22 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>F&O Live Scanner</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#07100c;color:#edf7f0;font-family:Arial,sans-serif}.container{max-width:1200px;margin:auto;padding:14px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.brand{display:flex;align-items:center;gap:11px}.logo{width:50px;height:50px;border-radius:15px;background:#16c784;color:#062117;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900}.title{font-size:21px;font-weight:900}.subtitle{margin-top:3px;color:#718279;font-size:11px}.connection{padding:8px 11px;border-radius:11px;background:#10231a;border:1px solid #20402e;color:#16c784;font-size:10px;font-weight:bold}.login{max-width:500px;margin:50px auto;background:#101b16;border:1px solid #21352a;border-radius:20px;padding:23px}.login h2{margin:0;font-size:21px}.login p{color:#788980;font-size:12px;line-height:1.5;margin:6px 0 18px}label{display:block;color:#b9c8c0;font-size:11px;font-weight:bold;margin:12px 0 6px}input{width:100%;padding:13px;background:#08110d;color:white;border:1px solid #294036;border-radius:11px;outline:0;font-size:13px}input:focus{border-color:#16c784}.connect{width:100%;margin-top:18px;padding:13px;border:0;border-radius:12px;background:#16c784;color:#062117;font-weight:900;font-size:14px}.error{display:none;margin-top:12px;padding:11px;border-radius:10px;background:#3b181a;color:#ff969d;font-size:11px}#dashboard{display:none}.index-panel{background:#101b16;border:1px solid #21352a;border-radius:19px;overflow:hidden;margin-bottom:15px}.tabs{display:flex;border-bottom:1px solid #21352a}.tab{flex:1;padding:13px;background:transparent;color:#718279;border:0;font-weight:900;font-size:13px;position:relative}.tab.active{color:#16c784;background:#0c1711}.tab.active:after{content:"";position:absolute;left:15%;right:15%;bottom:0;height:2px;background:#16c784}.index-content{padding:17px}.index-row{display:flex;justify-content:space-between;align-items:center}.index-name{font-size:13px;font-weight:900}.live-badge{font-size:9px;color:#718279;margin-top:4px}.toggle{width:48px;height:27px;border-radius:30px;background:#26352d;position:relative;cursor:pointer}.toggle span{width:21px;height:21px;border-radius:50%;position:absolute;top:3px;left:3px;background:#718279;transition:.2s}.toggle.on{background:#16c784}.toggle.on span{transform:translateX(21px);background:#062117}.index-price{font-size:29px;font-weight:900;margin-top:13px}.index-change{margin-top:4px;font-size:12px;font-weight:bold}.green{color:#16c784}.red{color:#ff5d66}.gray{color:#718279}.oi-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.card{background:#101b16;border:1px solid #21352a;border-radius:19px;overflow:hidden}.card-head{padding:16px;border-bottom:1px solid #21352a}.card-title{font-size:16px;font-weight:900}.card-sub{color:#718279;font-size:10px;margin-top:4px}.rows{padding:0 16px}.row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px 0;border-bottom:1px solid #1a2921}.row:last-child{border-bottom:0}.symbol{font-size:14px;font-weight:900}.price-line{margin-top:4px;font-size:11px;color:#718279}.oi-box{text-align:right}.oi-value{font-size:13px;font-weight:900}.oi-label{margin-top:3px;color:#718279;font-size:9px}.empty{min-height:200px;display:flex;align-items:center;justify-content:center;color:#718279;font-size:12px}.log-card{margin-top:15px;background:#050a07;border:1px solid #21352a;border-radius:19px;overflow:hidden}.log-head{display:flex;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #21352a}.log-title{font-size:15px;font-weight:900}.log-live{color:#16c784;font-size:9px;font-weight:900}.logs{height:210px;overflow-y:auto;padding:9px 13px;font-family:monospace;font-size:10px}.log{padding:5px 0;border-bottom:1px solid #0e1914;line-height:1.4}.log-time{color:#526159}.log-info{color:#a9b8af}.log-success{color:#16c784}.log-error{color:#ff646d}.log-warn{color:#f4c452}@media(max-width:750px){.container{padding:10px}.connection{display:none}.title{font-size:18px}.oi-grid{grid-template-columns:1fr}.tab{min-width:50%}.index-price{font-size:27px}}
+*{box-sizing:border-box}body{margin:0;background:#07100c;color:#edf7f0;font-family:Arial,sans-serif}.container{max-width:1200px;margin:auto;padding:14px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.brand{display:flex;align-items:center;gap:11px}.logo{width:50px;height:50px;border-radius:15px;background:#16c784;color:#062117;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900}.title{font-size:21px;font-weight:900}.subtitle{margin-top:3px;color:#718279;font-size:11px}.connection{padding:8px 11px;border-radius:11px;background:#10231a;border:1px solid #20402e;color:#16c784;font-size:10px;font-weight:bold}.login{max-width:500px;margin:50px auto;background:#101b16;border:1px solid #21352a;border-radius:20px;padding:23px}.login h2{margin:0;font-size:21px}.login p{color:#788980;font-size:12px;line-height:1.5;margin:6px 0 18px}label{display:block;color:#b9c8c0;font-size:11px;font-weight:bold;margin:12px 0 6px}input{width:100%;padding:13px;background:#08110d;color:white;border:1px solid #294036;border-radius:11px;outline:0;font-size:13px}.connect{width:100%;margin-top:18px;padding:13px;border:0;border-radius:12px;background:#16c784;color:#062117;font-weight:900;font-size:14px}.error{display:none;margin-top:12px;padding:11px;border-radius:10px;background:#3b181a;color:#ff969d;font-size:11px}#dashboard{display:none}.index-panel{background:#101b16;border:1px solid #21352a;border-radius:19px;overflow:hidden;margin-bottom:15px}.tabs{display:flex;border-bottom:1px solid #21352a}.tab{flex:1;padding:13px;background:transparent;color:#718279;border:0;font-weight:900;font-size:13px;position:relative}.tab.active{color:#16c784;background:#0c1711}.tab.active:after{content:"";position:absolute;left:15%;right:15%;bottom:0;height:2px;background:#16c784}.index-content{padding:17px}.index-row{display:flex;justify-content:space-between;align-items:center}.index-name{font-size:13px;font-weight:900}.market-state{font-size:9px;color:#718279;margin-top:4px}.index-price{font-size:29px;font-weight:900;margin-top:13px}.index-change{margin-top:4px;font-size:12px;font-weight:bold}.toggle{width:48px;height:27px;border-radius:30px;background:#26352d;position:relative;cursor:pointer}.toggle span{width:21px;height:21px;border-radius:50%;position:absolute;top:3px;left:3px;background:#718279;transition:.2s}.toggle.on{background:#16c784}.toggle.on span{transform:translateX(21px);background:#062117}.green{color:#16c784}.red{color:#ff5d66}.gray{color:#718279}.oi-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.card{background:#101b16;border:1px solid #21352a;border-radius:19px;overflow:hidden}.card-head{padding:16px;border-bottom:1px solid #21352a}.card-title{font-size:16px;font-weight:900}.card-sub{color:#718279;font-size:10px;margin-top:4px}.rows{padding:0 16px}.row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px 0;border-bottom:1px solid #1a2921}.row:last-child{border-bottom:0}.symbol{font-size:14px;font-weight:900}.price-line{margin-top:4px;font-size:11px;color:#718279}.oi-box{text-align:right}.oi-value{font-size:13px;font-weight:900}.oi-label{margin-top:3px;color:#718279;font-size:9px}.empty{min-height:200px;display:flex;align-items:center;justify-content:center;color:#718279;font-size:12px}.log-card{margin-top:15px;background:#050a07;border:1px solid #21352a;border-radius:19px;overflow:hidden}.log-head{display:flex;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #21352a}.log-title{font-size:15px;font-weight:900}.log-live{color:#16c784;font-size:9px;font-weight:900}.logs{height:210px;overflow-y:auto;padding:9px 13px;font-family:monospace;font-size:10px}.log{padding:5px 0;border-bottom:1px solid #0e1914;line-height:1.4}.log-time{color:#526159}.log-info{color:#a9b8af}.log-success{color:#16c784}.log-error{color:#ff646d}.log-warn{color:#f4c452}@media(max-width:750px){.container{padding:10px}.connection{display:none}.title{font-size:18px}.oi-grid{grid-template-columns:1fr}.tab{min-width:50%}.index-price{font-size:27px}}
 </style>
 </head>
 <body>
 <div class="container">
 <div class="header">
-<div class="brand">
-<div class="logo">₹</div>
-<div><div class="title">F&O Live Scanner</div><div class="subtitle">Angel One • Tick-by-Tick</div></div>
-</div>
+<div class="brand"><div class="logo">₹</div><div><div class="title">F&O Live Scanner</div><div class="subtitle">Angel One • Tick-by-Tick</div></div></div>
 <div class="connection" id="connection">● Broker Disconnected</div>
 </div>
 
 <div class="login" id="login">
 <h2>Connect Broker</h2>
-<p>Angel One credentials enter karein. Long alphanumeric TOTP Secret se current OTP automatically generate hoga.</p>
+<p>Long alphanumeric TOTP Secret enter karein. Current OTP automatically generate hoga.</p>
 <label>API Key</label>
 <input id="apiKey" type="password" autocomplete="off" placeholder="Angel One API Key">
 <label>Client ID</label>
@@ -39,36 +36,27 @@
 <button class="tab active" id="niftyTab" onclick="selectTab('nifty')">NIFTY 50</button>
 <button class="tab" id="sensexTab" onclick="selectTab('sensex')">SENSEX</button>
 </div>
-
 <div class="index-content">
 <div id="niftyContent">
-<div class="index-row">
-<div><div class="index-name">NIFTY 50</div><div class="live-badge" id="niftyLive">● Tick OFF</div></div>
-<div class="toggle" id="niftyToggle" onclick="toggleIndex('nifty')"><span></span></div>
-</div>
+<div class="index-row"><div><div class="index-name">NIFTY 50</div><div class="market-state" id="niftyLive">● Waiting...</div></div><div class="toggle" id="niftyToggle" onclick="toggleIndex('nifty')"><span></span></div></div>
 <div class="index-price" id="niftyPrice">—</div>
-<div class="index-change gray" id="niftyChange">Live tick OFF</div>
+<div class="index-change gray" id="niftyChange">Last data waiting...</div>
 </div>
-
 <div id="sensexContent" style="display:none">
-<div class="index-row">
-<div><div class="index-name">SENSEX</div><div class="live-badge" id="sensexLive">● Tick OFF</div></div>
-<div class="toggle" id="sensexToggle" onclick="toggleIndex('sensex')"><span></span></div>
-</div>
+<div class="index-row"><div><div class="index-name">SENSEX</div><div class="market-state" id="sensexLive">● Waiting...</div></div><div class="toggle" id="sensexToggle" onclick="toggleIndex('sensex')"><span></span></div></div>
 <div class="index-price" id="sensexPrice">—</div>
-<div class="index-change gray" id="sensexChange">Live tick OFF</div>
+<div class="index-change gray" id="sensexChange">Last data waiting...</div>
 </div>
 </div>
 </div>
 
 <div class="oi-grid">
 <div class="card">
-<div class="card-head"><div class="card-title">📈 Top 10 OI Gainers</div><div class="card-sub">Sorted by OI Change % • Live Cash Price</div></div>
+<div class="card-head"><div class="card-title">📈 Top 10 OI Gainers</div><div class="card-sub">OI Change % • Cash Symbol • Live Price</div></div>
 <div class="rows" id="oiGainers"><div class="empty">Waiting for OI data...</div></div>
 </div>
-
 <div class="card">
-<div class="card-head"><div class="card-title">📉 Top 10 OI Losers</div><div class="card-sub">Sorted by OI Change % • Live Cash Price</div></div>
+<div class="card-head"><div class="card-title">📉 Top 10 OI Losers</div><div class="card-sub">OI Change % • Cash Symbol • Live Price</div></div>
 <div class="rows" id="oiLosers"><div class="empty">Waiting for OI data...</div></div>
 </div>
 </div>
@@ -82,33 +70,64 @@
 
 <script>
 let stream=null;
+let lastIndexes={},lastGainers=[],lastLosers=[],lastIndexState={};
+
+function isMarketHours(){
+  const d=new Date();
+  const day=d.getDay();
+  const h=d.getHours(),m=d.getMinutes();
+  if(day===0||day===6)return false;
+  const t=h*60+m;
+  return t>=555&&t<=930;
+}
 
 function saveCache(){
   try{
     localStorage.setItem("fnoLastData",JSON.stringify({
-      indexes:window.lastIndexes||{},
-      indexState:window.lastIndexState||{},
-      gainers:window.lastGainers||[],
-      losers:window.lastLosers||[]
+      savedAt:Date.now(),
+      indexes:lastIndexes,
+      gainers:lastGainers,
+      losers:lastLosers,
+      indexState:lastIndexState
     }));
   }catch(e){}
 }
 
 function loadCache(){
   try{
-    const data=JSON.parse(localStorage.getItem("fnoLastData")||"null");
-    if(!data)return;
-    window.lastIndexes=data.indexes||{};
-    window.lastIndexState=data.indexState||{};
-    window.lastGainers=data.gainers||[];
-    window.lastLosers=data.losers||[];
-    if(data.indexes){
-      if(data.indexes.nifty)updateIndex("nifty",data.indexes.nifty);
-      if(data.indexes.sensex)updateIndex("sensex",data.indexes.sensex);
-    }
-    if(data.gainers?.length)renderOI("oiGainers",data.gainers,true);
-    if(data.losers?.length)renderOI("oiLosers",data.losers,false);
+    const x=JSON.parse(localStorage.getItem("fnoLastData")||"null");
+    if(!x)return;
+    lastIndexes=x.indexes||{};
+    lastGainers=x.gainers||[];
+    lastLosers=x.losers||[];
+    lastIndexState=x.indexState||{};
+
+    if(lastIndexes.nifty)updateIndex("nifty",lastIndexes.nifty,false);
+    if(lastIndexes.sensex)updateIndex("sensex",lastIndexes.sensex,false);
+    if(lastGainers.length)renderOI("oiGainers",lastGainers,true);
+    if(lastLosers.length)renderOI("oiLosers",lastLosers,false);
+
+    updateMarketLabels();
   }catch(e){}
+}
+
+function updateMarketLabels(){
+  ["nifty","sensex"].forEach(i=>{
+    const x=lastIndexes[i];
+    const el=document.getElementById(i+"Live");
+    if(!x?.timestamp){
+      el.textContent="● No market data";
+      return;
+    }
+    const t=new Date(x.timestamp).toLocaleTimeString("en-IN");
+    if(isMarketHours()){
+      el.textContent="● LIVE • "+t;
+      el.className="market-state green";
+    }else{
+      el.textContent="● MARKET CLOSED • Last data "+t;
+      el.className="market-state gray";
+    }
+  });
 }
 
 async function loginBroker(){
@@ -116,26 +135,25 @@ async function loginBroker(){
   const clientId=document.getElementById("clientId").value.trim();
   const mpin=document.getElementById("mpin").value.trim();
   const totpSecret=document.getElementById("totpSecret").value.trim();
-  const button=document.getElementById("connectBtn");
-  document.getElementById("errorBox").style.display="none";
+  const btn=document.getElementById("connectBtn");
 
+  document.getElementById("errorBox").style.display="none";
   if(!apiKey||!clientId||!mpin||!totpSecret){
     showError("API Key, Client ID, MPIN aur Long TOTP Secret required hai.");
     return;
   }
 
-  button.disabled=true;
-  button.textContent="⏳ Connecting...";
+  btn.disabled=true;
+  btn.textContent="⏳ Connecting...";
 
   try{
-    const response=await fetch("/api/login",{
+    const r=await fetch("/api/login",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({apiKey,clientId,mpin,totpSecret})
     });
-
-    const data=await response.json();
-    if(!response.ok||!data.success)throw new Error(data.message||"Login failed.");
+    const data=await r.json();
+    if(!r.ok||!data.success)throw new Error(data.message||"Login failed.");
 
     document.getElementById("login").style.display="none";
     document.getElementById("dashboard").style.display="block";
@@ -143,18 +161,18 @@ async function loginBroker(){
     addLocalLog("Broker connected successfully.","success");
     connectStream();
     loadCache();
-  }catch(error){
-    showError(error.message);
+  }catch(e){
+    showError(e.message);
   }finally{
-    button.disabled=false;
-    button.textContent="🔐 Connect Angel One";
+    btn.disabled=false;
+    btn.textContent="🔐 Connect Angel One";
   }
 }
 
-function showError(message){
-  const box=document.getElementById("errorBox");
-  box.textContent=message;
-  box.style.display="block";
+function showError(x){
+  const b=document.getElementById("errorBox");
+  b.textContent=x;
+  b.style.display="block";
 }
 
 function selectTab(tab){
@@ -169,47 +187,40 @@ async function toggleIndex(index){
   const enabled=!toggle.classList.contains("on");
 
   try{
-    const response=await fetch("/api/index-toggle",{
+    const r=await fetch("/api/index-toggle",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({index,enabled})
     });
-
-    const data=await response.json();
-    if(!response.ok||!data.success)throw new Error(data.message||"Toggle failed.");
+    const d=await r.json();
+    if(!r.ok||!d.success)throw new Error(d.message||"Toggle failed.");
     updateToggle(index,enabled);
-  }catch(error){
-    addLocalLog(error.message,"error");
-  }
+  }catch(e){addLocalLog(e.message,"error")}
 }
 
-function updateToggle(index,enabled){
-  document.getElementById(index+"Toggle").classList.toggle("on",enabled);
-  const live=document.getElementById(index+"Live");
-  live.textContent=enabled?"● Tick-by-tick LIVE":"● Tick OFF";
-  live.className=enabled?"live-badge green":"live-badge";
-
-  window.lastIndexState=window.lastIndexState||{};
-  window.lastIndexState[index]=enabled;
+function updateToggle(index,on){
+  document.getElementById(index+"Toggle").classList.toggle("on",on);
+  lastIndexState[index]=on;
   saveCache();
 }
 
-function updateIndex(index,data){
+function updateIndex(index,data,save=true){
   if(!data)return;
 
-  document.getElementById(index+"Price").textContent=
-    data.price!=null?"₹"+Number(data.price).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}):"—";
+  if(data.price!=null){
+    document.getElementById(index+"Price").textContent="₹"+Number(data.price).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
 
   if(data.changePercent!=null){
     const sign=data.change>=0?"+":"";
     const el=document.getElementById(index+"Change");
-    el.textContent=`${sign}${Number(data.change).toFixed(2)} (${sign}${Number(data.changePercent).toFixed(2)}%)`;
+    el.textContent=`${sign}${Number(data.change).toFixed(2)} (${sign}${Number(data.changePercent).toFixed(2)}%) • ${new Date(data.timestamp||Date.now()).toLocaleTimeString("en-IN")}`;
     el.className="index-change "+(data.change>=0?"green":"red");
   }
 
-  window.lastIndexes=window.lastIndexes||{};
-  window.lastIndexes[index]=data;
-  saveCache();
+  lastIndexes[index]=data;
+  if(save)saveCache();
+  updateMarketLabels();
 }
 
 function connectStream(){
@@ -218,34 +229,33 @@ function connectStream(){
 
   stream.addEventListener("status",e=>{
     try{
-      const data=JSON.parse(e.data);
-      if(data.connected)document.getElementById("connection").textContent="● Broker Connected";
-    }catch(err){}
+      const d=JSON.parse(e.data);
+      if(d.connected)document.getElementById("connection").textContent="● Broker Connected";
+    }catch(x){}
   });
 
   stream.addEventListener("indexState",e=>{
-    const state=JSON.parse(e.data);
-    updateToggle("nifty",state.nifty);
-    updateToggle("sensex",state.sensex);
+    const d=JSON.parse(e.data);
+    updateToggle("nifty",d.nifty);
+    updateToggle("sensex",d.sensex);
   });
 
   stream.addEventListener("indexTick",e=>{
-    const data=JSON.parse(e.data);
-    updateIndex(data.index,data.data);
+    const d=JSON.parse(e.data);
+    updateIndex(d.index,d.data,true);
   });
 
   stream.addEventListener("oi",e=>{
-    const data=JSON.parse(e.data);
+    const d=JSON.parse(e.data);
 
-    // Empty list kabhi purana valid list replace nahi karegi.
-    if(data.gainers?.length){
-      window.lastGainers=data.gainers;
-      renderOI("oiGainers",data.gainers,true);
+    if(d.gainers?.length){
+      lastGainers=d.gainers;
+      renderOI("oiGainers",lastGainers,true);
     }
 
-    if(data.losers?.length){
-      window.lastLosers=data.losers;
-      renderOI("oiLosers",data.losers,false);
+    if(d.losers?.length){
+      lastLosers=d.losers;
+      renderOI("oiLosers",lastLosers,false);
     }
 
     saveCache();
@@ -255,9 +265,13 @@ function connectStream(){
     updateStockPrice(JSON.parse(e.data));
   });
 
-  stream.addEventListener("activity",e=>{
-    addActivity(JSON.parse(e.data));
+  stream.addEventListener("oiPrice",e=>{
+    const d=JSON.parse(e.data);
+    updateOICache(d);
+    updateStockPrice(d);
   });
+
+  stream.addEventListener("activity",e=>addActivity(JSON.parse(e.data)));
 
   stream.addEventListener("logs",e=>{
     document.getElementById("logs").innerHTML="";
@@ -266,38 +280,46 @@ function connectStream(){
 
   stream.onopen=()=>{
     document.getElementById("logLive").textContent="LIVE";
-    document.getElementById("logLive").style.color="#16c784";
   };
 
   stream.onerror=()=>{
     document.getElementById("logLive").textContent="RECONNECTING";
-    document.getElementById("logLive").style.color="#f4c452";
   };
 }
 
+function updateOICache(tick){
+  for(const list of [lastGainers,lastLosers]){
+    const x=list.find(r=>r.symbol===tick.symbol);
+    if(x){
+      x.price=tick.price;
+      x.change=tick.change;
+      x.changePercent=tick.changePercent;
+      x.timestamp=tick.timestamp;
+    }
+  }
+  saveCache();
+}
+
 function renderOI(id,rows,positive){
-  const container=document.getElementById(id);
+  const box=document.getElementById(id);
 
   if(!rows?.length){
-    if(container.querySelector(".row"))return;
-    container.innerHTML='<div class="empty">OI data waiting...</div>';
+    if(box.querySelector(".row"))return;
+    box.innerHTML='<div class="empty">Last OI data waiting...</div>';
     return;
   }
 
-  container.innerHTML=rows.slice(0,10).map(row=>{
-    const oi=Number(row.oiPercent||0);
-    const price=row.price;
-    const change=row.changePercent;
+  box.innerHTML=rows.slice(0,10).map(r=>{
+    const oi=Number(r.oiPercent||0);
+    const p=r.price;
+    const c=r.changePercent;
 
-    return `
-    <div class="row" data-symbol="${escapeHtml(row.symbol)}">
+    return `<div class="row" data-symbol="${esc(r.symbol)}">
       <div>
-        <div class="symbol">${escapeHtml(row.symbol)}</div>
+        <div class="symbol">${esc(r.symbol)}</div>
         <div class="price-line">
-          <span class="live-price">${price!=null?"₹"+Number(price).toFixed(2):"Live price..."}</span>
-          <span class="live-change ${change!=null?(change>=0?"green":"red"):""}">
-            ${change!=null?` • ${change>=0?"+":""}${Number(change).toFixed(2)}%`:""}
-          </span>
+          <span class="live-price">${p!=null?"₹"+Number(p).toFixed(2):"Last price unavailable"}</span>
+          <span class="live-change ${c!=null?(c>=0?"green":"red"):""}">${c!=null?` • ${c>=0?"+":""}${Number(c).toFixed(2)}%`:""}</span>
         </div>
       </div>
       <div class="oi-box">
@@ -308,46 +330,38 @@ function renderOI(id,rows,positive){
   }).join("");
 }
 
-function updateStockPrice(tick){
-  document.querySelectorAll(`.row[data-symbol="${CSS.escape(tick.symbol)}"]`).forEach(row=>{
-    const price=row.querySelector(".live-price");
-    const change=row.querySelector(".live-change");
-
-    if(tick.price!=null)price.textContent="₹"+Number(tick.price).toFixed(2);
-
-    if(tick.changePercent!=null){
-      change.textContent=` • ${tick.changePercent>=0?"+":""}${Number(tick.changePercent).toFixed(2)}%`;
-      change.className="live-change "+(tick.changePercent>=0?"green":"red");
+function updateStockPrice(t){
+  document.querySelectorAll(`.row[data-symbol="${CSS.escape(t.symbol)}"]`).forEach(row=>{
+    const p=row.querySelector(".live-price"),c=row.querySelector(".live-change");
+    if(t.price!=null)p.textContent="₹"+Number(t.price).toFixed(2);
+    if(t.changePercent!=null){
+      c.textContent=` • ${t.changePercent>=0?"+":""}${Number(t.changePercent).toFixed(2)}%`;
+      c.className="live-change "+(t.changePercent>=0?"green":"red");
     }
   });
 }
 
 function addActivity(log){
-  const container=document.getElementById("logs");
-  const div=document.createElement("div");
+  const box=document.getElementById("logs");
+  const d=document.createElement("div");
   const type=String(log.type||"INFO").toLowerCase();
-  const time=new Date(log.time).toLocaleTimeString("en-IN");
-
-  div.className="log";
-  div.innerHTML=`<span class="log-time">[${time}]</span> <span class="log-${type}">${escapeHtml(log.message)}</span>`;
-  container.appendChild(div);
-
-  while(container.children.length>300)container.removeChild(container.firstChild);
-  container.scrollTop=container.scrollHeight;
+  d.className="log";
+  d.innerHTML=`<span class="log-time">[${new Date(log.time).toLocaleTimeString("en-IN")}]</span> <span class="log-${type}">${esc(log.message)}</span>`;
+  box.appendChild(d);
+  while(box.children.length>300)box.removeChild(box.firstChild);
+  box.scrollTop=box.scrollHeight;
 }
 
 function addLocalLog(message,type="info"){
   addActivity({time:new Date().toISOString(),type,message});
 }
 
-function escapeHtml(value){
-  return String(value)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
+function esc(v){
+  return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
 }
+
+loadCache();
+setInterval(updateMarketLabels,30000);
 </script>
 </body>
 </html>
